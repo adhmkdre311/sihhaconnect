@@ -31,8 +31,6 @@ export const bootstrapWorker = createServerFn({ method: "POST" })
     }, { onConflict: "user_id,role" });
 
     if (employerId) {
-      await supabaseAdmin.rpc("exec_sql" as never).then(() => undefined).catch(() => undefined);
-      // increment worker_count manually
       const { data: emp2 } = await supabaseAdmin.from("employers").select("worker_count").eq("id", employerId).single();
       if (emp2) await supabaseAdmin.from("employers").update({ worker_count: (emp2.worker_count ?? 0) + 1 }).eq("id", employerId);
     }
