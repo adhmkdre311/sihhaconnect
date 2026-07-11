@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 
@@ -30,6 +31,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/app/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/app/chat',
+  path: '/app/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppBookRoute = AppBookRouteImport.update({
   id: '/app/book',
   path: '/app/book',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
   '/app/': typeof AppIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
   '/app': typeof AppIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
   '/app/': typeof AppIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app/book' | '/app/' | '/app/appointments/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/chat'
+    | '/app/'
+    | '/app/appointments/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/book' | '/app' | '/app/appointments/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/chat'
+    | '/app'
+    | '/app/appointments/$id'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/app/book'
+    | '/app/chat'
     | '/app/'
     | '/app/appointments/$id'
   fileRoutesById: FileRoutesById
@@ -81,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   AppBookRoute: typeof AppBookRoute
+  AppChatRoute: typeof AppChatRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
 }
@@ -108,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/app/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/book': {
       id: '/app/book'
       path: '/app/book'
@@ -129,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   AppBookRoute: AppBookRoute,
+  AppChatRoute: AppChatRoute,
   AppIndexRoute: AppIndexRoute,
   AppAppointmentsIdRoute: AppAppointmentsIdRoute,
 }
