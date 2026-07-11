@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
@@ -39,6 +40,11 @@ const EmployerIndexRoute = EmployerIndexRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerRosterRoute = EmployerRosterRouteImport.update({
+  id: '/employer/roster',
+  path: '/employer/roster',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRecordsRoute = AppRecordsRouteImport.update({
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
   '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/employer/roster': typeof EmployerRosterRoute
   '/app': typeof AppIndexRoute
   '/employer': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
   '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/employer/roster'
     | '/app/'
     | '/employer/'
     | '/app/appointments/$id'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/employer/roster'
     | '/app'
     | '/employer'
     | '/app/appointments/$id'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/employer/roster'
     | '/app/'
     | '/employer/'
     | '/app/appointments/$id'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
+  EmployerRosterRoute: typeof EmployerRosterRoute
   AppIndexRoute: typeof AppIndexRoute
   EmployerIndexRoute: typeof EmployerIndexRoute
   AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
@@ -201,6 +214,13 @@ declare module '@tanstack/react-router' {
       path: '/app'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/roster': {
+      id: '/employer/roster'
+      path: '/employer/roster'
+      fullPath: '/employer/roster'
+      preLoaderRoute: typeof EmployerRosterRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/records': {
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
+  EmployerRosterRoute: EmployerRosterRoute,
   AppIndexRoute: AppIndexRoute,
   EmployerIndexRoute: EmployerIndexRoute,
   AppAppointmentsIdRoute: AppAppointmentsIdRoute,
