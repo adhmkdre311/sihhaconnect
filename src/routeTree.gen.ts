@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -34,18 +35,25 @@ const AppBookRoute = AppBookRouteImport.update({
   path: '/app/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
+  id: '/app/appointments/$id',
+  path: '/app/appointments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app/': typeof AppIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app': typeof AppIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,20 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app/': typeof AppIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/app/book' | '/app/'
+  fullPaths: '/' | '/auth' | '/app/book' | '/app/' | '/app/appointments/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/app/book' | '/app'
-  id: '__root__' | '/' | '/auth' | '/app/book' | '/app/'
+  to: '/' | '/auth' | '/app/book' | '/app' | '/app/appointments/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/'
+    | '/app/appointments/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +82,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   AppBookRoute: typeof AppBookRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +115,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/appointments/$id': {
+      id: '/app/appointments/$id'
+      path: '/app/appointments/$id'
+      fullPath: '/app/appointments/$id'
+      preLoaderRoute: typeof AppAppointmentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +130,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   AppBookRoute: AppBookRoute,
   AppIndexRoute: AppIndexRoute,
+  AppAppointmentsIdRoute: AppAppointmentsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
