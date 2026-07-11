@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -28,6 +29,11 @@ const AuthRoute = AuthRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerIndexRoute = EmployerIndexRouteImport.update({
+  id: '/employer/',
+  path: '/employer/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/app/': typeof AppIndexRoute
+  '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesByTo {
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/app': typeof AppIndexRoute
+  '/employer': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesById {
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/app/': typeof AppIndexRoute
+  '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRouteTypes {
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/app/'
+    | '/employer/'
     | '/app/appointments/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -132,6 +142,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/app'
+    | '/employer'
     | '/app/appointments/$id'
   id:
     | '__root__'
@@ -144,6 +155,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/app/'
+    | '/employer/'
     | '/app/appointments/$id'
   fileRoutesById: FileRoutesById
 }
@@ -157,6 +169,7 @@ export interface RootRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   AppIndexRoute: typeof AppIndexRoute
+  EmployerIndexRoute: typeof EmployerIndexRoute
   AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
 }
 
@@ -174,6 +187,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/': {
+      id: '/employer/'
+      path: '/employer'
+      fullPath: '/employer/'
+      preLoaderRoute: typeof EmployerIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -245,6 +265,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   AppIndexRoute: AppIndexRoute,
+  EmployerIndexRoute: EmployerIndexRoute,
   AppAppointmentsIdRoute: AppAppointmentsIdRoute,
 }
 export const routeTree = rootRouteImport
