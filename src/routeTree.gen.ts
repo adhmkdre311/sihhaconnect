@@ -15,6 +15,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
@@ -49,6 +50,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/app/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppEmergencyRoute = AppEmergencyRouteImport.update({
+  id: '/app/emergency',
+  path: '/app/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppChatRoute = AppChatRouteImport.update({
   id: '/app/chat',
   path: '/app/chat',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/book'
     | '/app/chat'
+    | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/book'
     | '/app/chat'
+    | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/app/book'
     | '/app/chat'
+    | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
+  AppEmergencyRoute: typeof AppEmergencyRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
@@ -191,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/emergency': {
+      id: '/app/emergency'
+      path: '/app/emergency'
+      fullPath: '/app/emergency'
+      preLoaderRoute: typeof AppEmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/chat': {
       id: '/app/chat'
       path: '/app/chat'
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
+  AppEmergencyRoute: AppEmergencyRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
