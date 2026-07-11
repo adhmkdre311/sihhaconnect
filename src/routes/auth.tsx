@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
@@ -40,12 +40,11 @@ function AuthPage() {
   const runBootstrapEmployer = useServerFn(bootstrapEmployer);
   const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
 
-  useState(() => {
+  useEffect(() => {
     if (role === "clinic_staff") {
-      supabase.from("clinics").select("id,name").then(({ data }) => setClinics(data ?? []));
+      void supabase.from("clinics").select("id,name").then(({ data }) => setClinics(data ?? []));
     }
-    return undefined;
-  });
+  }, [role]);
 
   const targetFor = () =>
     role === "worker" ? "/app" : role === "employer_admin" ? "/employer" : "/clinic";
