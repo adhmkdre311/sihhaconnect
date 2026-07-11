@@ -112,7 +112,17 @@ Produce a plain-language summary for a non-medical reader with possibly low heal
 
 Only restate what is explicitly written. Never infer a diagnosis or add advice not present. If unclear or low-quality, set flagged_for_human_review true. If urgent, set follow_up_needed and flagged_for_human_review both true.`;
 
-    let parsed: Record<string, unknown> = {
+    type Summary = {
+      document_type: string;
+      summary: string;
+      key_instructions: string[];
+      medications_mentioned: { name: string; plain_language_purpose: string }[];
+      follow_up_needed: boolean;
+      follow_up_reason: string | null;
+      flagged_for_human_review: boolean;
+      flag_reason: string | null;
+    };
+    let parsed: Summary = {
       document_type: "unknown",
       summary: "",
       key_instructions: [],
@@ -132,7 +142,7 @@ Only restate what is explicitly written. Never infer a diagnosis or add advice n
       });
       const raw = out.choices?.[0]?.message?.content ?? "{}";
       const cleaned = raw.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim();
-      parsed = JSON.parse(cleaned);
+      parsed = { ...parsed, ...JSON.parse(cleaned) };
     } catch (err) {
       console.error("summarize error", err);
     }
@@ -141,12 +151,16 @@ Only restate what is explicitly written. Never infer a diagnosis or add advice n
     const { data: doc } = await supabase.from("documents").select("id, worker_id").eq("id", data.documentId).single();
     if (!doc || doc.worker_id !== userId) throw new Error("Not authorized");
 
+    const allowedTypes = ["prescription","lab_report","visit_summary","insurance_form","other"] as const;
+    const docType = (allowedTypes as readonly string[]).includes(parsed.document_type)
+      ? (parsed.document_type as typeof allowedTypes[number])
+      : "other";
     await supabase.from("documents").update({
       original_text: data.text,
-      ai_summary_json: parsed,
-      ai_plain_language_summary: String(parsed.summary ?? ""),
-      flagged_for_human_review: Boolean(parsed.flagged_for_human_review),
-      type: (parsed.document_type as string) === "unknown" ? "other" : (parsed.document_type as never),
+      ai_summary_json: parsed as unknown as never,
+      ai_plain_language_summary: parsed.summary,
+      flagged_for_human_review: parsed.flagged_for_human_review,
+      type: docType,
     }).eq("id", data.documentId);
 
     return { summary: parsed };
