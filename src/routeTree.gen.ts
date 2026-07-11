@@ -19,6 +19,7 @@ import { Route as EmployerNotificationsRouteImport } from './routes/employer.not
 import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
+import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
@@ -77,6 +78,11 @@ const EmployerAppointmentsRoute = EmployerAppointmentsRouteImport.update({
   path: '/employer/appointments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
+  id: '/clinic/slots',
+  path: '/clinic/slots',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRecordsRoute = AppRecordsRouteImport.update({
   id: '/app/records',
   path: '/app/records',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
@@ -161,6 +169,7 @@ export interface FileRoutesById {
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
@@ -182,6 +191,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
@@ -220,6 +231,7 @@ export interface FileRouteTypes {
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
+    | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
@@ -240,6 +252,7 @@ export interface RootRouteChildren {
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
+  ClinicSlotsRoute: typeof ClinicSlotsRoute
   EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
   EmployerBillingRoute: typeof EmployerBillingRoute
   EmployerComplianceRoute: typeof EmployerComplianceRoute
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof EmployerAppointmentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clinic/slots': {
+      id: '/clinic/slots'
+      path: '/clinic/slots'
+      fullPath: '/clinic/slots'
+      preLoaderRoute: typeof ClinicSlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/records': {
       id: '/app/records'
       path: '/app/records'
@@ -384,6 +404,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppNotificationsRoute: AppNotificationsRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
+  ClinicSlotsRoute: ClinicSlotsRoute,
   EmployerAppointmentsRoute: EmployerAppointmentsRoute,
   EmployerBillingRoute: EmployerBillingRoute,
   EmployerComplianceRoute: EmployerComplianceRoute,
