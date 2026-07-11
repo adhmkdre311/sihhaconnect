@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
+import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -46,6 +47,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const EmployerRosterRoute = EmployerRosterRouteImport.update({
   id: '/employer/roster',
   path: '/employer/roster',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerComplianceRoute = EmployerComplianceRouteImport.update({
+  id: '/employer/compliance',
+  path: '/employer/compliance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployerAppointmentsRoute = EmployerAppointmentsRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
   '/employer/': typeof EmployerIndexRoute
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app': typeof AppIndexRoute
   '/employer': typeof EmployerIndexRoute
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
   '/employer/': typeof EmployerIndexRoute
@@ -147,6 +156,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/employer/appointments'
+    | '/employer/compliance'
     | '/employer/roster'
     | '/app/'
     | '/employer/'
@@ -162,6 +172,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/employer/appointments'
+    | '/employer/compliance'
     | '/employer/roster'
     | '/app'
     | '/employer'
@@ -177,6 +188,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/employer/appointments'
+    | '/employer/compliance'
     | '/employer/roster'
     | '/app/'
     | '/employer/'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
+  EmployerComplianceRoute: typeof EmployerComplianceRoute
   EmployerRosterRoute: typeof EmployerRosterRoute
   AppIndexRoute: typeof AppIndexRoute
   EmployerIndexRoute: typeof EmployerIndexRoute
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/employer/roster'
       fullPath: '/employer/roster'
       preLoaderRoute: typeof EmployerRosterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/compliance': {
+      id: '/employer/compliance'
+      path: '/employer/compliance'
+      fullPath: '/employer/compliance'
+      preLoaderRoute: typeof EmployerComplianceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employer/appointments': {
@@ -305,6 +325,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   EmployerAppointmentsRoute: EmployerAppointmentsRoute,
+  EmployerComplianceRoute: EmployerComplianceRoute,
   EmployerRosterRoute: EmployerRosterRoute,
   AppIndexRoute: AppIndexRoute,
   EmployerIndexRoute: EmployerIndexRoute,
