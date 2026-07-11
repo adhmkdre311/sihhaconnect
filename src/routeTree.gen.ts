@@ -9,38 +9,270 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EmployerIndexRouteImport } from './routes/employer.index'
+import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
+import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
+import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
+import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
+import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
+import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
+import { Route as AppRecordsRouteImport } from './routes/app.records'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
+import { Route as AppChatRouteImport } from './routes/app.chat'
+import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EmployerIndexRoute = EmployerIndexRouteImport.update({
+  id: '/employer/',
+  path: '/employer/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicIndexRoute = ClinicIndexRouteImport.update({
+  id: '/clinic/',
+  path: '/clinic/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerRosterRoute = EmployerRosterRouteImport.update({
+  id: '/employer/roster',
+  path: '/employer/roster',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerNotificationsRoute = EmployerNotificationsRouteImport.update({
+  id: '/employer/notifications',
+  path: '/employer/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerComplianceRoute = EmployerComplianceRouteImport.update({
+  id: '/employer/compliance',
+  path: '/employer/compliance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerBillingRoute = EmployerBillingRouteImport.update({
+  id: '/employer/billing',
+  path: '/employer/billing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerAppointmentsRoute = EmployerAppointmentsRouteImport.update({
+  id: '/employer/appointments',
+  path: '/employer/appointments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
+  id: '/clinic/slots',
+  path: '/clinic/slots',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRecordsRoute = AppRecordsRouteImport.update({
+  id: '/app/records',
+  path: '/app/records',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/app/profile',
+  path: '/app/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/app/notifications',
+  path: '/app/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppEmergencyRoute = AppEmergencyRouteImport.update({
+  id: '/app/emergency',
+  path: '/app/emergency',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppChatRoute = AppChatRouteImport.update({
+  id: '/app/chat',
+  path: '/app/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppBookRoute = AppBookRouteImport.update({
+  id: '/app/book',
+  path: '/app/book',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
+  id: '/app/appointments/$id',
+  path: '/app/appointments/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
+  '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/billing': typeof EmployerBillingRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/notifications': typeof EmployerNotificationsRoute
+  '/employer/roster': typeof EmployerRosterRoute
+  '/app/': typeof AppIndexRoute
+  '/clinic/': typeof ClinicIndexRoute
+  '/employer/': typeof EmployerIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
+  '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/billing': typeof EmployerBillingRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/notifications': typeof EmployerNotificationsRoute
+  '/employer/roster': typeof EmployerRosterRoute
+  '/app': typeof AppIndexRoute
+  '/clinic': typeof ClinicIndexRoute
+  '/employer': typeof EmployerIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/app/book': typeof AppBookRoute
+  '/app/chat': typeof AppChatRoute
+  '/app/emergency': typeof AppEmergencyRoute
+  '/app/notifications': typeof AppNotificationsRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/records': typeof AppRecordsRoute
+  '/clinic/slots': typeof ClinicSlotsRoute
+  '/employer/appointments': typeof EmployerAppointmentsRoute
+  '/employer/billing': typeof EmployerBillingRoute
+  '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/notifications': typeof EmployerNotificationsRoute
+  '/employer/roster': typeof EmployerRosterRoute
+  '/app/': typeof AppIndexRoute
+  '/clinic/': typeof ClinicIndexRoute
+  '/employer/': typeof EmployerIndexRoute
+  '/app/appointments/$id': typeof AppAppointmentsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/chat'
+    | '/app/emergency'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/records'
+    | '/clinic/slots'
+    | '/employer/appointments'
+    | '/employer/billing'
+    | '/employer/compliance'
+    | '/employer/notifications'
+    | '/employer/roster'
+    | '/app/'
+    | '/clinic/'
+    | '/employer/'
+    | '/app/appointments/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/chat'
+    | '/app/emergency'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/records'
+    | '/clinic/slots'
+    | '/employer/appointments'
+    | '/employer/billing'
+    | '/employer/compliance'
+    | '/employer/notifications'
+    | '/employer/roster'
+    | '/app'
+    | '/clinic'
+    | '/employer'
+    | '/app/appointments/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/app/book'
+    | '/app/chat'
+    | '/app/emergency'
+    | '/app/notifications'
+    | '/app/profile'
+    | '/app/records'
+    | '/clinic/slots'
+    | '/employer/appointments'
+    | '/employer/billing'
+    | '/employer/compliance'
+    | '/employer/notifications'
+    | '/employer/roster'
+    | '/app/'
+    | '/clinic/'
+    | '/employer/'
+    | '/app/appointments/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  AppBookRoute: typeof AppBookRoute
+  AppChatRoute: typeof AppChatRoute
+  AppEmergencyRoute: typeof AppEmergencyRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppRecordsRoute: typeof AppRecordsRoute
+  ClinicSlotsRoute: typeof ClinicSlotsRoute
+  EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
+  EmployerBillingRoute: typeof EmployerBillingRoute
+  EmployerComplianceRoute: typeof EmployerComplianceRoute
+  EmployerNotificationsRoute: typeof EmployerNotificationsRoute
+  EmployerRosterRoute: typeof EmployerRosterRoute
+  AppIndexRoute: typeof AppIndexRoute
+  ClinicIndexRoute: typeof ClinicIndexRoute
+  EmployerIndexRoute: typeof EmployerIndexRoute
+  AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +280,141 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/employer/': {
+      id: '/employer/'
+      path: '/employer'
+      fullPath: '/employer/'
+      preLoaderRoute: typeof EmployerIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/': {
+      id: '/clinic/'
+      path: '/clinic'
+      fullPath: '/clinic/'
+      preLoaderRoute: typeof ClinicIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/roster': {
+      id: '/employer/roster'
+      path: '/employer/roster'
+      fullPath: '/employer/roster'
+      preLoaderRoute: typeof EmployerRosterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/notifications': {
+      id: '/employer/notifications'
+      path: '/employer/notifications'
+      fullPath: '/employer/notifications'
+      preLoaderRoute: typeof EmployerNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/compliance': {
+      id: '/employer/compliance'
+      path: '/employer/compliance'
+      fullPath: '/employer/compliance'
+      preLoaderRoute: typeof EmployerComplianceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/billing': {
+      id: '/employer/billing'
+      path: '/employer/billing'
+      fullPath: '/employer/billing'
+      preLoaderRoute: typeof EmployerBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/appointments': {
+      id: '/employer/appointments'
+      path: '/employer/appointments'
+      fullPath: '/employer/appointments'
+      preLoaderRoute: typeof EmployerAppointmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/slots': {
+      id: '/clinic/slots'
+      path: '/clinic/slots'
+      fullPath: '/clinic/slots'
+      preLoaderRoute: typeof ClinicSlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/records': {
+      id: '/app/records'
+      path: '/app/records'
+      fullPath: '/app/records'
+      preLoaderRoute: typeof AppRecordsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/app/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/app/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/emergency': {
+      id: '/app/emergency'
+      path: '/app/emergency'
+      fullPath: '/app/emergency'
+      preLoaderRoute: typeof AppEmergencyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/chat': {
+      id: '/app/chat'
+      path: '/app/chat'
+      fullPath: '/app/chat'
+      preLoaderRoute: typeof AppChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/book': {
+      id: '/app/book'
+      path: '/app/book'
+      fullPath: '/app/book'
+      preLoaderRoute: typeof AppBookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/appointments/$id': {
+      id: '/app/appointments/$id'
+      path: '/app/appointments/$id'
+      fullPath: '/app/appointments/$id'
+      preLoaderRoute: typeof AppAppointmentsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  AppBookRoute: AppBookRoute,
+  AppChatRoute: AppChatRoute,
+  AppEmergencyRoute: AppEmergencyRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppRecordsRoute: AppRecordsRoute,
+  ClinicSlotsRoute: ClinicSlotsRoute,
+  EmployerAppointmentsRoute: EmployerAppointmentsRoute,
+  EmployerBillingRoute: EmployerBillingRoute,
+  EmployerComplianceRoute: EmployerComplianceRoute,
+  EmployerNotificationsRoute: EmployerNotificationsRoute,
+  EmployerRosterRoute: EmployerRosterRoute,
+  AppIndexRoute: AppIndexRoute,
+  ClinicIndexRoute: ClinicIndexRoute,
+  EmployerIndexRoute: EmployerIndexRoute,
+  AppAppointmentsIdRoute: AppAppointmentsIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
