@@ -16,7 +16,7 @@ type Dict = Record<string, string>;
 
 const T: Record<Lang, Dict> = {
   en: {
-    app_name: "SihhaConnect",
+    app_name: "Sihha",
     tagline: "Health, in your language.",
     choose_language: "Choose your language",
     continue: "Continue",
@@ -109,7 +109,7 @@ const T: Record<Lang, Dict> = {
     back: "Back",
   },
   ar: {
-    app_name: "صحة كونكت",
+    app_name: "صحة",
     tagline: "الصحة بلغتك.",
     choose_language: "اختر لغتك",
     continue: "متابعة",
@@ -202,7 +202,7 @@ const T: Record<Lang, Dict> = {
     back: "رجوع",
   },
   hi: {
-    app_name: "सिहा कनेक्ट",
+    app_name: "सिहा",
     tagline: "स्वास्थ्य, आपकी भाषा में।",
     choose_language: "अपनी भाषा चुनें",
     continue: "जारी रखें",
@@ -295,7 +295,7 @@ const T: Record<Lang, Dict> = {
     back: "वापस",
   },
   ur: {
-    app_name: "صحت کنیکٹ",
+    app_name: "صحت",
     tagline: "صحت، آپ کی زبان میں۔",
     choose_language: "اپنی زبان منتخب کریں",
     continue: "جاری رکھیں",
@@ -388,7 +388,7 @@ const T: Record<Lang, Dict> = {
     back: "واپس",
   },
   ne: {
-    app_name: "सिह्हा कनेक्ट",
+    app_name: "सिह्हा",
     tagline: "स्वास्थ्य, तपाईंको भाषामा।",
     choose_language: "आफ्नो भाषा छान्नुहोस्",
     continue: "जारी राख्नुहोस्",
@@ -481,7 +481,7 @@ const T: Record<Lang, Dict> = {
     back: "फर्कनुहोस्",
   },
   tl: {
-    app_name: "SihhaConnect",
+    app_name: "Sihha",
     tagline: "Kalusugan, sa iyong wika.",
     choose_language: "Pumili ng iyong wika",
     continue: "Magpatuloy",
@@ -574,7 +574,7 @@ const T: Record<Lang, Dict> = {
     back: "Bumalik",
   },
   bn: {
-    app_name: "সিহা কানেক্ট",
+    app_name: "সিহা",
     tagline: "স্বাস্থ্য, আপনার ভাষায়।",
     choose_language: "আপনার ভাষা বেছে নিন",
     continue: "চালিয়ে যান",

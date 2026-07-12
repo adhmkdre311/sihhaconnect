@@ -63,73 +63,76 @@
 
 :root {
   --radius: 0.875rem;
-  --background: oklch(0.985 0.008 160);
-  --foreground: oklch(0.24 0.04 180);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.04 180);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.04 180);
-  --primary: oklch(0.55 0.12 175);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.94 0.03 170);
-  --secondary-foreground: oklch(0.32 0.06 180);
-  --muted: oklch(0.955 0.015 170);
-  --muted-foreground: oklch(0.48 0.03 200);
-  --accent: oklch(0.78 0.14 55);
-  --accent-foreground: oklch(0.22 0.05 40);
-  --destructive: oklch(0.6 0.22 25);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.9 0.02 175);
-  --input: oklch(0.92 0.02 175);
-  --ring: oklch(0.55 0.12 175);
+  /* Sihha brand — Pearl Sand base, Doha Teal primary, Dune Gold accent, Soft Coral for urgent */
+  --background: #F6F1E7;      /* Pearl Sand */
+  --foreground: #16262B;      /* Ink Navy */
+  --card: #FFFFFF;
+  --card-foreground: #16262B;
+  --popover: #FFFFFF;
+  --popover-foreground: #16262B;
+  --primary: #0E5C56;         /* Doha Teal */
+  --primary-foreground: #F6F1E7;
+  --secondary: #EDE5D2;
+  --secondary-foreground: #16262B;
+  --muted: #ECE4D0;
+  --muted-foreground: #5B6B67;
+  --accent: #D9A441;          /* Dune Gold */
+  --accent-foreground: #16262B;
+  --destructive: #E8806B;     /* Soft Coral — urgent only */
+  --destructive-foreground: #FFFFFF;
+  --border: #E1D9C8;
+  --input: #E1D9C8;
+  --ring: #0E5C56;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.98 0.01 170);
-  --sidebar-foreground: oklch(0.24 0.04 180);
-  --sidebar-primary: oklch(0.55 0.12 175);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.94 0.03 170);
-  --sidebar-accent-foreground: oklch(0.32 0.06 180);
-  --sidebar-border: oklch(0.9 0.02 175);
-  --sidebar-ring: oklch(0.55 0.12 175);
+  --sidebar: #0E5C56;                    /* Doha Teal sidebar */
+  --sidebar-foreground: #F6F1E7;
+  --sidebar-primary: #D9A441;            /* Gold accent on teal */
+  --sidebar-primary-foreground: #16262B;
+  --sidebar-accent: #0A423E;             /* Teal Dark */
+  --sidebar-accent-foreground: #F6F1E7;
+  --sidebar-border: #0A423E;
+  --sidebar-ring: #D9A441;
+  --font-sans: 'Inter', 'Noto Sans', 'Noto Sans Arabic', 'Noto Sans Devanagari', 'Noto Sans Bengali', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
+  --background: #16262B;      /* Ink Navy */
+  --foreground: #F6F1E7;
+  --card: #1E3338;
+  --card-foreground: #F6F1E7;
+  --popover: #1E3338;
+  --popover-foreground: #F6F1E7;
+  --primary: #4FA89F;         /* Teal on dark reads brighter */
+  --primary-foreground: #16262B;
+  --secondary: #1E3338;
+  --secondary-foreground: #F6F1E7;
+  --muted: #23393E;
+  --muted-foreground: #A9B8B4;
+  --accent: #E8C077;          /* Gold on dark */
+  --accent-foreground: #16262B;
+  --destructive: #E8806B;
+  --destructive-foreground: #FFFFFF;
+  --border: rgba(246,241,231,0.12);
+  --input: rgba(246,241,231,0.16);
+  --ring: #E8C077;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  --sidebar: #0A423E;
+  --sidebar-foreground: #F6F1E7;
+  --sidebar-primary: #E8C077;
+  --sidebar-primary-foreground: #16262B;
+  --sidebar-accent: #16262B;
+  --sidebar-accent-foreground: #F6F1E7;
+  --sidebar-border: rgba(246,241,231,0.1);
+  --sidebar-ring: #E8C077;
 }
 
 @layer base {
@@ -140,5 +143,12 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
   }
 }
