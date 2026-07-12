@@ -1,8 +1,9 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CalendarClock, ListChecks, Stethoscope, LogOut } from "lucide-react";
+import { CalendarClock, ListChecks, LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
+import { SihhaLockup } from "@/components/SihhaLogo";
 
 export function ClinicShell({ children }: { children: ReactNode }) {
   const { t } = useLang();
@@ -20,10 +21,10 @@ export function ClinicShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r bg-sidebar text-sidebar-foreground md:flex md:flex-col">
-        <div className="flex items-center gap-2 border-b p-4">
-          <Stethoscope className="h-6 w-6 text-primary" />
-          <span className="font-semibold">{t("clinic_staff")}</span>
+      <aside className="hidden w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
+        <div className="border-b border-sidebar-border p-4">
+          <SihhaLockup variant="reversed" size="md" />
+          <p className="mt-1 text-xs text-sidebar-foreground/70">{t("clinic_staff")}</p>
         </div>
         <nav className="flex-1 space-y-1 p-3">
           {items.map((i) => {

@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Home, MessageCircle, FileText, User, AlertTriangle, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
+import { SihhaMark } from "@/components/SihhaLogo";
 
 export function AppShell({ children, title }: { children: ReactNode; title?: string }) {
   const { t } = useLang();
@@ -25,7 +26,10 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-20">
       <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur">
-        <h1 className="text-lg font-semibold">{title ?? t("app_name")}</h1>
+        <div className="flex items-center gap-2">
+          <SihhaMark className="h-7 w-7" />
+          <h1 className="font-display text-lg font-semibold">{title ?? t("app_name")}</h1>
+        </div>
         <Link to="/app/emergency" className="rounded-full bg-destructive/10 p-2 text-destructive" aria-label={t("emergency")}>
           <AlertTriangle className="h-5 w-5" />
         </Link>
