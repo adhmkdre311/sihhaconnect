@@ -105,6 +105,24 @@ export type Database = {
           },
         ]
       }
+      chat_rate_limits: {
+        Row: {
+          count: number
+          window_start: string
+          worker_id: string
+        }
+        Insert: {
+          count?: number
+          window_start?: string
+          worker_id: string
+        }
+        Update: {
+          count?: number
+          window_start?: string
+          worker_id?: string
+        }
+        Relationships: []
+      }
       clinic_slots: {
         Row: {
           booked: number
@@ -304,6 +322,13 @@ export type Database = {
             foreignKeyName: "notifications_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "notifications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
             referencedRelation: "employers"
             referencedColumns: ["id"]
           },
@@ -312,6 +337,7 @@ export type Database = {
       profiles: {
         Row: {
           clinic_id: string | null
+          consent_accepted_at: string | null
           created_at: string
           email: string | null
           emergency_contact: string | null
@@ -325,6 +351,7 @@ export type Database = {
         }
         Insert: {
           clinic_id?: string | null
+          consent_accepted_at?: string | null
           created_at?: string
           email?: string | null
           emergency_contact?: string | null
@@ -338,6 +365,7 @@ export type Database = {
         }
         Update: {
           clinic_id?: string | null
+          consent_accepted_at?: string | null
           created_at?: string
           email?: string | null
           emergency_contact?: string | null
@@ -356,6 +384,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
           },
           {
             foreignKeyName: "profiles_employer_id_fkey"
@@ -403,6 +438,13 @@ export type Database = {
             foreignKeyName: "user_roles_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "user_roles_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
             referencedRelation: "employers"
             referencedColumns: ["id"]
           },
@@ -410,7 +452,16 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      employer_compliance_stats: {
+        Row: {
+          checkups_completed: number | null
+          employer_id: string | null
+          no_show_rate_pct: number | null
+          no_shows: number | null
+          workers_enrolled: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       current_clinic_id: { Args: never; Returns: string }
