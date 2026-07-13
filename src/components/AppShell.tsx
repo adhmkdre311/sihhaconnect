@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Home, MessageCircle, FileText, User, AlertTriangle, Bell } from "lucide-react";
+import { Home, CalendarPlus, MessageCircle, FileText, AlertTriangle, Bell, User } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaMark } from "@/components/SihhaLogo";
@@ -37,10 +37,9 @@ function WorkerFrame({ children, title }: { children: ReactNode; title?: string 
 
   const tabs = [
     { to: "/app", icon: Home, label: t("home") },
+    { to: "/app/book", icon: CalendarPlus, label: t("book_appointment") },
     { to: "/app/chat", icon: MessageCircle, label: t("ask_question") },
     { to: "/app/records", icon: FileText, label: t("my_records") },
-    { to: "/app/notifications", icon: Bell, label: t("notifications") },
-    { to: "/app/profile", icon: User, label: t("profile") },
   ];
 
   return (
@@ -50,9 +49,17 @@ function WorkerFrame({ children, title }: { children: ReactNode; title?: string 
           <SihhaMark className="h-7 w-7" />
           <h1 className="font-display text-lg font-semibold">{title ?? t("app_name")}</h1>
         </div>
-        <Link to="/app/emergency" className="rounded-full bg-destructive/10 p-2 text-destructive" aria-label={t("emergency")}>
-          <AlertTriangle className="h-5 w-5" />
-        </Link>
+        <div className="flex items-center gap-1">
+          <Link to="/app/notifications" className="rounded-full p-2 text-foreground/70 hover:bg-muted" aria-label={t("notifications")}>
+            <Bell className="h-5 w-5" />
+          </Link>
+          <Link to="/app/profile" className="rounded-full p-2 text-foreground/70 hover:bg-muted" aria-label={t("profile")}>
+            <User className="h-5 w-5" />
+          </Link>
+          <Link to="/app/emergency" className="rounded-full bg-destructive/10 p-2 text-destructive" aria-label={t("emergency")}>
+            <AlertTriangle className="h-5 w-5" />
+          </Link>
+        </div>
       </header>
       <main className="flex-1 px-4 py-4">{children}</main>
       <nav className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-md justify-around border-t bg-background/95 py-2 backdrop-blur">
