@@ -1,9 +1,13 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Home, MessageCircle, FileText, User, AlertTriangle, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaMark } from "@/components/SihhaLogo";
+import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { acceptConsent } from "@/lib/roles.functions";
+import { Button } from "@/components/ui/button";
 
 export function AppShell({ children, title }: { children: ReactNode; title?: string }) {
   const { t } = useLang();
@@ -14,6 +18,22 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
   if (!user) { nav({ to: "/auth", search: { role: "worker" } }); return null; }
   if (!roles.includes("worker")) { nav({ to: "/" }); return null; }
+
+  return <WorkerFrame title={title}>{children}</WorkerFrame>;
+}
+
+function WorkerFrame({ children, title }: { children: ReactNode; title?: string }) {
+  const { t } = useLang();
+  const loc = useLocation();
+  const { user } = useAuth();
+  const accept = useServerFn(acceptConsent);
+  const [consent, setConsent] = useState<"loading" | "accepted" | "pending">("loading");
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("profiles").select("consent_accepted_at").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setConsent(data?.consent_accepted_at ? "accepted" : "pending"));
+  }, [user]);
 
   const tabs = [
     { to: "/app", icon: Home, label: t("home") },
@@ -47,6 +67,28 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
           );
         })}
       </nav>
+      {consent === "pending" && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-ink/60 backdrop-blur-sm sm:items-center">
+          <div className="w-full max-w-md rounded-t-2xl bg-background p-6 shadow-xl sm:rounded-2xl">
+            <SihhaMark className="mb-3 h-8 w-8" />
+            <h2 className="font-display text-xl font-semibold text-foreground">Your privacy matters</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Sihha helps you understand your health in your language. We store your appointments, uploaded documents, and chats securely so you can review them later. We never share your health data with your employer. By continuing, you accept our Terms of Service and Privacy Policy.
+            </p>
+            <div className="mt-5 flex flex-col gap-2">
+              <Button
+                onClick={async () => {
+                  await accept({});
+                  setConsent("accepted");
+                }}
+              >
+                I agree, continue
+              </Button>
+              <Button variant="ghost" onClick={() => supabase.auth.signOut()}>Not now</Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

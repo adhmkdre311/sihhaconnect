@@ -9,7 +9,7 @@ const LANG_NAMES: Record<string, string> = {
 
 function chatSystemPrompt(lang: string) {
   const langName = LANG_NAMES[lang] ?? "English";
-  return `You are a multilingual health-literacy assistant for migrant workers in Qatar, operating inside SihhaConnect. Your job is STRICTLY limited to:
+  return `You are a multilingual health-literacy assistant for migrant workers in Qatar, operating inside Sihha. Your job is STRICTLY limited to:
 
 1) TRANSLATION & EXPLANATION — Explain medical terms, prescriptions, lab results and doctor instructions in plain, simple language in ${langName}. Short sentences, no jargon.
 2) APPOINTMENT & PROCESS GUIDANCE — Help understand how to book, reschedule, prepare (fasting, what to bring). Help understand insurance/HR forms in plain language.
@@ -38,6 +38,27 @@ async function callGateway(body: unknown) {
 
 const RED_FLAG = /\b(chest pain|can'?t breathe|difficulty breathing|severe bleeding|unconscious|passing out|suicid|heat stroke|stroke|seizure|choking|overdose)\b/i;
 
+// Code-level guardrail (Sihha spec §3.5): even if a prompt is bypassed,
+// diagnostic language and specific dosage advice must never reach the user.
+const DIAGNOSTIC_PATTERNS: RegExp[] = [
+  /you (have|are suffering from|are experiencing) [a-z\s]{1,40}(itis|osis|emia|oma|disease|infection|syndrome)\b/i,
+  /this (is|looks like|sounds like|appears to be) [a-z\s]{1,40}(itis|osis|emia|oma|disease|infection|syndrome)\b/i,
+  /\btake\s+\d+\s?(mg|ml|mcg|g|tablets?|pills?|capsules?)\b/i,
+  /\b(i\s+diagnose|my diagnosis|the diagnosis is)\b/i,
+];
+const SAFE_FALLBACK =
+  "I can't tell you what this is, but I can help you book a visit to get it checked. Would you like to book now?";
+function checkGuardrail(text: string): { safe: boolean; reason?: string } {
+  for (const p of DIAGNOSTIC_PATTERNS) {
+    if (p.test(text)) return { safe: false, reason: "diagnostic_or_dosage_language_detected" };
+  }
+  return { safe: true };
+}
+
+// Rate limit: 30 chat messages / 10 minutes per worker.
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const RATE_MAX = 30;
+
 export const askAssistant = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data) =>
@@ -48,6 +69,21 @@ export const askAssistant = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+
+    // Rate limit check
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rl } = await supabaseAdmin
+      .from("chat_rate_limits").select("window_start, count").eq("worker_id", userId).maybeSingle();
+    const now = Date.now();
+    const windowStart = rl ? new Date(rl.window_start).getTime() : 0;
+    if (rl && now - windowStart < RATE_WINDOW_MS) {
+      if ((rl.count ?? 0) >= RATE_MAX) {
+        return { reply: "You've sent a lot of messages in a short time. Please pause a few minutes, or if this is urgent call 999.", flagged: false, rate_limited: true };
+      }
+      await supabaseAdmin.from("chat_rate_limits").update({ count: (rl.count ?? 0) + 1 }).eq("worker_id", userId);
+    } else {
+      await supabaseAdmin.from("chat_rate_limits").upsert({ worker_id: userId, window_start: new Date(now).toISOString(), count: 1 });
+    }
 
     // Persist user message
     const flag = RED_FLAG.test(data.message);
@@ -76,11 +112,16 @@ export const askAssistant = createServerFn({ method: "POST" })
       assistantText = "I'm having trouble right now. If this is urgent, please call 999.";
     }
 
+    // Code-level safety net
+    const guard = checkGuardrail(assistantText);
+    const guardFlag = !guard.safe;
+    if (!guard.safe) assistantText = SAFE_FALLBACK;
+
     await supabase.from("chat_messages").insert({
-      worker_id: userId, role: "assistant", content: assistantText, flagged_for_human_review: flag,
+      worker_id: userId, role: "assistant", content: assistantText, flagged_for_human_review: flag || guardFlag,
     });
 
-    return { reply: assistantText, flagged: flag };
+    return { reply: assistantText, flagged: flag || guardFlag };
   });
 
 export const summarizeDocument = createServerFn({ method: "POST" })
