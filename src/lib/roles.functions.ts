@@ -37,6 +37,14 @@ export const bootstrapWorker = createServerFn({ method: "POST" })
     return { ok: true, employerId };
   });
 
+export const acceptConsent = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    await supabase.from("profiles").update({ consent_accepted_at: new Date().toISOString() }).eq("id", userId);
+    return { ok: true };
+  });
+
 export const bootstrapEmployer = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({
