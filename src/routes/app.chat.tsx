@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useLang } from "@/lib/i18n";
@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Sparkles } from "lucide-react";
+import { Send, Sparkles, CalendarPlus } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant } from "@/lib/ai.functions";
 
@@ -67,6 +67,16 @@ function Chat() {
         ))}
         {busy && <div className="text-xs text-muted-foreground">…</div>}
       </div>
+
+      {msgs.some((m) => m.role === "assistant") && (
+        <Link
+          to="/app/book"
+          className="mb-2 flex items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-2 text-sm font-medium text-primary transition hover:bg-primary/10"
+        >
+          <CalendarPlus className="h-4 w-4" />
+          Book a follow-up about this
+        </Link>
+      )}
 
       <div className="mb-2 flex gap-2 overflow-x-auto">
         {quick.map((q) => (
