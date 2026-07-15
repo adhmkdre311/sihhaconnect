@@ -80,7 +80,13 @@ function Chat() {
 
       <div className="mb-2 flex gap-2 overflow-x-auto">
         {quick.map((q) => (
-          <button key={q} onClick={() => void send(q)} className="whitespace-nowrap rounded-full border bg-background px-3 py-1 text-xs">{q}</button>
+          <button
+            key={q}
+            onClick={() => void send(q)}
+            className="whitespace-nowrap rounded-full border border-accent bg-background px-3 py-1.5 text-xs font-semibold text-accent-foreground/80 transition hover:bg-accent/10"
+          >
+            {q}
+          </button>
         ))}
       </div>
 
