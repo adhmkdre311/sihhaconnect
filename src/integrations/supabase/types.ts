@@ -473,6 +473,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      purge_old_documents: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "worker" | "employer_admin" | "clinic_staff" | "super_admin"
