@@ -12,6 +12,7 @@ function WorkerHome() {
   const { t } = useLang();
   const { user } = useAuth();
   const [next, setNext] = useState<{ id: string; scheduled_at: string; department: string; clinic: { name: string; address: string | null } | null } | null>(null);
+  const [firstName, setFirstName] = useState<string>("");
 
   useEffect(() => {
     if (!user) return;
@@ -21,29 +22,38 @@ function WorkerHome() {
       .in("status", ["booked"])
       .order("scheduled_at").limit(1).maybeSingle()
       .then(({ data }) => setNext(data as never));
+    void supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()
+      .then(({ data }) => setFirstName(((data?.full_name as string | null) ?? "").split(" ")[0] ?? ""));
   }, [user]);
 
   const when = next ? new Date(next.scheduled_at) : null;
+  const today = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
 
   return (
     <AppShell>
-      {/* Upcoming appointment — the one thing they're most likely to need */}
-      <section className="mb-5">
-        <div className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-          {t("upcoming_appointment")}
+      {/* Greeting */}
+      <section className="mb-4">
+        <div className="font-display text-2xl font-bold text-foreground">
+          {firstName ? `Hello, ${firstName}` : "Hello"}
         </div>
+        <div className="mt-0.5 text-xs text-muted-foreground">{today}</div>
+      </section>
+
+      {/* Upcoming appointment — gold eyebrow card */}
+      <section className="mb-5">
         {next && when ? (
           <Link
             to="/app/appointments/$id"
             params={{ id: next.id }}
-            className="group block overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-accent/10 p-5 shadow-sm transition hover:border-primary/40"
+            className="group block overflow-hidden rounded-2xl border bg-card p-5 shadow-sm transition hover:border-primary/40"
           >
+            <div className="eyebrow !text-accent">{t("upcoming")}</div>
             <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="font-display text-2xl font-semibold text-foreground">
+              <div className="mt-1">
+                <div className="font-display text-xl font-semibold text-foreground">
                   {when.toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "short" })}
                 </div>
-                <div className="mt-1 text-lg text-foreground/80">
+                <div className="mt-0.5 text-base text-foreground/80">
                   {when.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                 </div>
                 <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -52,44 +62,33 @@ function WorkerHome() {
                 </div>
                 <div className="mt-0.5 text-xs capitalize text-muted-foreground">{next.department}</div>
               </div>
-              <ChevronRight className="h-5 w-5 text-primary transition group-hover:translate-x-0.5" />
+              <ChevronRight className="mt-1 h-5 w-5 text-primary transition group-hover:translate-x-0.5" />
             </div>
           </Link>
         ) : (
-          <div className="rounded-2xl border border-dashed bg-card p-5 text-center">
+          <div className="rounded-2xl border bg-card p-5 text-center">
+            <div className="eyebrow !text-accent">{t("upcoming")}</div>
             <div className="text-sm text-muted-foreground">{t("no_upcoming")}</div>
           </div>
         )}
       </section>
 
-      {/* Two large primary actions — Book, Ask Assistant */}
+      {/* Two CTAs — filled teal + ghost outlined teal (matches brand prototype) */}
       <section className="space-y-3">
         <Link
           to="/app/book"
-          className="flex items-center gap-4 rounded-2xl bg-primary p-5 text-primary-foreground shadow-md transition active:translate-y-px hover:bg-primary/90"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-4 font-display text-base font-semibold text-primary-foreground shadow-sm transition active:translate-y-px hover:bg-primary/90"
         >
-          <span className="rounded-xl bg-primary-foreground/15 p-3">
-            <CalendarPlus className="h-7 w-7" />
-          </span>
-          <span className="flex-1">
-            <span className="block font-display text-lg font-semibold">{t("book_appointment")}</span>
-            <span className="block text-sm text-primary-foreground/80">Choose by symptom, in your language</span>
-          </span>
-          <ChevronRight className="h-5 w-5" />
+          <CalendarPlus className="h-5 w-5" />
+          {t("book_appointment")}
         </Link>
 
         <Link
           to="/app/chat"
-          className="flex items-center gap-4 rounded-2xl border-2 border-primary bg-card p-5 text-primary shadow-sm transition active:translate-y-px hover:bg-primary/5"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border-[1.5px] border-primary bg-card px-5 py-4 font-display text-base font-semibold text-primary transition active:translate-y-px hover:bg-primary/5"
         >
-          <span className="rounded-xl bg-primary/10 p-3">
-            <MessageCircle className="h-7 w-7" />
-          </span>
-          <span className="flex-1">
-            <span className="block font-display text-lg font-semibold text-foreground">{t("ask_question")}</span>
-            <span className="block text-sm text-muted-foreground">Explain a document or a medical word</span>
-          </span>
-          <ChevronRight className="h-5 w-5" />
+          <MessageCircle className="h-5 w-5" />
+          {t("ask_question")}
         </Link>
       </section>
 
