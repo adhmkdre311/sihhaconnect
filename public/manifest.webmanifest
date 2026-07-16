@@ -1,0 +1,31 @@
+{
+  "name": "Sihha — Health, understood.",
+  "short_name": "Sihha",
+  "description": "Multilingual health-literacy and appointment platform for Qatar's workforce.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F6F1E7",
+  "theme_color": "#0E5C56",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/brand/sihha-icon-primary.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/sihha-app-icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/sihha-app-icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ]
+}
