@@ -117,7 +117,11 @@ function AuthPage() {
             {mode === "signup" && role === "worker" && (
               <>
                 <div><Label>{t("phone")}</Label><Input type="tel" value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="+974 …" required /></div>
-                <div><Label>{t("invite_code")}</Label><Input value={inviteCode} onChange={(e)=>setInviteCode(e.target.value)} /></div>
+                <div>
+                  <Label>{t("invite_code")}</Label>
+                  <Input value={inviteCode} onChange={(e)=>setInviteCode(e.target.value)} placeholder="e.g. ACME-2026" />
+                  <p className="mt-1 text-xs text-muted-foreground">Ask your HR or supervisor for your company's code — it links your account to your employer.</p>
+                </div>
               </>
             )}
             {mode === "signup" && role === "employer_admin" && (
