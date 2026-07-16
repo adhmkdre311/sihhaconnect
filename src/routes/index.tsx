@@ -45,7 +45,7 @@ function Landing() {
         <div className="mb-10 flex items-center justify-between">
           <SihhaLockup size="md" />
           <span className="hidden font-display text-xs uppercase tracking-[0.16em] text-primary md:inline">
-            Brand v1.0
+            {"\n"}
           </span>
         </div>
 
