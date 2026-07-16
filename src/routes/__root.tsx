@@ -80,6 +80,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      { name: "theme-color", content: "#0E5C56" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { title: "Sihha — Health, understood." },
       { name: "description", content: "Sihha is a multilingual health-literacy and appointment platform built for Qatar's workforce — clinics, employers, and workers, in one calm interface." },
       { property: "og:title", content: "Sihha — Health, understood." },
