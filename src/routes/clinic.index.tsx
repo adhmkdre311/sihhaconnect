@@ -60,9 +60,16 @@ function Queue() {
                 <div className="text-lg font-semibold">{q.worker?.full_name ?? "—"}</div>
                 <div className="text-xs text-muted-foreground">{new Date(q.scheduled_at).toLocaleString()} · {q.department} · {q.status}</div>
               </div>
-              <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 text-xs font-medium text-accent-foreground">
-                <Languages className="h-3 w-3" />{q.worker?.preferred_language ?? "en"}
-              </span>
+              <div className="flex flex-col items-end gap-1">
+                <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 text-xs font-medium text-accent-foreground">
+                  <Languages className="h-3 w-3" />{q.worker?.preferred_language ?? "en"}
+                </span>
+                {q.worker?.preferred_language && !["en","ar"].includes(q.worker.preferred_language) && (
+                  <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                    Interpreter needed
+                  </span>
+                )}
+              </div>
             </div>
             {q.ai_context_summary && (
               <div className="mt-3 rounded-lg bg-secondary p-3 text-sm">

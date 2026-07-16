@@ -47,7 +47,12 @@ function Chat() {
     } finally { setBusy(false); }
   }
 
-  const quick = [t("quick_medicine"), t("quick_prep"), t("quick_explain")];
+  const quick = [
+    "Do I need to see a doctor?",
+    t("quick_medicine"),
+    t("quick_prep"),
+    t("quick_explain"),
+  ];
 
   return (
     <AppShell title={t("ask_question")}>
