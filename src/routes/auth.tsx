@@ -319,7 +319,7 @@ function AuthPage() {
             <button type="button" onClick={()=>setMode("login")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="login"?"bg-primary text-primary-foreground":""}`}>{t("login")}</button>
           </div>
 
-          <form onSubmit={submit} className="space-y-3">
+          <form noValidate onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
               <Field
                 label={t("name_label")}
@@ -327,7 +327,6 @@ function AuthPage() {
                 autoComplete="name"
                 dir="auto"
                 maxLength={100}
-                required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 error={fieldErrors.name}
@@ -339,7 +338,6 @@ function AuthPage() {
               name="email"
               autoComplete="email"
               dir="ltr"
-              required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={fieldErrors.email}
@@ -351,7 +349,6 @@ function AuthPage() {
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               dir="ltr"
               minLength={8}
-              required
               hint={mode === "signup" ? t("password_hint") : undefined}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -383,7 +380,6 @@ function AuthPage() {
                 name="confirm-password"
                 autoComplete="new-password"
                 dir="ltr"
-                required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 error={fieldErrors.confirm}
@@ -411,7 +407,6 @@ function AuthPage() {
                   autoComplete="tel"
                   dir="ltr"
                   placeholder="+974 …"
-                  required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   error={fieldErrors.phone}
@@ -436,7 +431,6 @@ function AuthPage() {
                 autoComplete="organization"
                 dir="auto"
                 maxLength={100}
-                required
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 error={fieldErrors.company}
@@ -448,7 +442,6 @@ function AuthPage() {
                 <select
                   id="clinic-select"
                   name="clinic"
-                  required
                   value={clinicId}
                   onChange={(e) => setClinicId(e.target.value)}
                   aria-invalid={fieldErrors.clinic ? true : undefined}
