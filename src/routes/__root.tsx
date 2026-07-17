@@ -86,10 +86,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Sihha — Health, understood." },
       { name: "description", content: "Sihha is a multilingual health-literacy and appointment platform built for Qatar's workforce — clinics, employers, and workers, in one calm interface." },
       { property: "og:title", content: "Sihha — Health, understood." },
-      { property: "og:description", content: "Book appointments, understand medicine and reports, in your language." },
+      { property: "og:description", content: "Sihha is a multilingual health-literacy and appointment platform built for Qatar's workforce — clinics, employers, and workers, in one calm interface." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Sihha — Health, understood." },
+      { name: "twitter:description", content: "Sihha is a multilingual health-literacy and appointment platform built for Qatar's workforce — clinics, employers, and workers, in one calm interface." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e2aadaea-bd4a-464f-bf1d-f644d2265a01/id-preview-17734661--2faaf23d-6f2e-4135-b613-df663ca6412e.lovable.app-1784171181472.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/e2aadaea-bd4a-464f-bf1d-f644d2265a01/id-preview-17734661--2faaf23d-6f2e-4135-b613-df663ca6412e.lovable.app-1784171181472.png" },
     ],
     links: [
       {
