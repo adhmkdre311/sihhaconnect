@@ -55,8 +55,8 @@ function Profile() {
           <Label>{t("language")}</Label>
           <div className="mt-1 flex flex-wrap gap-2">
             {LANGUAGES.map((l) => (
-              <button key={l.code} onClick={()=>setLang(l.code)} className={`rounded-full border px-3 py-1 text-xs ${lang===l.code?"border-primary bg-primary text-primary-foreground":""}`}>
-                {l.flag} {l.native}
+              <button key={l.code} onClick={()=>setLang(l.code)} aria-pressed={lang===l.code} className={`rounded-full border px-3 py-1 text-xs ${lang===l.code?"border-primary bg-primary text-primary-foreground":""}`}>
+                {l.native}
               </button>
             ))}
           </div>
