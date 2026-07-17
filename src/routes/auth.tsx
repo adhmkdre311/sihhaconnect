@@ -24,6 +24,7 @@ import {
 } from "@/lib/validation";
 import { PasswordToggle } from "@/components/PasswordToggle";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { role, mode: initialMode } = Route.useSearch();
+  const { role, mode: initialMode, next } = Route.useSearch();
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
@@ -94,8 +95,13 @@ function AuthPage() {
     }
   }, [role]);
 
-  const targetFor = () =>
-    role === "worker" ? "/app" : role === "employer_admin" ? "/employer" : "/clinic";
+  const ROLE_HOME: Record<Role, string> = {
+    worker: "/app",
+    employer_admin: "/employer",
+    clinic_staff: "/clinic",
+  };
+  // BUG-27: honor validated `next` on login, sanitized by parseNext (Task 3).
+  const targetFor = () => next ?? ROLE_HOME[role as Role];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -242,10 +248,11 @@ function AuthPage() {
         {t("skip_to_content")}
       </a>
       <div className="mx-auto w-full max-w-md">
-        <header className="mb-4">
+        <header className="mb-4 flex items-center justify-between gap-2">
           <Button variant="ghost" onClick={() => nav({ to: "/" })}>
             <span aria-hidden="true" className="inline-block rtl:rotate-180">←</span> {t("back")}
           </Button>
+          <LanguageSwitcher className="justify-end" />
         </header>
         <main id="main" tabIndex={-1} className="rounded-2xl border bg-card p-6 shadow-sm">
           {view === "check-inbox" ? (

@@ -11,7 +11,11 @@ export function ClinicShell({ children }: { children: ReactNode }) {
   const nav = useNavigate();
   const { user, loading, roles, signOut } = useAuth();
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
-  if (!user) { nav({ to: "/auth", search: { role: "clinic_staff" } }); return null; }
+  if (!user) {
+    const next = loc.pathname + (typeof loc.search === "string" ? loc.search : "");
+    nav({ to: "/auth", search: { role: "clinic_staff", mode: "login", next } });
+    return null;
+  }
   if (!roles.includes("clinic_staff")) { nav({ to: "/" }); return null; }
 
   const items = [

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LANGUAGES, useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/lib/auth";
 import { Stethoscope, Building2, User } from "lucide-react";
 import { SihhaLockup, SihhaMark } from "@/components/SihhaLogo";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { lang, setLang, t } = useLang();
+  const { t } = useLang();
   const { user, roles, loading } = useAuth();
   const nav = useNavigate();
   useDocumentTitle("hero_title");
@@ -75,28 +76,13 @@ function Landing() {
           <p className="mb-3 font-display text-xs font-semibold uppercase tracking-wider text-primary">
             {t("choose_language")}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => setLang(l.code)}
-                aria-pressed={lang === l.code}
-                className={`rounded-full border px-4 py-2 text-sm transition ${
-                  lang === l.code
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background hover:border-primary hover:text-primary"
-                }`}
-              >
-                {l.native}
-              </button>
-            ))}
-          </div>
+          <LanguageSwitcher />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <RoleCard icon={<User className="h-6 w-6" />} title={t("worker")} desc={t("role_worker_desc")} to="/auth" search={{ role: "worker" }} />
-          <RoleCard icon={<Building2 className="h-6 w-6" />} title={t("employer_admin")} desc={t("role_employer_desc")} to="/auth" search={{ role: "employer_admin" }} />
-          <RoleCard icon={<Stethoscope className="h-6 w-6" />} title={t("clinic_staff")} desc={t("role_clinic_desc")} to="/auth" search={{ role: "clinic_staff" }} />
+          <RoleCard icon={<User className="h-6 w-6" />} title={t("worker")} desc={t("role_worker_desc")} to="/auth" search={{ role: "worker", mode: "signup" }} />
+          <RoleCard icon={<Building2 className="h-6 w-6" />} title={t("employer_admin")} desc={t("role_employer_desc")} to="/auth" search={{ role: "employer_admin", mode: "signup" }} />
+          <RoleCard icon={<Stethoscope className="h-6 w-6" />} title={t("clinic_staff")} desc={t("role_clinic_desc")} to="/auth" search={{ role: "clinic_staff", mode: "signup" }} />
         </div>
         </main>
 

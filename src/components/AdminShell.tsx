@@ -11,7 +11,11 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const nav = useNavigate();
   const { user, loading, roles, signOut } = useAuth();
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
-  if (!user) { nav({ to: "/auth", search: { role: "employer_admin" } }); return null; }
+  if (!user) {
+    const next = loc.pathname + (typeof loc.search === "string" ? loc.search : "");
+    nav({ to: "/auth", search: { role: "employer_admin", mode: "login", next } });
+    return null;
+  }
   if (!roles.includes("employer_admin")) { nav({ to: "/" }); return null; }
 
   const items = [
