@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
@@ -20,7 +19,6 @@ import { Route as EmployerComplianceRouteImport } from './routes/employer.compli
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
-import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
@@ -29,11 +27,6 @@ import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -84,11 +77,6 @@ const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
   path: '/clinic/slots',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthResetRoute = AuthResetRouteImport.update({
-  id: '/reset',
-  path: '/reset',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AppRecordsRoute = AppRecordsRouteImport.update({
   id: '/app/records',
   path: '/app/records',
@@ -127,14 +115,12 @@ const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
-  '/auth/reset': typeof AuthResetRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -148,14 +134,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
-  '/auth/reset': typeof AuthResetRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -170,14 +154,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
-  '/auth/reset': typeof AuthResetRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -193,14 +175,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/auth'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
-    | '/auth/reset'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -214,14 +194,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
-    | '/auth/reset'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -235,14 +213,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/auth'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
     | '/app/profile'
     | '/app/records'
-    | '/auth/reset'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -257,7 +233,6 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRouteWithChildren
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
   AppEmergencyRoute: typeof AppEmergencyRoute
@@ -278,13 +253,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -355,13 +323,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClinicSlotsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/auth/reset': {
-      id: '/auth/reset'
-      path: '/reset'
-      fullPath: '/auth/reset'
-      preLoaderRoute: typeof AuthResetRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/app/records': {
       id: '/app/records'
       path: '/app/records'
@@ -414,19 +375,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthRouteChildren {
-  AuthResetRoute: typeof AuthResetRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthResetRoute: AuthResetRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRouteWithChildren,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
   AppEmergencyRoute: AppEmergencyRoute,
