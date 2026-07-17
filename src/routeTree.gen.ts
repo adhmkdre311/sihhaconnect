@@ -88,7 +88,7 @@ const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
   getParentRoute: () => AuthRoute,
-} as any)
+} as any).lazy(() => import('./routes/auth.reset.lazy').then((d) => d.Route))
 const AppRecordsRoute = AppRecordsRouteImport.update({
   id: '/app/records',
   path: '/app/records',
