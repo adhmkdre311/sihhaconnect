@@ -12,6 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
 import { isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
+import { validateEmail } from "@/lib/validation";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -60,7 +61,7 @@ function AuthPage() {
   const [clinics, setClinics] = useState<{id:string;name:string}[]>([]);
   const [busy, setBusy] = useState(false);
   // BUG-06: view state for post-signup confirmation & inline unconfirmed-login
-  const [view, setView] = useState<"form" | "check-inbox" | "role-pending">("form");
+  const [view, setView] = useState<"form" | "check-inbox" | "role-pending" | "forgot">("form");
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
@@ -70,8 +71,8 @@ function AuthPage() {
   const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
 
   // BUG-03/10: field-level errors keyed by field name; wired to Field's aria-describedby.
-  // Full validation is added in Task 7; placeholder shape kept empty until then.
-  const fieldErrors: Partial<Record<"name" | "email" | "password" | "phone" | "company" | "invite" | "clinic", string>> = {};
+  // Full validation is added in Task 7; this state is used starting Task 5 (forgot flow).
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<"name" | "email" | "password" | "phone" | "company" | "invite" | "clinic" | "confirm", string>>>({});
 
   useEffect(() => {
     if (role === "clinic_staff") {
@@ -187,6 +188,53 @@ function AuthPage() {
                 {t("back_to_login")}
               </Button>
             </div>
+          ) : view === "forgot" ? (
+            <form
+              noValidate
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const emailError = validateEmail(email, t);
+                setFieldErrors((prev) => ({ ...prev, email: emailError }));
+                if (emailError) return;
+                setBusy(true);
+                await supabase.auth.resetPasswordForEmail(email, {
+                  redirectTo: `${window.location.origin}/auth/reset`,
+                });
+                setBusy(false);
+                // Enumeration-safe: show the inbox screen either way.
+                setSubmittedEmail(email);
+                setView("check-inbox");
+              }}
+              className="space-y-4"
+            >
+              <h2 className="text-xl font-semibold">{t("reset_title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("reset_body")}</p>
+              <Field
+                label={t("email_label")}
+                type="email"
+                name="email"
+                autoComplete="email"
+                dir="ltr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={fieldErrors.email}
+              />
+              <Button type="submit" disabled={busy} className="w-full">
+                {busy ? t("loading") : t("send_reset_link")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setView("form");
+                  setMode("login");
+                  setFieldErrors({});
+                }}
+              >
+                {t("back_to_login")}
+              </Button>
+            </form>
           ) : (
           <>
           <h1 className="text-xl font-semibold">{heading}</h1>
@@ -235,6 +283,19 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={fieldErrors.password}
             />
+            {mode === "login" && (
+              <button
+                type="button"
+                className="text-sm font-medium text-primary underline underline-offset-4"
+                onClick={() => {
+                  setView("forgot");
+                  setFormError(undefined);
+                  setShowResendInline(false);
+                }}
+              >
+                {t("forgot_password")}
+              </button>
+            )}
             {mode === "signup" && role === "worker" && (
               <>
                 <Field
