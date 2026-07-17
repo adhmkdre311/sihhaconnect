@@ -23,6 +23,7 @@ import {
   passwordStrength,
 } from "@/lib/validation";
 import { PasswordToggle } from "@/components/PasswordToggle";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -61,6 +62,7 @@ function AuthPage() {
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  useDocumentTitle(mode === "login" ? "login" : "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -231,10 +233,21 @@ function AuthPage() {
     role === "employer_admin" ? t("employer_admin") : t("clinic_staff");
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-md">
-        <Button variant="ghost" onClick={() => nav({ to: "/" })} className="mb-4">← {t("back")}</Button>
-        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+    <div className="flex min-h-screen flex-col bg-background p-4">
+      {/* BUG-16: skip link; visible on keyboard focus only */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:start-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:ring-2 focus:ring-ring"
+      >
+        {t("skip_to_content")}
+      </a>
+      <div className="mx-auto w-full max-w-md">
+        <header className="mb-4">
+          <Button variant="ghost" onClick={() => nav({ to: "/" })}>
+            <span aria-hidden="true" className="inline-block rtl:rotate-180">←</span> {t("back")}
+          </Button>
+        </header>
+        <main id="main" tabIndex={-1} className="rounded-2xl border bg-card p-6 shadow-sm">
           {view === "check-inbox" ? (
             <CheckInbox
               email={submittedEmail}
@@ -314,9 +327,9 @@ function AuthPage() {
           <h1 className="text-xl font-semibold">{heading}</h1>
           <p className="mb-4 text-sm text-muted-foreground">{mode === "login" ? t("login") : t("signup")}</p>
 
-          <div className="mb-4 flex rounded-lg border p-1 text-sm">
-            <button type="button" onClick={()=>setMode("signup")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="signup"?"bg-primary text-primary-foreground":""}`}>{t("signup")}</button>
-            <button type="button" onClick={()=>setMode("login")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="login"?"bg-primary text-primary-foreground":""}`}>{t("login")}</button>
+          <div role="group" className="mb-4 flex rounded-lg border p-1 text-sm">
+            <button type="button" aria-pressed={mode==="signup"} onClick={()=>setMode("signup")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="signup"?"bg-primary text-primary-foreground":""}`}>{t("signup")}</button>
+            <button type="button" aria-pressed={mode==="login"} onClick={()=>setMode("login")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="login"?"bg-primary text-primary-foreground":""}`}>{t("login")}</button>
           </div>
 
           <form noValidate onSubmit={submit} className="space-y-3">
@@ -486,7 +499,7 @@ function AuthPage() {
           </form>
           </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );

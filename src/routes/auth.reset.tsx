@@ -9,6 +9,7 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { validatePassword, validateConfirm } from "@/lib/validation";
 import { mapAuthError } from "@/lib/authErrors";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 export const Route = createFileRoute("/auth/reset")({
   component: ResetPasswordPage,
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/auth/reset")({
 
 function ResetPasswordPage() {
   const { t } = useLang();
+  useDocumentTitle("reset_password");
   const navigate = useNavigate();
   const [ready, setReady] = useState(false);
   const [password, setPassword] = useState("");
