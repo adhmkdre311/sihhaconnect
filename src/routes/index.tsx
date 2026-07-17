@@ -80,9 +80,9 @@ function Landing() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          <RoleCard icon={<User className="h-6 w-6" />} title={t("worker")} desc={t("role_worker_desc")} to="/auth" search={{ role: "worker" }} />
-          <RoleCard icon={<Building2 className="h-6 w-6" />} title={t("employer_admin")} desc={t("role_employer_desc")} to="/auth" search={{ role: "employer_admin" }} />
-          <RoleCard icon={<Stethoscope className="h-6 w-6" />} title={t("clinic_staff")} desc={t("role_clinic_desc")} to="/auth" search={{ role: "clinic_staff" }} />
+          <RoleCard icon={<User className="h-6 w-6" />} title={t("worker")} desc={t("role_worker_desc")} to="/auth" search={{ role: "worker", mode: "signup" }} />
+          <RoleCard icon={<Building2 className="h-6 w-6" />} title={t("employer_admin")} desc={t("role_employer_desc")} to="/auth" search={{ role: "employer_admin", mode: "signup" }} />
+          <RoleCard icon={<Stethoscope className="h-6 w-6" />} title={t("clinic_staff")} desc={t("role_clinic_desc")} to="/auth" search={{ role: "clinic_staff", mode: "signup" }} />
         </div>
         </main>
 
