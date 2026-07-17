@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -12,21 +11,43 @@ import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/
 import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
 
-const search = z.object({
-  role: z.enum(["worker","employer_admin","clinic_staff"]).default("worker"),
-});
+// BUG-08: safe search-param parsing — never throw, always fall back.
+const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
+export type Role = (typeof ROLES)[number];
+export type AuthMode = "login" | "signup";
+
+export function parseRole(value: unknown): Role {
+  return (ROLES as readonly string[]).includes(value as string) ? (value as Role) : "worker";
+}
+
+export function parseMode(value: unknown): AuthMode {
+  // default is 'login' so gate redirects land on Log in (BUG-27);
+  // the landing role cards pass mode=signup explicitly.
+  return value === "signup" ? "signup" : "login";
+}
+
+export function parseNext(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  // internal absolute paths only — blocks open redirects (//evil.com, backslash tricks)
+  if (!value.startsWith("/") || value.startsWith("//") || value.includes("\\")) return undefined;
+  return value;
+}
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s) => search.parse(s),
+  validateSearch: (s: Record<string, unknown>) => ({
+    role: parseRole(s.role),
+    mode: parseMode(s.mode),
+    next: parseNext(s.next),
+  }),
   component: AuthPage,
 });
 
 function AuthPage() {
-  const { role } = Route.useSearch();
+  const { role, mode: initialMode } = Route.useSearch();
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
-  const [mode, setMode] = useState<"login"|"signup">("signup");
+  const [mode, setMode] = useState<AuthMode>(initialMode);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
