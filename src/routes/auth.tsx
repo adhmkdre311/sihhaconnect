@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/roles.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { mapAuthError } from "@/lib/authErrors";
 
 const search = z.object({
   role: z.enum(["worker","employer_admin","clinic_staff"]).default("worker"),
@@ -84,8 +85,8 @@ function AuthPage() {
       toast.success("Account ready");
       nav({ to: targetFor() });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed";
-      toast.error(msg);
+      // BUG-10: never render raw Supabase error text; use translated map.
+      toast.error(mapAuthError(err, t));
     } finally {
       setBusy(false);
     }

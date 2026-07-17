@@ -54,11 +54,10 @@ function Landing() {
             {t("tagline")}
           </p>
           <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight text-foreground md:text-6xl">
-            Health,<br />understood.
+            {t("hero_title")}
           </h1>
           <p className="mt-5 max-w-lg text-base text-muted-foreground md:text-lg">
-            {t("app_name")} — a calm, multilingual place to book care, understand
-            your medicine, and stay well. Built for Qatar's workforce.
+            {t("hero_subtitle")}
           </p>
         </div>
 
@@ -93,8 +92,7 @@ function Landing() {
         <div className="mt-14 flex flex-col items-center gap-2 text-center">
           <SihhaMark className="h-5 w-5 opacity-70" />
           <p className="max-w-md text-xs text-muted-foreground">
-            Administrative and health-literacy platform. Not for diagnosis or
-            emergency use. For emergencies, call 999.
+            {t("hero_disclaimer")}
           </p>
         </div>
       </div>
@@ -114,10 +112,17 @@ function RoleCard({ icon, title, desc, to, search }: { icon: React.ReactNode; ti
       </div>
       <h3 className="mb-1 font-display text-lg font-semibold">{title}</h3>
       <p className="text-sm text-muted-foreground">{desc}</p>
-      <span className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition group-hover:opacity-100">
-        Continue →
+      {/* BUG-31 affordance: continue CTA always visible, translated, RTL-aware arrow */}
+      <span className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary opacity-100 transition group-focus-visible:underline">
+        <TranslatedContinue />
+        <span aria-hidden="true" className="inline-block rtl:rotate-180">→</span>
       </span>
     </Link>
   );
+}
+
+function TranslatedContinue() {
+  const { t } = useLang();
+  return <>{t("continue")}</>;
 }
 
