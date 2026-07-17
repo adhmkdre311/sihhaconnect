@@ -58,7 +58,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { role, mode: initialMode } = Route.useSearch();
+  const { role, mode: initialMode, next } = Route.useSearch();
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
@@ -95,8 +95,13 @@ function AuthPage() {
     }
   }, [role]);
 
-  const targetFor = () =>
-    role === "worker" ? "/app" : role === "employer_admin" ? "/employer" : "/clinic";
+  const ROLE_HOME: Record<Role, string> = {
+    worker: "/app",
+    employer_admin: "/employer",
+    clinic_staff: "/clinic",
+  };
+  // BUG-27: honor validated `next` on login, sanitized by parseNext (Task 3).
+  const targetFor = () => next ?? ROLE_HOME[role];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
