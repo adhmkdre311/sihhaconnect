@@ -327,9 +327,9 @@ function AuthPage() {
           <h1 className="text-xl font-semibold">{heading}</h1>
           <p className="mb-4 text-sm text-muted-foreground">{mode === "login" ? t("login") : t("signup")}</p>
 
-          <div className="mb-4 flex rounded-lg border p-1 text-sm">
-            <button type="button" onClick={()=>setMode("signup")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="signup"?"bg-primary text-primary-foreground":""}`}>{t("signup")}</button>
-            <button type="button" onClick={()=>setMode("login")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="login"?"bg-primary text-primary-foreground":""}`}>{t("login")}</button>
+          <div role="group" className="mb-4 flex rounded-lg border p-1 text-sm">
+            <button type="button" aria-pressed={mode==="signup"} onClick={()=>setMode("signup")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="signup"?"bg-primary text-primary-foreground":""}`}>{t("signup")}</button>
+            <button type="button" aria-pressed={mode==="login"} onClick={()=>setMode("login")} className={`flex-1 rounded-md px-3 py-1.5 ${mode==="login"?"bg-primary text-primary-foreground":""}`}>{t("login")}</button>
           </div>
 
           <form noValidate onSubmit={submit} className="space-y-3">
