@@ -119,8 +119,11 @@
   --muted-foreground: #A9B8B4;
   --accent: #E8C077;          /* Gold on dark */
   --accent-foreground: #16262B;
-  --destructive: #E8806B;
-  --destructive-foreground: #FFFFFF;
+  /* Dark mode: white-on-#C2402F passes (5.16:1), but destructive *text* on the
+     dark surface needs a lighter red: #E8705C = 6.08:1 on the dark background.
+     Buttons in dark mode pair it with a dark foreground: 6.26:1. */
+  --destructive: #E8705C;
+  --destructive-foreground: #1D0B06;
   --border: rgba(246,241,231,0.12);
   --input: rgba(246,241,231,0.16);
   --ring: #E8C077;
