@@ -499,7 +499,7 @@ function AuthPage() {
           </form>
           </>
           )}
-        </div>
+        </main>
       </div>
     </div>
   );
