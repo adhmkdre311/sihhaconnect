@@ -34,7 +34,7 @@ export const Route = createLazyFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { role, mode: initialMode, next } = Route.useSearch();
+  const { role, mode: initialMode, next } = RouteApi.useSearch();
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
