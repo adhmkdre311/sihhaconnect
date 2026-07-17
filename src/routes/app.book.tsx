@@ -94,7 +94,7 @@ function Book() {
       )}
       {step === 2 && (
         <>
-          <Button variant="ghost" onClick={() => setStep(1)} className="mb-2 px-0">← {t("back")}</Button>
+          <Button variant="ghost" onClick={() => setStep(1)} className="mb-2 px-0"><span aria-hidden="true" className="inline-block rtl:rotate-180">←</span> {t("back")}</Button>
           <p className="mb-3 text-sm font-medium">{t("choose_clinic")}</p>
           <div className="space-y-2">
             {filteredClinics.map((c) => (
@@ -109,7 +109,7 @@ function Book() {
       )}
       {step === 3 && (
         <>
-          <Button variant="ghost" onClick={() => setStep(2)} className="mb-2 px-0">← {t("back")}</Button>
+          <Button variant="ghost" onClick={() => setStep(2)} className="mb-2 px-0"><span aria-hidden="true" className="inline-block rtl:rotate-180">←</span> {t("back")}</Button>
           <p className="mb-3 text-sm font-medium">{t("choose_time")}</p>
           <div className="grid grid-cols-2 gap-2">
             {generateSlots().map((s) => (
@@ -125,7 +125,7 @@ function Book() {
       )}
       {step === 4 && (
         <>
-          <Button variant="ghost" onClick={() => setStep(3)} className="mb-2 px-0">← {t("back")}</Button>
+          <Button variant="ghost" onClick={() => setStep(3)} className="mb-2 px-0"><span aria-hidden="true" className="inline-block rtl:rotate-180">←</span> {t("back")}</Button>
           <div className="mb-3 rounded-2xl border p-4">
             <div className="text-xs text-muted-foreground">{t("date")} · {t("time")}</div>
             <div className="text-lg font-semibold">{slot?.toLocaleString()}</div>
