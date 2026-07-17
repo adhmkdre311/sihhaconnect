@@ -994,7 +994,12 @@ type Ctx = { lang: Lang; setLang: (l: Lang) => void; t: (k: string) => string; d
 const LangContext = createContext<Ctx | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("en");
+  // BUG-22: initialize from same localStorage key as the pre-hydration boot script.
+  const [lang, setLangState] = useState<Lang>(() => {
+    if (typeof window === "undefined") return "en";
+    const saved = window.localStorage.getItem("lang") as Lang | null;
+    return saved && T[saved] ? saved : "en";
+  });
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem("lang") as Lang | null;
