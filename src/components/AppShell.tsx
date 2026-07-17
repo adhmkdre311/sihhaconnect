@@ -16,7 +16,11 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
   const { user, loading, roles } = useAuth();
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
-  if (!user) { nav({ to: "/auth", search: { role: "worker" } }); return null; }
+  if (!user) {
+    const next = loc.pathname + (loc.search ? (typeof loc.search === "string" ? loc.search : "") : "");
+    nav({ to: "/auth", search: { role: "worker", mode: "login", next } });
+    return null;
+  }
   if (!roles.includes("worker")) { nav({ to: "/" }); return null; }
 
   return <WorkerFrame title={title}>{children}</WorkerFrame>;
