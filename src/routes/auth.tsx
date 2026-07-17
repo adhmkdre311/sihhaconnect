@@ -12,7 +12,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
 import { isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
-import { validateEmail, passwordStrength } from "@/lib/validation";
+import {
+  validateEmail,
+  validatePassword,
+  validateConfirm,
+  validateName,
+  validatePhone,
+  validateRequired,
+  validateInviteFormat,
+  passwordStrength,
+} from "@/lib/validation";
 import { PasswordToggle } from "@/components/PasswordToggle";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
@@ -88,9 +97,42 @@ function AuthPage() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    setBusy(true);
     setFormError(undefined);
     setShowResendInline(false);
+    // BUG-10/18/19/20: run translated client-side validation before any network call.
+    if (mode === "login") {
+      const next = {
+        email: validateEmail(email, t),
+        // Do not enforce min-length on login (legacy 6-char accounts).
+        password: validateRequired(password, t),
+      };
+      setFieldErrors(next);
+      if (Object.values(next).some(Boolean)) {
+        requestAnimationFrame(() =>
+          document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),
+        );
+        return;
+      }
+    } else {
+      const next: Record<string, string | undefined> = {
+        name: validateName(fullName, t),
+        email: validateEmail(email, t),
+        password: validatePassword(password, t),
+        confirm: validateConfirm(password, confirmPassword, t),
+        phone: role === "worker" ? validatePhone(phone, t) : undefined,
+        company: role === "employer_admin" ? validateRequired(companyName, t) : undefined,
+        clinic: role === "clinic_staff" && !clinicId ? t("validation_required") : undefined,
+        invite: role === "worker" ? validateInviteFormat(inviteCode, t) : undefined,
+      };
+      setFieldErrors(next);
+      if (Object.values(next).some(Boolean)) {
+        requestAnimationFrame(() =>
+          document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),
+        );
+        return;
+      }
+    }
+    setBusy(true);
     try {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -110,6 +152,20 @@ function AuthPage() {
         return;
       }
       // signup
+      // BUG-19: anon-safe invite validation BEFORE account creation.
+      const trimmedCode = role === "worker" ? inviteCode.trim() : "";
+      if (trimmedCode) {
+        const { error: inviteError } = await supabase.rpc("validate_invite", {
+          _code: trimmedCode,
+        });
+        if (inviteError) {
+          setFieldErrors((prev) => ({ ...prev, invite: t("error_invalid_invite") }));
+          requestAnimationFrame(() =>
+            document.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus(),
+          );
+          return;
+        }
+      }
       const { data, error } = await supabase.auth.signUp({
         email, password,
         options: { data: { full_name: fullName, preferred_language: lang } },
@@ -144,6 +200,17 @@ function AuthPage() {
         toast.success("Account ready");
         nav({ to: targetFor() });
         return;
+      }
+      // BUG-19: authenticated invite consumption — links employer server-side.
+      // Failure must NOT block onboarding.
+      if (trimmedCode && data.user) {
+        const { error: consumeError } = await supabase.rpc("consume_invite", {
+          _code: trimmedCode,
+        });
+        if (consumeError) {
+          console.warn("consume_invite failed", consumeError);
+          toast.warning(t("error_invalid_invite"));
+        }
       }
       setSubmittedEmail(email);
       setView("check-inbox");
