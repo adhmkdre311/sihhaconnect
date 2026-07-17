@@ -5,8 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Field } from "@/components/ui/field";
 import { toast } from "sonner";
 import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/roles.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -40,6 +40,10 @@ function AuthPage() {
   const runBootstrapWorker = useServerFn(bootstrapWorker);
   const runBootstrapEmployer = useServerFn(bootstrapEmployer);
   const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
+
+  // BUG-03/10: field-level errors keyed by field name; wired to Field's aria-describedby.
+  // Full validation is added in Task 7; placeholder shape kept empty until then.
+  const fieldErrors: Partial<Record<"name" | "email" | "password" | "phone" | "company" | "invite" | "clinic", string>> = {};
 
   useEffect(() => {
     if (role === "clinic_staff") {
@@ -111,30 +115,109 @@ function AuthPage() {
 
           <form onSubmit={submit} className="space-y-3">
             {mode === "signup" && (
-              <div><Label>{t("full_name")}</Label><Input value={fullName} onChange={(e)=>setFullName(e.target.value)} required /></div>
+              <Field
+                label={t("name_label")}
+                name="name"
+                autoComplete="name"
+                dir="auto"
+                maxLength={100}
+                required
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                error={fieldErrors.name}
+              />
             )}
-            <div><Label>{t("email")}</Label><Input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} required /></div>
-            <div><Label>{t("password")}</Label><Input type="password" value={password} onChange={(e)=>setPassword(e.target.value)} required minLength={6} /></div>
+            <Field
+              label={t("email_label")}
+              type="email"
+              name="email"
+              autoComplete="email"
+              dir="ltr"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={fieldErrors.email}
+            />
+            <Field
+              label={t("password_label")}
+              type="password"
+              name={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              dir="ltr"
+              minLength={8}
+              required
+              hint={mode === "signup" ? t("password_hint") : undefined}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={fieldErrors.password}
+            />
             {mode === "signup" && role === "worker" && (
               <>
-                <div><Label>{t("phone")}</Label><Input type="tel" value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="+974 …" required /></div>
-                <div>
-                  <Label>{t("invite_code")}</Label>
-                  <Input value={inviteCode} onChange={(e)=>setInviteCode(e.target.value)} placeholder="e.g. ACME-2026" />
-                  <p className="mt-1 text-xs text-muted-foreground">Ask your HR or supervisor for your company's code — it links your account to your employer.</p>
-                </div>
+                <Field
+                  label={t("phone_label")}
+                  type="tel"
+                  name="tel"
+                  autoComplete="tel"
+                  dir="ltr"
+                  placeholder="+974 …"
+                  required
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  error={fieldErrors.phone}
+                />
+                <Field
+                  label={t("invite_code")}
+                  name="invite-code"
+                  autoComplete="off"
+                  dir="ltr"
+                  placeholder="e.g. ACME-2026"
+                  hint={t("invite_code_help")}
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value)}
+                  error={fieldErrors.invite}
+                />
               </>
             )}
             {mode === "signup" && role === "employer_admin" && (
-              <div><Label>Company</Label><Input value={companyName} onChange={(e)=>setCompanyName(e.target.value)} required /></div>
+              <Field
+                label={t("company_label")}
+                name="organization"
+                autoComplete="organization"
+                dir="auto"
+                maxLength={100}
+                required
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                error={fieldErrors.company}
+              />
             )}
             {mode === "signup" && role === "clinic_staff" && (
-              <div>
-                <Label>Clinic</Label>
-                <select className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm" value={clinicId} onChange={(e)=>setClinicId(e.target.value)} required>
-                  <option value="">—</option>
-                  {clinics.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              <div className="space-y-1.5">
+                <Label htmlFor="clinic-select">{t("choose_clinic")}</Label>
+                <select
+                  id="clinic-select"
+                  name="clinic"
+                  required
+                  value={clinicId}
+                  onChange={(e) => setClinicId(e.target.value)}
+                  aria-invalid={fieldErrors.clinic ? true : undefined}
+                  aria-describedby={fieldErrors.clinic ? "clinic-select-error" : undefined}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                >
+                  <option value="" disabled>
+                    {t("choose_clinic")}
+                  </option>
+                  {clinics.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
                 </select>
+                {fieldErrors.clinic && (
+                  <p id="clinic-select-error" role="alert" className="text-sm font-medium text-destructive">
+                    {fieldErrors.clinic}
+                  </p>
+                )}
               </div>
             )}
             <Button type="submit" disabled={busy} className="w-full">{busy ? t("loading") : mode === "login" ? t("login") : t("signup")}</Button>
