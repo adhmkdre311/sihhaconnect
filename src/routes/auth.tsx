@@ -188,6 +188,53 @@ function AuthPage() {
                 {t("back_to_login")}
               </Button>
             </div>
+          ) : view === "forgot" ? (
+            <form
+              noValidate
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const emailError = validateEmail(email, t);
+                setFieldErrors((prev) => ({ ...prev, email: emailError }));
+                if (emailError) return;
+                setBusy(true);
+                await supabase.auth.resetPasswordForEmail(email, {
+                  redirectTo: `${window.location.origin}/auth/reset`,
+                });
+                setBusy(false);
+                // Enumeration-safe: show the inbox screen either way.
+                setSubmittedEmail(email);
+                setView("check-inbox");
+              }}
+              className="space-y-4"
+            >
+              <h2 className="text-xl font-semibold">{t("reset_title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("reset_body")}</p>
+              <Field
+                label={t("email_label")}
+                type="email"
+                name="email"
+                autoComplete="email"
+                dir="ltr"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={fieldErrors.email}
+              />
+              <Button type="submit" disabled={busy} className="w-full">
+                {busy ? t("loading") : t("send_reset_link")}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setView("form");
+                  setMode("login");
+                  setFieldErrors({});
+                }}
+              >
+                {t("back_to_login")}
+              </Button>
+            </form>
           ) : (
           <>
           <h1 className="text-xl font-semibold">{heading}</h1>
