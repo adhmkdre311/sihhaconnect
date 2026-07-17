@@ -75,22 +75,7 @@ function Landing() {
           <p className="mb-3 font-display text-xs font-semibold uppercase tracking-wider text-primary">
             {t("choose_language")}
           </p>
-          <div className="flex flex-wrap gap-2">
-            {LANGUAGES.map((l) => (
-              <button
-                key={l.code}
-                onClick={() => setLang(l.code)}
-                aria-pressed={lang === l.code}
-                className={`rounded-full border px-4 py-2 text-sm transition ${
-                  lang === l.code
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background hover:border-primary hover:text-primary"
-                }`}
-              >
-                {l.native}
-              </button>
-            ))}
-          </div>
+          <LanguageSwitcher />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
