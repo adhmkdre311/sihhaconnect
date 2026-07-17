@@ -155,7 +155,9 @@ function RootComponent() {
       <LanguageProvider>
         <AuthProvider>
           <Outlet />
-          <Toaster position="top-center" richColors />
+          {/* BUG-25: top-center toasts covered the Back button and vanished with no
+              persistent record. bottom-center + inline form errors (Tasks 4/7) fix both. */}
+          <Toaster position="bottom-center" closeButton richColors={false} />
         </AuthProvider>
       </LanguageProvider>
     </QueryClientProvider>
