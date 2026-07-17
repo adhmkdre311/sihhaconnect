@@ -12,6 +12,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
 import { isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
+import { validateEmail } from "@/lib/validation";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -60,7 +61,7 @@ function AuthPage() {
   const [clinics, setClinics] = useState<{id:string;name:string}[]>([]);
   const [busy, setBusy] = useState(false);
   // BUG-06: view state for post-signup confirmation & inline unconfirmed-login
-  const [view, setView] = useState<"form" | "check-inbox" | "role-pending">("form");
+  const [view, setView] = useState<"form" | "check-inbox" | "role-pending" | "forgot">("form");
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
@@ -70,8 +71,8 @@ function AuthPage() {
   const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
 
   // BUG-03/10: field-level errors keyed by field name; wired to Field's aria-describedby.
-  // Full validation is added in Task 7; placeholder shape kept empty until then.
-  const fieldErrors: Partial<Record<"name" | "email" | "password" | "phone" | "company" | "invite" | "clinic", string>> = {};
+  // Full validation is added in Task 7; this state is used starting Task 5 (forgot flow).
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<"name" | "email" | "password" | "phone" | "company" | "invite" | "clinic" | "confirm", string>>>({});
 
   useEffect(() => {
     if (role === "clinic_staff") {
