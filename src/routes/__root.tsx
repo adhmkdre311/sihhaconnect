@@ -126,6 +126,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "apple-touch-icon", href: "/brand/sihha-app-icon-180.png", sizes: "180x180" },
       { rel: "manifest", href: "/manifest.webmanifest" },
     ],
+    scripts: [
+      {
+        // BUG-22: apply the stored locale before first paint (pre-hydration).
+        children:
+          "(function(){try{var s=window.localStorage.getItem('lang');var L=['en','ar','hi','ur','ne','tl','bn'];var l=s&&L.indexOf(s)!==-1?s:'en';document.documentElement.lang=l;document.documentElement.dir=(l==='ar'||l==='ur')?'rtl':'ltr';}catch(e){document.documentElement.lang='en';document.documentElement.dir='ltr';}})();",
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
