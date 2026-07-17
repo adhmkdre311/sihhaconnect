@@ -120,8 +120,8 @@ function AuthPage() {
         }
         const { error: rrErr } = await supabase.rpc("request_privileged_role", {
           _role: role,
-          _clinic_id: role === "clinic_staff" ? clinicId : null,
-          _company_name: role === "employer_admin" ? companyName : null,
+          _clinic_id: (role === "clinic_staff" ? clinicId : null) as unknown as string,
+          _company_name: (role === "employer_admin" ? companyName : null) as unknown as string,
         });
         if (rrErr) {
           console.warn("request_privileged_role failed", rrErr);
