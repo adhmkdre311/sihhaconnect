@@ -101,7 +101,7 @@ function AuthPage() {
     clinic_staff: "/clinic",
   };
   // BUG-27: honor validated `next` on login, sanitized by parseNext (Task 3).
-  const targetFor = () => next ?? ROLE_HOME[role];
+  const targetFor = () => next ?? ROLE_HOME[role as Role];
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
