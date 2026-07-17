@@ -155,9 +155,12 @@ function AuthPage() {
       // BUG-19: anon-safe invite validation BEFORE account creation.
       const trimmedCode = role === "worker" ? inviteCode.trim() : "";
       if (trimmedCode) {
-        const { error: inviteError } = await supabase.rpc("validate_invite", {
-          _code: trimmedCode,
-        });
+        // Cast: validate_invite lives in the applied DB migration but is not in
+        // the generated Supabase types yet.
+        const { error: inviteError } = await (supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: unknown }>)("validate_invite", { _code: trimmedCode });
         if (inviteError) {
           setFieldErrors((prev) => ({ ...prev, invite: t("error_invalid_invite") }));
           requestAnimationFrame(() =>
@@ -204,9 +207,10 @@ function AuthPage() {
       // BUG-19: authenticated invite consumption — links employer server-side.
       // Failure must NOT block onboarding.
       if (trimmedCode && data.user) {
-        const { error: consumeError } = await supabase.rpc("consume_invite", {
-          _code: trimmedCode,
-        });
+        const { error: consumeError } = await (supabase.rpc as unknown as (
+          fn: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ error: unknown }>)("consume_invite", { _code: trimmedCode });
         if (consumeError) {
           console.warn("consume_invite failed", consumeError);
           toast.warning(t("error_invalid_invite"));
