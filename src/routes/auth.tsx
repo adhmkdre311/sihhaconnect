@@ -12,7 +12,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
 import { isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
-import { validateEmail } from "@/lib/validation";
+import { validateEmail, passwordStrength } from "@/lib/validation";
+import { PasswordToggle } from "@/components/PasswordToggle";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -57,6 +58,8 @@ function AuthPage() {
   const [phone, setPhone] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [clinicId, setClinicId] = useState("");
   const [clinics, setClinics] = useState<{id:string;name:string}[]>([]);
   const [busy, setBusy] = useState(false);
@@ -272,7 +275,7 @@ function AuthPage() {
             />
             <Field
               label={t("password_label")}
-              type="password"
+              type={showPassword ? "text" : "password"}
               name={mode === "signup" ? "new-password" : "current-password"}
               autoComplete={mode === "signup" ? "new-password" : "current-password"}
               dir="ltr"
@@ -282,7 +285,39 @@ function AuthPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={fieldErrors.password}
+              trailing={<PasswordToggle visible={showPassword} onToggle={() => setShowPassword((v) => !v)} />}
             />
+            {mode === "signup" && password.length > 0 && (
+              <p
+                aria-live="polite"
+                className={
+                  passwordStrength(password) === 3
+                    ? "text-xs font-medium text-primary"
+                    : passwordStrength(password) === 2
+                    ? "text-xs font-medium text-muted-foreground"
+                    : "text-xs font-medium text-destructive"
+                }
+              >
+                {passwordStrength(password) === 3
+                  ? t("password_strength_strong")
+                  : passwordStrength(password) === 2
+                  ? t("password_strength_medium")
+                  : t("password_strength_weak")}
+              </p>
+            )}
+            {mode === "signup" && (
+              <Field
+                label={t("confirm_password_label")}
+                type={showPassword ? "text" : "password"}
+                name="confirm-password"
+                autoComplete="new-password"
+                dir="ltr"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                error={fieldErrors.confirm}
+              />
+            )}
             {mode === "login" && (
               <button
                 type="button"
