@@ -64,9 +64,10 @@ export const bootstrapEmployer = createServerFn({ method: "POST" })
     await supabaseAdmin.from("profiles").upsert({
       id: userId, full_name: data.fullName, employer_id: emp.id,
     });
-    await supabaseAdmin.from("user_roles").upsert({
-      user_id: userId, role: "employer_admin", employer_id: emp.id,
-    }, { onConflict: "user_id,role" });
+    // BUG-04: privileged role grant removed. employer_admin is granted only
+    // after a super_admin approves the role_requests row created via
+    // request_privileged_role(). This function now only records the intended
+    // employer; the role itself is not self-granted.
     return { employerId: emp.id, inviteCode: emp.invite_code };
   });
 
@@ -82,9 +83,9 @@ export const bootstrapClinicStaff = createServerFn({ method: "POST" })
     await supabaseAdmin.from("profiles").upsert({
       id: userId, full_name: data.fullName, clinic_id: data.clinicId,
     });
-    await supabaseAdmin.from("user_roles").upsert({
-      user_id: userId, role: "clinic_staff", clinic_id: data.clinicId,
-    }, { onConflict: "user_id,role" });
+    // BUG-04: privileged role grant removed. clinic_staff is granted only
+    // after a super_admin approves the role_requests row created via
+    // request_privileged_role().
     return { ok: true };
   });
 
