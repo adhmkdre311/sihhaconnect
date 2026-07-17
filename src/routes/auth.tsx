@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/roles.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { mapAuthError } from "@/lib/authErrors";
+import { isEmailNotConfirmed } from "@/lib/authErrors";
+import { CheckInbox } from "@/components/CheckInbox";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -57,6 +59,11 @@ function AuthPage() {
   const [clinicId, setClinicId] = useState("");
   const [clinics, setClinics] = useState<{id:string;name:string}[]>([]);
   const [busy, setBusy] = useState(false);
+  // BUG-06: view state for post-signup confirmation & inline unconfirmed-login
+  const [view, setView] = useState<"form" | "check-inbox">("form");
+  const [submittedEmail, setSubmittedEmail] = useState("");
+  const [formError, setFormError] = useState<string | undefined>();
+  const [showResendInline, setShowResendInline] = useState(false);
 
   const runBootstrapWorker = useServerFn(bootstrapWorker);
   const runBootstrapEmployer = useServerFn(bootstrapEmployer);
@@ -78,10 +85,21 @@ function AuthPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
+    setFormError(undefined);
+    setShowResendInline(false);
     try {
       if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        if (error) {
+          // BUG-06/25: persistent inline error; special-case unconfirmed email.
+          if (isEmailNotConfirmed(error)) {
+            setFormError(t("error_email_not_confirmed"));
+            setShowResendInline(true);
+          } else {
+            setFormError(mapAuthError(error, t));
+          }
+          return;
+        }
         await refreshRoles();
         toast.success("Welcome back");
         nav({ to: targetFor() });
@@ -93,25 +111,27 @@ function AuthPage() {
         options: { data: { full_name: fullName, preferred_language: lang } },
       });
       if (error) throw error;
-      if (!data.session) {
-        // If email confirmation required, ask user to check email — but bootstrap needs session.
-        const { error: sErr } = await supabase.auth.signInWithPassword({ email, password });
-        if (sErr) throw sErr;
+      // BUG-06: if a session exists (email confirmation off), bootstrap and enter app.
+      // Otherwise show the persistent Check-Inbox screen — never auto-login.
+      if (data.session) {
+        if (role === "worker") {
+          await runBootstrapWorker({ data: { fullName, phoneNumber: phone, preferredLanguage: lang, inviteCode: inviteCode || undefined } });
+        } else if (role === "employer_admin") {
+          await runBootstrapEmployer({ data: { fullName, companyName } });
+        } else {
+          if (!clinicId) throw new Error("Choose a clinic");
+          await runBootstrapClinic({ data: { fullName, clinicId } });
+        }
+        await refreshRoles();
+        toast.success("Account ready");
+        nav({ to: targetFor() });
+        return;
       }
-      if (role === "worker") {
-        await runBootstrapWorker({ data: { fullName, phoneNumber: phone, preferredLanguage: lang, inviteCode: inviteCode || undefined } });
-      } else if (role === "employer_admin") {
-        await runBootstrapEmployer({ data: { fullName, companyName } });
-      } else {
-        if (!clinicId) throw new Error("Choose a clinic");
-        await runBootstrapClinic({ data: { fullName, clinicId } });
-      }
-      await refreshRoles();
-      toast.success("Account ready");
-      nav({ to: targetFor() });
+      setSubmittedEmail(email);
+      setView("check-inbox");
     } catch (err: unknown) {
-      // BUG-10: never render raw Supabase error text; use translated map.
-      toast.error(mapAuthError(err, t));
+      // BUG-10/25: persistent inline error; translated, never raw.
+      setFormError(mapAuthError(err, t));
     } finally {
       setBusy(false);
     }
@@ -126,6 +146,18 @@ function AuthPage() {
       <div className="mx-auto max-w-md">
         <Button variant="ghost" onClick={() => nav({ to: "/" })} className="mb-4">← {t("back")}</Button>
         <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          {view === "check-inbox" ? (
+            <CheckInbox
+              email={submittedEmail}
+              onBack={() => {
+                setView("form");
+                setMode("login");
+                setFormError(undefined);
+                setShowResendInline(false);
+              }}
+            />
+          ) : (
+          <>
           <h1 className="text-xl font-semibold">{heading}</h1>
           <p className="mb-4 text-sm text-muted-foreground">{mode === "login" ? t("login") : t("signup")}</p>
 
@@ -242,7 +274,27 @@ function AuthPage() {
               </div>
             )}
             <Button type="submit" disabled={busy} className="w-full">{busy ? t("loading") : mode === "login" ? t("login") : t("signup")}</Button>
+            {formError && (
+              <p role="alert" className="text-sm font-medium text-destructive">
+                {formError}
+              </p>
+            )}
+            {showResendInline && (
+              <button
+                type="button"
+                className="text-sm font-medium text-primary underline underline-offset-4"
+                onClick={async () => {
+                  await supabase.auth.resend({ type: "signup", email });
+                  setSubmittedEmail(email);
+                  setView("check-inbox");
+                }}
+              >
+                {t("resend_confirmation")}
+              </button>
+            )}
           </form>
+          </>
+          )}
         </div>
       </div>
     </div>
