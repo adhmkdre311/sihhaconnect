@@ -157,6 +157,18 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // TASK 14: register the app-shell service worker in production only.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!("serviceWorker" in navigator)) return;
+    if (!import.meta.env.PROD) return;
+    const onLoad = () => {
+      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    };
+    window.addEventListener("load", onLoad);
+    return () => window.removeEventListener("load", onLoad);
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <LanguageProvider>
