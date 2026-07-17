@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { LANGUAGES, useLang } from "@/lib/i18n";
+import { useLang } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/lib/auth";
 import { Stethoscope, Building2, User } from "lucide-react";
 import { SihhaLockup, SihhaMark } from "@/components/SihhaLogo";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
-  const { lang, setLang, t } = useLang();
+  const { t } = useLang();
   const { user, roles, loading } = useAuth();
   const nav = useNavigate();
   useDocumentTitle("hero_title");
