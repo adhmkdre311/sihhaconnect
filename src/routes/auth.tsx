@@ -60,7 +60,7 @@ function AuthPage() {
   const [clinics, setClinics] = useState<{id:string;name:string}[]>([]);
   const [busy, setBusy] = useState(false);
   // BUG-06: view state for post-signup confirmation & inline unconfirmed-login
-  const [view, setView] = useState<"form" | "check-inbox">("form");
+  const [view, setView] = useState<"form" | "check-inbox" | "role-pending">("form");
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
@@ -111,17 +111,31 @@ function AuthPage() {
         options: { data: { full_name: fullName, preferred_language: lang } },
       });
       if (error) throw error;
-      // BUG-06: if a session exists (email confirmation off), bootstrap and enter app.
-      // Otherwise show the persistent Check-Inbox screen — never auto-login.
-      if (data.session) {
-        if (role === "worker") {
-          await runBootstrapWorker({ data: { fullName, phoneNumber: phone, preferredLanguage: lang, inviteCode: inviteCode || undefined } });
-        } else if (role === "employer_admin") {
-          await runBootstrapEmployer({ data: { fullName, companyName } });
-        } else {
-          if (!clinicId) throw new Error("Choose a clinic");
-          await runBootstrapClinic({ data: { fullName, clinicId } });
+      // BUG-04: privileged roles (clinic_staff, employer_admin) are REQUESTED,
+      // never self-granted. Worker signup keeps its immediate grant + invite flow.
+      if (role !== "worker") {
+        if (role === "clinic_staff" && !clinicId) {
+          setFormError(t("validation_required"));
+          return;
         }
+        const { error: rrErr } = await supabase.rpc("request_privileged_role", {
+          _role: role,
+          _clinic_id: (role === "clinic_staff" ? clinicId : null) as unknown as string,
+          _company_name: (role === "employer_admin" ? companyName : null) as unknown as string,
+        });
+        if (rrErr) {
+          console.warn("request_privileged_role failed", rrErr);
+          setFormError(t("error_signup_generic"));
+          return;
+        }
+        setView("role-pending");
+        return;
+      }
+      // Worker path.
+      // BUG-06: if a session exists (confirmation off), bootstrap and enter app;
+      // otherwise show the persistent Check-Inbox screen — never auto-login.
+      if (data.session) {
+        await runBootstrapWorker({ data: { fullName, phoneNumber: phone, preferredLanguage: lang, inviteCode: inviteCode || undefined } });
         await refreshRoles();
         toast.success("Account ready");
         nav({ to: targetFor() });
@@ -156,6 +170,23 @@ function AuthPage() {
                 setShowResendInline(false);
               }}
             />
+          ) : view === "role-pending" ? (
+            <div className="space-y-4 text-center" role="status">
+              <h2 className="text-xl font-semibold">{t("role_pending_title")}</h2>
+              <p className="text-sm text-muted-foreground">{t("role_pending_body")}</p>
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full"
+                onClick={() => {
+                  setView("form");
+                  setMode("login");
+                  setFormError(undefined);
+                }}
+              >
+                {t("back_to_login")}
+              </Button>
+            </div>
           ) : (
           <>
           <h1 className="text-xl font-semibold">{heading}</h1>

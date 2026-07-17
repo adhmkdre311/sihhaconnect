@@ -401,6 +401,53 @@ export type Database = {
           },
         ]
       }
+      role_requests: {
+        Row: {
+          clinic_id: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          clinic_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          clinic_id?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_requests_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           clinic_id: string | null
@@ -474,6 +521,10 @@ export type Database = {
         Returns: boolean
       }
       purge_old_documents: { Args: never; Returns: undefined }
+      request_privileged_role: {
+        Args: { _clinic_id: string; _company_name: string; _role: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "worker" | "employer_admin" | "clinic_staff" | "super_admin"
