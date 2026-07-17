@@ -23,6 +23,7 @@ import {
   passwordStrength,
 } from "@/lib/validation";
 import { PasswordToggle } from "@/components/PasswordToggle";
+import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
 // BUG-08: safe search-param parsing — never throw, always fall back.
 const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
@@ -61,6 +62,7 @@ function AuthPage() {
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
   const [mode, setMode] = useState<AuthMode>(initialMode);
+  useDocumentTitle(mode === "login" ? "login" : "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
