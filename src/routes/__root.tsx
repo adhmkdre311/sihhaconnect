@@ -80,6 +80,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // BUG-07: XSS defense-in-depth + anti-clickjacking.
+      // NOTE: script-src needs 'unsafe-inline' because the TanStack SSR streaming
+      // runtime injects inline bootstrap scripts; a meta CSP cannot use nonces.
+      // If CSP later moves to an HTTP header with nonces, drop 'unsafe-inline'.
+      {
+        httpEquiv: "Content-Security-Policy",
+        content:
+          "default-src 'self'; script-src 'self' 'unsafe-inline'; connect-src 'self' https://nlskwffscpkriqiecbfs.supabase.co wss://nlskwffscpkriqiecbfs.supabase.co; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; frame-ancestors 'none'; base-uri 'self'",
+      },
       { name: "theme-color", content: "#0E5C56" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
