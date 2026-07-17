@@ -78,10 +78,14 @@
   --muted-foreground: #5B6B67;
   --accent: #D9A441;          /* Dune Gold */
   --accent-foreground: #16262B;
-  --destructive: #E8806B;     /* Soft Coral — urgent only */
+  /* BUG-09: was #E8806B → 2.72:1 with white text. #C2402F = 5.16:1 with white,
+     4.59:1 as text on the cream background. */
+  --destructive: #C2402F;
   --destructive-foreground: #FFFFFF;
-  --border: #E1D9C8;
-  --input: #E1D9C8;
+  /* BUG-30: was #E1D9C8 → 1.40:1 (below the 3:1 non-text minimum).
+     #978A6B = 3.41:1 on white cards, 3.03:1 on the page background. */
+  --border: #978A6B;
+  --input: #978A6B;
   --ring: #0E5C56;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
