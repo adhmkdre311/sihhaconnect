@@ -27,9 +27,9 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AuthMode, Role } from "./auth";
 
-const Route = getRouteApi("/auth");
+const RouteApi = getRouteApi("/auth");
 
-export const Route$Lazy = createLazyFileRoute("/auth")({
+export const Route = createLazyFileRoute("/auth")({
   component: AuthPage,
 });
 
