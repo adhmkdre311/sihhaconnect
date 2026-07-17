@@ -283,6 +283,19 @@ function AuthPage() {
               onChange={(e) => setPassword(e.target.value)}
               error={fieldErrors.password}
             />
+            {mode === "login" && (
+              <button
+                type="button"
+                className="text-sm font-medium text-primary underline underline-offset-4"
+                onClick={() => {
+                  setView("forgot");
+                  setFormError(undefined);
+                  setShowResendInline(false);
+                }}
+              >
+                {t("forgot_password")}
+              </button>
+            )}
             {mode === "signup" && role === "worker" && (
               <>
                 <Field
