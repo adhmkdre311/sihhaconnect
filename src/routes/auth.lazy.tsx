@@ -8,8 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Field } from "@/components/ui/field";
 import { toast } from "sonner";
-import { useServerFn } from "@tanstack/react-start";
-import { startEmailSignup, sendPasswordResetEmail } from "@/lib/email.functions";
 import { mapAuthError, isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
 import {
@@ -56,9 +54,6 @@ function AuthPage() {
   const [submittedEmail, setSubmittedEmail] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
-
-  const runStartSignup = useServerFn(startEmailSignup);
-  const runSendPasswordReset = useServerFn(sendPasswordResetEmail);
 
   // BUG-03/10: field-level errors keyed by field name; wired to Field's aria-describedby.
   // Full validation is added in Task 7; this state is used starting Task 5 (forgot flow).
@@ -156,16 +151,33 @@ function AuthPage() {
         setFormError(t("validation_required"));
         return;
       }
-      // Custom Resend auth: create account (unconfirmed) and email a
-      // Supabase-signed verification link. Role/invite/etc. travel as
-      // user_metadata and are applied by /auth/verify after confirmation.
-      await runStartSignup({ data: {
-        email, password, fullName, preferredLanguage: lang, role,
-        phoneNumber: role === "worker" ? phone : undefined,
-        inviteCode: role === "worker" ? (inviteCode || undefined) : undefined,
-        companyName: role === "employer_admin" ? companyName : undefined,
-        clinicId: role === "clinic_staff" ? clinicId : undefined,
-      }});
+      // Supabase managed auth: signUp triggers the Lovable auth webhook,
+      // which renders the branded template and sends via managed infra.
+      // Role/invite metadata rides in user_metadata and is applied by
+      // /auth/verify after email confirmation.
+      const { error: signUpErr } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify`,
+          data: {
+            full_name: fullName,
+            preferred_language: lang,
+            pending_role: role,
+            phone_number: role === "worker" ? phone : undefined,
+            pending_invite_code:
+              role === "worker" ? (inviteCode?.trim() || undefined) : undefined,
+            pending_company_name:
+              role === "employer_admin" ? companyName : undefined,
+            pending_clinic_id:
+              role === "clinic_staff" ? clinicId : undefined,
+          },
+        },
+      });
+      if (signUpErr) {
+        setFormError(mapAuthError(signUpErr, t));
+        return;
+      }
       setSubmittedEmail(email);
       setView("check-inbox");
     } catch (err: unknown) {
@@ -234,7 +246,9 @@ function AuthPage() {
                 if (emailError) return;
                 setBusy(true);
                 try {
-                  await runSendPasswordReset({ data: { email } });
+                  await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/reset`,
+                  });
                 } catch (err) {
                   console.warn("password reset send failed", err);
                 }
