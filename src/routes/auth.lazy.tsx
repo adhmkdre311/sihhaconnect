@@ -24,6 +24,7 @@ import { PasswordToggle } from "@/components/PasswordToggle";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AuthMode, Role } from "./auth";
+import { lovable } from "@/integrations/lovable/index";
 
 const RouteApi = getRouteApi("/auth");
 
@@ -443,6 +444,45 @@ function AuthPage() {
               </div>
             )}
             <Button type="submit" disabled={busy} className="w-full">{busy ? t("loading") : mode === "login" ? t("login") : t("signup")}</Button>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">or</span>
+              </div>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={busy}
+              className="w-full"
+              onClick={async () => {
+                setFormError(undefined);
+                setBusy(true);
+                try {
+                  const result = await lovable.auth.signInWithOAuth("google", {
+                    redirect_uri: window.location.origin,
+                  });
+                  if (result.redirected) return;
+                  if (result.error) {
+                    setFormError(result.error.message);
+                    return;
+                  }
+                  await refreshRoles();
+                  nav({ to: targetFor() });
+                } catch (err) {
+                  setFormError(err instanceof Error ? err.message : String(err));
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+                <path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.4-1.7 4-5.5 4-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.4 14.6 2.5 12 2.5 6.8 2.5 2.6 6.7 2.6 12s4.2 9.5 9.4 9.5c5.4 0 9-3.8 9-9.2 0-.6-.1-1.1-.2-1.6H12z"/>
+              </svg>
+              Continue with Google
+            </Button>
             {formError && (
               <p role="alert" className="text-sm font-medium text-destructive">
                 {formError}
