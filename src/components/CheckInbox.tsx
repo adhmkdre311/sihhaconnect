@@ -63,11 +63,15 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
     }
     setVerifying(true);
     setVerifyError(undefined);
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: flow === "recovery" ? "recovery" : "email",
-    });
+    let error;
+    if (flow === "recovery") {
+      ({ error } = await supabase.auth.verifyOtp({ email, token, type: "recovery" }));
+    } else {
+      ({ error } = await supabase.auth.verifyOtp({ email, token, type: "signup" }));
+      if (error) {
+        ({ error } = await supabase.auth.verifyOtp({ email, token, type: "magiclink" }));
+      }
+    }
     setVerifying(false);
     if (error) {
       setVerifyError("That code is invalid or has expired. Try again or resend.");
