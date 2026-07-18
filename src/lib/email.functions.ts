@@ -65,6 +65,26 @@ function brandedCodeEmail(opts: { title: string; intro: string; code: string; fo
   </table></body></html>`;
 }
 
+async function sendAuthCodeEmail(opts: {
+  email: string;
+  code: string;
+  subject: string;
+  title: string;
+  intro: string;
+  footer: string;
+}) {
+  await resendSend({
+    to: [opts.email],
+    subject: opts.subject,
+    html: brandedCodeEmail({
+      title: opts.title,
+      intro: opts.intro,
+      code: opts.code,
+      footer: opts.footer,
+    }),
+  });
+}
+
 const InputSchema = z.object({
   to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
   subject: z.string().min(1).max(200),
@@ -141,8 +161,25 @@ export const startEmailSignup = createServerFn({ method: "POST" })
     });
     if (createErr) {
       const msg = createErr.message?.toLowerCase() ?? "";
-      // Enumeration-safe response — client always shows check-inbox screen.
       if (msg.includes("registered") || msg.includes("exists") || msg.includes("already")) {
+        // Repeated signup attempts are common in QA and for users who missed
+        // the first email. Keep the response enumeration-safe, but still issue
+        // a fresh OTP instead of silently showing a dead check-inbox screen.
+        const { data: retryLink, error: retryErr } = await supabaseAdmin.auth.admin.generateLink({
+          type: "magiclink",
+          email,
+        });
+        const retryCode = retryLink?.properties?.email_otp;
+        if (!retryErr && retryCode) {
+          await sendAuthCodeEmail({
+            email,
+            code: retryCode,
+            subject: `Your Sihha confirmation code: ${retryCode}`,
+            title: "Confirm your email",
+            intro: `Use the 6-digit code below to continue with your Sihha account.`,
+            footer: "If you didn't request this, you can ignore this email.",
+          });
+        }
         return { ok: true, alreadyExists: true };
       }
       throw createErr;
@@ -159,15 +196,13 @@ export const startEmailSignup = createServerFn({ method: "POST" })
       console.error("generateLink signup failed", linkErr);
       throw new Error("Could not issue verification code");
     }
-    await resendSend({
-      to: [email],
+    await sendAuthCodeEmail({
+      email,
+      code,
       subject: `Your Sihha confirmation code: ${code}`,
-      html: brandedCodeEmail({
-        title: "Confirm your email",
-        intro: `Hi ${data.fullName}, use the 6-digit code below to confirm your email and finish setting up your Sihha account.`,
-        code,
-        footer: "If you didn't create a Sihha account, you can safely ignore this email.",
-      }),
+      title: "Confirm your email",
+      intro: `Hi ${data.fullName}, use the 6-digit code below to confirm your email and finish setting up your Sihha account.`,
+      footer: "If you didn't create a Sihha account, you can safely ignore this email.",
     });
 
     return { ok: true, alreadyExists: false };
@@ -187,15 +222,13 @@ export const resendSignupEmail = createServerFn({ method: "POST" })
     const code = link?.properties?.email_otp;
     // Silent success — never leak whether the address exists / is already confirmed.
     if (error || !code) return { ok: true };
-    await resendSend({
-      to: [email],
+    await sendAuthCodeEmail({
+      email,
+      code,
       subject: `Your Sihha confirmation code: ${code}`,
-      html: brandedCodeEmail({
-        title: "Confirm your email",
-        intro: "Here's a fresh confirmation code for your Sihha account.",
-        code,
-        footer: "If you didn't request this, you can ignore this email.",
-      }),
+      title: "Confirm your email",
+      intro: "Here's a fresh confirmation code for your Sihha account.",
+      footer: "If you didn't request this, you can ignore this email.",
     });
     return { ok: true };
   });
@@ -212,15 +245,13 @@ export const sendPasswordResetEmail = createServerFn({ method: "POST" })
     const code = link?.properties?.email_otp;
     // Enumeration-safe: always report ok. Skip send only when there's no code.
     if (error || !code) return { ok: true };
-    await resendSend({
-      to: [email],
+    await sendAuthCodeEmail({
+      email,
+      code,
       subject: `Your Sihha password reset code: ${code}`,
-      html: brandedCodeEmail({
-        title: "Reset your password",
-        intro: "Enter the 6-digit code below in the Sihha app to reset your password. The code expires in 1 hour.",
-        code,
-        footer: "If you didn't request a password reset, you can safely ignore this email.",
-      }),
+      title: "Reset your password",
+      intro: "Enter the 6-digit code below in the Sihha app to reset your password. The code expires in 1 hour.",
+      footer: "If you didn't request a password reset, you can safely ignore this email.",
     });
     return { ok: true };
   });
