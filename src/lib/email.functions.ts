@@ -57,7 +57,7 @@ const SignupSchema = z.object({
 
 /**
  * Custom sign-up: creates a user with email_confirm=false, then emails a
- * verification link (issued by Supabase, delivered by Resend). All role
+ * verification code (issued by Supabase, delivered by Resend). All role
  * context is packed into user_metadata for the /auth/verify handler to
  * consume once the session is established.
  */
@@ -101,7 +101,7 @@ export const startEmailSignup = createServerFn({ method: "POST" })
             code: retryCode,
             subject: `Your Sihha confirmation code: ${retryCode}`,
             title: "Confirm your email",
-            intro: `Use the 6-digit code below to continue with your Sihha account.`,
+            intro: "Use the verification code below to continue with your Sihha account.",
             footer: "If you didn't request this, you can ignore this email.",
           });
         }
@@ -110,7 +110,7 @@ export const startEmailSignup = createServerFn({ method: "POST" })
       throw createErr;
     }
 
-    // Issue a signup 6-digit verification code (Supabase-signed OTP) and email it.
+    // Issue a signup verification code (Supabase-signed OTP) and email it.
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "signup",
       email,
@@ -126,7 +126,7 @@ export const startEmailSignup = createServerFn({ method: "POST" })
       code,
       subject: `Your Sihha confirmation code: ${code}`,
       title: "Confirm your email",
-      intro: `Hi ${data.fullName}, use the 6-digit code below to confirm your email and finish setting up your Sihha account.`,
+      intro: `Hi ${data.fullName}, use the verification code below to confirm your email and finish setting up your Sihha account.`,
       footer: "If you didn't create a Sihha account, you can safely ignore this email.",
     });
 
@@ -175,7 +175,7 @@ export const sendPasswordResetEmail = createServerFn({ method: "POST" })
       code,
       subject: `Your Sihha password reset code: ${code}`,
       title: "Reset your password",
-      intro: "Enter the 6-digit code below in the Sihha app to reset your password. The code expires in 1 hour.",
+      intro: "Enter the verification code below in the Sihha app to reset your password. The code expires in 1 hour.",
       footer: "If you didn't request a password reset, you can safely ignore this email.",
     });
     return { ok: true };

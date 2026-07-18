@@ -46,7 +46,7 @@ function brandedCodeEmail(opts: { title: string; intro: string; code: string; fo
         <tr><td align="center" style="padding:8px 0 24px 0">
           <div style="display:inline-block;background:#F6F1E7;border:1px solid #E4D9BF;border-radius:12px;padding:16px 28px;font-family:'SFMono-Regular',Menlo,monospace;font-size:32px;font-weight:700;letter-spacing:10px;color:#0E5C56">${esc(code)}</div>
         </td></tr>
-        <tr><td style="font-size:13px;line-height:1.5;color:#666;padding-bottom:8px">Enter this 6-digit code in the Sihha app to continue. The code expires in 1 hour.</td></tr>
+        <tr><td style="font-size:13px;line-height:1.5;color:#666;padding-bottom:8px">Enter this code in the Sihha app to continue. The code expires in 1 hour.</td></tr>
         <tr><td style="font-size:12px;color:#888;padding-top:20px;border-top:1px solid #eee">${esc(footer)}</td></tr>
       </table>
     </td></tr>
