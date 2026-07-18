@@ -35,22 +35,33 @@ function VerifyPage() {
     if (ran.current) return;
     ran.current = true;
     (async () => {
-      if (!token_hash || !type) {
-        setStatus("error");
-        setError(t("verify_missing_token"));
-        return;
+      // Two entry paths:
+      //  1) Legacy magic-link URL with token_hash → exchange for a session.
+      //  2) 6-digit OTP flow → CheckInbox already established the session and
+      //     routed here with no params.
+      let userMeta: Record<string, unknown> | undefined;
+      if (token_hash && type) {
+        const otpType = type === "magiclink" ? "magiclink" : "signup";
+        const { data, error: verifyErr } = await supabase.auth.verifyOtp({
+          token_hash,
+          type: otpType,
+        });
+        if (verifyErr || !data.session || !data.user) {
+          setStatus("error");
+          setError(t("verify_link_invalid"));
+          return;
+        }
+        userMeta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+      } else {
+        const { data: sess } = await supabase.auth.getSession();
+        if (!sess.session?.user) {
+          setStatus("error");
+          setError(t("verify_missing_token"));
+          return;
+        }
+        userMeta = (sess.session.user.user_metadata ?? {}) as Record<string, unknown>;
       }
-      const otpType = type === "magiclink" ? "magiclink" : "signup";
-      const { data, error: verifyErr } = await supabase.auth.verifyOtp({
-        token_hash,
-        type: otpType,
-      });
-      if (verifyErr || !data.session || !data.user) {
-        setStatus("error");
-        setError(t("verify_link_invalid"));
-        return;
-      }
-      const meta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+      const meta = userMeta;
       const role = (meta.pending_role as string | undefined) ?? "worker";
       const fullName = (meta.full_name as string | undefined) ?? "";
       const lang = (meta.preferred_language as "en"|"ar"|"hi"|"ur"|"ne"|"tl"|"bn" | undefined) ?? "en";
