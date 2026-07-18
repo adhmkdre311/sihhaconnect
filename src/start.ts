@@ -5,6 +5,8 @@ import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
   try {
+    // Bypass all app middleware logic for Lovable email/webhook routes.
+    // They authenticate themselves via API key or signed webhook.
     return await next();
   } catch (error) {
     if (error != null && typeof error === "object" && "statusCode" in error) {
