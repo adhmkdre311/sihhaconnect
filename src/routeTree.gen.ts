@@ -89,7 +89,7 @@ const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => AuthRoute,
-} as any)
+} as any).lazy(() => import('./routes/auth.verify.lazy').then((d) => d.Route))
 const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
