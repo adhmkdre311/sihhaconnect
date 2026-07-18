@@ -190,13 +190,13 @@ export const resendSignupEmail = createServerFn({ method: "POST" })
     const email = data.email.toLowerCase().trim();
     const redirectTo = `${siteUrl()}/auth/verify`;
     const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
-      type: "signup",
+      type: "magiclink",
       email,
       options: { redirectTo },
     });
     // Silent success — never leak whether the address exists / is already confirmed.
     if (error || !link.properties?.hashed_token) return { ok: true };
-    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=signup`;
+    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=magiclink`;
     await resendSend({
       to: [email],
       subject: "Your new Sihha confirmation link",
