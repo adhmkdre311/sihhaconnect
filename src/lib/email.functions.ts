@@ -91,8 +91,9 @@ export const startEmailSignup = createServerFn({ method: "POST" })
         // the first email. Keep the response enumeration-safe, but still issue
         // a fresh OTP instead of silently showing a dead check-inbox screen.
         const { data: retryLink, error: retryErr } = await supabaseAdmin.auth.admin.generateLink({
-          type: "magiclink",
+          type: "signup",
           email,
+          password: data.password,
         });
         const retryCode = retryLink?.properties?.email_otp;
         if (!retryErr && retryCode) {
