@@ -25,6 +25,8 @@ import { useDocumentTitle } from "@/lib/useDocumentTitle";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AuthMode, Role } from "./auth";
 import { lovable } from "@/integrations/lovable/index";
+import { useServerFn } from "@tanstack/react-start";
+import { startEmailSignup, sendPasswordResetEmail } from "@/lib/email.functions";
 
 const RouteApi = getRouteApi("/auth");
 
@@ -37,6 +39,8 @@ function AuthPage() {
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
+  const doSignup = useServerFn(startEmailSignup);
+  const doReset = useServerFn(sendPasswordResetEmail);
   const [mode, setMode] = useState<AuthMode>(initialMode);
   useDocumentTitle(mode === "login" ? "login" : "signup");
   const [email, setEmail] = useState("");
@@ -152,33 +156,21 @@ function AuthPage() {
         setFormError(t("validation_required"));
         return;
       }
-      // Supabase managed auth: signUp triggers the Lovable auth webhook,
-      // which renders the branded template and sends via managed infra.
-      // Role/invite metadata rides in user_metadata and is applied by
-      // /auth/verify after email confirmation.
-      const { error: signUpErr } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/verify`,
-          data: {
-            full_name: fullName,
-            preferred_language: lang,
-            pending_role: role,
-            phone_number: role === "worker" ? phone : undefined,
-            pending_invite_code:
-              role === "worker" ? (inviteCode?.trim() || undefined) : undefined,
-            pending_company_name:
-              role === "employer_admin" ? companyName : undefined,
-            pending_clinic_id:
-              role === "clinic_staff" ? clinicId : undefined,
-          },
+      // Custom Resend flow: server fn creates the user (unconfirmed), issues a
+      // Supabase-signed verify link, and delivers via Resend.
+      await doSignup({
+        data: {
+          email,
+          password,
+          fullName,
+          preferredLanguage: lang,
+          role,
+          phoneNumber: role === "worker" ? phone : undefined,
+          inviteCode: role === "worker" ? (inviteCode?.trim() || undefined) : undefined,
+          companyName: role === "employer_admin" ? companyName : undefined,
+          clinicId: role === "clinic_staff" ? clinicId : undefined,
         },
       });
-      if (signUpErr) {
-        setFormError(mapAuthError(signUpErr, t));
-        return;
-      }
       setSubmittedEmail(email);
       setView("check-inbox");
     } catch (err: unknown) {
@@ -247,9 +239,7 @@ function AuthPage() {
                 if (emailError) return;
                 setBusy(true);
                 try {
-                  await supabase.auth.resetPasswordForEmail(email, {
-                    redirectTo: `${window.location.origin}/auth/reset`,
-                  });
+                  await doReset({ data: { email } });
                 } catch (err) {
                   console.warn("password reset send failed", err);
                 }
