@@ -63,11 +63,9 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
     }
     setVerifying(true);
     setVerifyError(undefined);
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token,
-      type: flow === "recovery" ? "recovery" : "email",
-    });
+    const { error } = flow === "recovery"
+      ? await supabase.auth.verifyOtp({ email, token, type: "recovery" })
+      : await supabase.auth.verifyOtp({ email, token, type: "signup" });
     setVerifying(false);
     if (error) {
       setVerifyError("That code is invalid or has expired. Try again or resend.");
