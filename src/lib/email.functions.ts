@@ -7,6 +7,68 @@ import { z } from "zod";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
 
+// ---------------------------------------------------------------------------
+// Shared helpers
+// ---------------------------------------------------------------------------
+
+function assertKeys() {
+  const lovableKey = process.env.LOVABLE_API_KEY;
+  const resendKey = process.env.RESEND_API_KEY;
+  if (!lovableKey) throw new Error("LOVABLE_API_KEY is not configured");
+  if (!resendKey) throw new Error("RESEND_API_KEY is not configured");
+  return { lovableKey, resendKey };
+}
+
+async function resendSend(payload: Record<string, unknown>) {
+  const { lovableKey, resendKey } = assertKeys();
+  const from = (payload.from as string | undefined) ?? process.env.RESEND_FROM ?? "Sihha <onboarding@resend.dev>";
+  const res = await fetch(`${GATEWAY_URL}/emails`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${lovableKey}`,
+      "X-Connection-Api-Key": resendKey,
+    },
+    body: JSON.stringify({ ...payload, from }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    console.error(`Resend send failed [${res.status}]: ${body}`);
+    throw new Error(`Email send failed [${res.status}]: ${body}`);
+  }
+  return (await res.json()) as { id: string };
+}
+
+// Minimal branded template. Kept inline to avoid pulling react-email into the
+// server bundle. Escapes untrusted values.
+function esc(s: string) {
+  return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+}
+function brandedEmail(opts: { title: string; intro: string; ctaLabel: string; ctaUrl: string; footer: string }) {
+  const { title, intro, ctaLabel, ctaUrl, footer } = opts;
+  return `<!doctype html><html><body style="margin:0;padding:0;background:#F6F1E7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;color:#1a1a1a">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F1E7;padding:32px 16px">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:16px;padding:32px;box-shadow:0 2px 8px rgba(14,92,86,0.06)">
+        <tr><td style="padding-bottom:16px">
+          <div style="font-family:'Space Grotesk',Inter,sans-serif;font-size:22px;font-weight:700;color:#0E5C56">Sihha</div>
+        </td></tr>
+        <tr><td style="font-size:20px;font-weight:600;padding-bottom:12px">${esc(title)}</td></tr>
+        <tr><td style="font-size:15px;line-height:1.55;color:#333;padding-bottom:24px">${esc(intro)}</td></tr>
+        <tr><td style="padding-bottom:24px">
+          <a href="${ctaUrl}" style="display:inline-block;background:#0E5C56;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;font-size:15px">${esc(ctaLabel)}</a>
+        </td></tr>
+        <tr><td style="font-size:13px;line-height:1.5;color:#666;padding-bottom:8px">If the button doesn't work, copy this link:<br/><span style="color:#0E5C56;word-break:break-all">${esc(ctaUrl)}</span></td></tr>
+        <tr><td style="font-size:12px;color:#888;padding-top:20px;border-top:1px solid #eee">${esc(footer)}</td></tr>
+      </table>
+    </td></tr>
+  </table></body></html>`;
+}
+
+function siteUrl(): string {
+  return process.env.APP_URL || process.env.SITE_URL || "https://sihhaconnect.lovable.app";
+}
+
 const InputSchema = z.object({
   to: z.union([z.string().email(), z.array(z.string().email()).min(1)]),
   subject: z.string().min(1).max(200),
@@ -21,37 +83,158 @@ const InputSchema = z.object({
 export const sendEmail = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => InputSchema.parse(input))
   .handler(async ({ data }) => {
-    const lovableKey = process.env.LOVABLE_API_KEY;
-    const resendKey = process.env.RESEND_API_KEY;
-    if (!lovableKey) throw new Error("LOVABLE_API_KEY is not configured");
-    if (!resendKey) throw new Error("RESEND_API_KEY is not configured");
+    return resendSend({
+      to: Array.isArray(data.to) ? data.to : [data.to],
+      subject: data.subject,
+      html: data.html,
+      text: data.text,
+      from: data.from,
+      reply_to: data.reply_to,
+      cc: data.cc,
+      bcc: data.bcc,
+    });
+  });
 
-    // Use verified domain via env, else Resend's onboarding sender (owner-only delivery).
-    const from = data.from ?? process.env.RESEND_FROM ?? "Sihha <onboarding@resend.dev>";
+// ---------------------------------------------------------------------------
+// Custom auth email flow (Resend delivery, Supabase-issued tokens).
+// ---------------------------------------------------------------------------
 
-    const res = await fetch(`${GATEWAY_URL}/emails`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": resendKey,
-      },
-      body: JSON.stringify({
-        from,
-        to: Array.isArray(data.to) ? data.to : [data.to],
-        subject: data.subject,
-        html: data.html,
-        text: data.text,
-        reply_to: data.reply_to,
-        cc: data.cc,
-        bcc: data.bcc,
+const RoleEnum = z.enum(["worker", "employer_admin", "clinic_staff"]);
+const LangEnum = z.enum(["en", "ar", "hi", "ur", "ne", "tl", "bn"]);
+
+const SignupSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+  fullName: z.string().min(1).max(120),
+  preferredLanguage: LangEnum.default("en"),
+  role: RoleEnum,
+  phoneNumber: z.string().max(40).optional(),
+  inviteCode: z.string().max(64).optional(),
+  companyName: z.string().max(200).optional(),
+  clinicId: z.string().uuid().optional(),
+});
+
+/**
+ * Custom sign-up: creates a user with email_confirm=false, then emails a
+ * verification link (issued by Supabase, delivered by Resend). All role
+ * context is packed into user_metadata for the /auth/verify handler to
+ * consume once the session is established.
+ */
+export const startEmailSignup = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => SignupSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = data.email.toLowerCase().trim();
+
+    const metadata = {
+      full_name: data.fullName,
+      preferred_language: data.preferredLanguage,
+      phone_number: data.phoneNumber ?? null,
+      pending_role: data.role,
+      pending_invite_code: data.inviteCode ?? null,
+      pending_company_name: data.companyName ?? null,
+      pending_clinic_id: data.clinicId ?? null,
+    };
+
+    const { error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: false,
+      user_metadata: metadata,
+      phone: data.phoneNumber || undefined,
+    });
+    if (createErr) {
+      const msg = createErr.message?.toLowerCase() ?? "";
+      // Enumeration-safe response — client always shows check-inbox screen.
+      if (msg.includes("registered") || msg.includes("exists") || msg.includes("already")) {
+        return { ok: true, alreadyExists: true };
+      }
+      throw createErr;
+    }
+
+    // Issue a signup verification link (Supabase-signed token) and email it.
+    const redirectTo = `${siteUrl()}/auth/verify`;
+    const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
+      type: "signup",
+      email,
+      password: data.password,
+      options: { redirectTo },
+    });
+    if (linkErr || !link.properties?.hashed_token) {
+      console.error("generateLink signup failed", linkErr);
+      throw new Error("Could not issue verification link");
+    }
+
+    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=signup`;
+    await resendSend({
+      to: [email],
+      subject: "Confirm your Sihha account",
+      html: brandedEmail({
+        title: "Confirm your email",
+        intro: `Hi ${data.fullName}, tap the button below to confirm your email address and finish setting up your Sihha account.`,
+        ctaLabel: "Confirm email",
+        ctaUrl: verifyUrl,
+        footer: "If you didn't create a Sihha account, you can safely ignore this email.",
       }),
     });
 
-    if (!res.ok) {
-      const body = await res.text();
-      console.error(`Resend send failed [${res.status}]: ${body}`);
-      throw new Error(`Email send failed [${res.status}]: ${body}`);
-    }
-    return (await res.json()) as { id: string };
+    return { ok: true, alreadyExists: false };
+  });
+
+const ResendSchema = z.object({ email: z.string().email() });
+
+export const resendSignupEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => ResendSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = data.email.toLowerCase().trim();
+    const redirectTo = `${siteUrl()}/auth/verify`;
+    const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+      options: { redirectTo },
+    });
+    // Silent success — never leak whether the address exists / is already confirmed.
+    if (error || !link.properties?.hashed_token) return { ok: true };
+    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=magiclink`;
+    await resendSend({
+      to: [email],
+      subject: "Your new Sihha confirmation link",
+      html: brandedEmail({
+        title: "Confirm your email",
+        intro: "Here's a fresh confirmation link for your Sihha account.",
+        ctaLabel: "Confirm email",
+        ctaUrl: verifyUrl,
+        footer: "If you didn't request this, you can ignore this email.",
+      }),
+    });
+    return { ok: true };
+  });
+
+export const sendPasswordResetEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => ResendSchema.parse(input))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const email = data.email.toLowerCase().trim();
+    const redirectTo = `${siteUrl()}/auth/reset`;
+    const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
+      type: "recovery",
+      email,
+      options: { redirectTo },
+    });
+    // Enumeration-safe: always report ok. Skip send only when there's no link.
+    if (error || !link.properties?.hashed_token) return { ok: true };
+    const resetUrl = `${siteUrl()}/auth/reset?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=recovery`;
+    await resendSend({
+      to: [email],
+      subject: "Reset your Sihha password",
+      html: brandedEmail({
+        title: "Reset your password",
+        intro: "Tap the button below to choose a new password for your Sihha account. This link expires in 1 hour.",
+        ctaLabel: "Reset password",
+        ctaUrl: resetUrl,
+        footer: "If you didn't request a password reset, you can safely ignore this email.",
+      }),
+    });
+    return { ok: true };
   });

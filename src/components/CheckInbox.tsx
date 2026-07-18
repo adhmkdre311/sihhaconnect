@@ -1,9 +1,10 @@
 // BUG-06: post-signup / post-reset-request confirmation state with
 // resend + cooldown. Never surfaces raw Supabase errors.
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
+import { useServerFn } from "@tanstack/react-start";
+import { resendSignupEmail } from "@/lib/email.functions";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -14,6 +15,7 @@ interface CheckInboxProps {
 
 export function CheckInbox({ email, onBack }: CheckInboxProps) {
   const { t } = useLang();
+  const runResend = useServerFn(resendSignupEmail);
   const [cooldown, setCooldown] = useState(0);
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
@@ -30,12 +32,14 @@ export function CheckInbox({ email, onBack }: CheckInboxProps) {
     setBusy(true);
     setResent(false);
     setResendError(undefined);
-    const { error } = await supabase.auth.resend({ type: "signup", email });
-    setBusy(false);
-    if (error) {
+    try {
+      await runResend({ data: { email } });
+    } catch {
       setResendError(t("error_network"));
+      setBusy(false);
       return;
     }
+    setBusy(false);
     setResent(true);
     setCooldown(RESEND_COOLDOWN_SECONDS);
   }

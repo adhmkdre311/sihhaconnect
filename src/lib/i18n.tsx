@@ -153,6 +153,12 @@ const T: Record<Lang, Dict> = {
     role_pending_title: "Request sent for approval",
     role_pending_body: "Your account was created. An administrator will review and approve your access before you can sign in.",
     skip_to_content: "Skip to main content",
+    verifying_email: "Verifying your email…",
+    please_wait: "Please wait a moment.",
+    email_verified: "Email verified",
+    redirecting: "Taking you into the app…",
+    verify_link_invalid: "This link is invalid or has expired.",
+    verify_missing_token: "The confirmation link is missing required information.",
   },
   ar: {
     app_name: "صحة",
