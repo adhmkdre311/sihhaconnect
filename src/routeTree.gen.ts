@@ -20,6 +20,7 @@ import { Route as EmployerComplianceRouteImport } from './routes/employer.compli
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
+import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
@@ -84,6 +85,11 @@ const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
   path: '/clinic/slots',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthVerifyRoute = AuthVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthResetRoute = AuthResetRouteImport.update({
   id: '/reset',
   path: '/reset',
@@ -135,6 +141,7 @@ export interface FileRoutesByFullPath {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -156,6 +163,7 @@ export interface FileRoutesByTo {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -178,6 +186,7 @@ export interface FileRoutesById {
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
+    | '/auth/verify'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
+    | '/auth/verify'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
+    | '/auth/verify'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -355,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClinicSlotsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/verify': {
+      id: '/auth/verify'
+      path: '/verify'
+      fullPath: '/auth/verify'
+      preLoaderRoute: typeof AuthVerifyRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/auth/reset': {
       id: '/auth/reset'
       path: '/reset'
@@ -416,10 +435,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthRouteChildren {
   AuthResetRoute: typeof AuthResetRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthResetRoute: AuthResetRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
