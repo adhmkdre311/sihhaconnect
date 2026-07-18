@@ -3,8 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { useServerFn } from "@tanstack/react-start";
-import { resendSignupEmail } from "@/lib/email.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 const RESEND_COOLDOWN_SECONDS = 60;
 
@@ -15,7 +14,6 @@ interface CheckInboxProps {
 
 export function CheckInbox({ email, onBack }: CheckInboxProps) {
   const { t } = useLang();
-  const runResend = useServerFn(resendSignupEmail);
   const [cooldown, setCooldown] = useState(0);
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
@@ -33,7 +31,8 @@ export function CheckInbox({ email, onBack }: CheckInboxProps) {
     setResent(false);
     setResendError(undefined);
     try {
-      await runResend({ data: { email } });
+      const { error } = await supabase.auth.resend({ type: "signup", email });
+      if (error) throw error;
     } catch {
       setResendError(t("error_network"));
       setBusy(false);
