@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
@@ -52,6 +53,11 @@ const ClinicIndexRoute = ClinicIndexRouteImport.update({
   path: '/clinic/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() => import('./routes/auth.index.lazy').then((d) => d.Route))
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
   '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -169,7 +176,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -185,6 +191,7 @@ export interface FileRoutesByTo {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app': typeof AppIndexRoute
+  '/auth': typeof AuthIndexRoute
   '/clinic': typeof ClinicIndexRoute
   '/employer': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -210,6 +217,7 @@ export interface FileRoutesById {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/app/': typeof AppIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
   '/employer/': typeof EmployerIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
@@ -236,6 +244,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/app/'
+    | '/auth/'
     | '/clinic/'
     | '/employer/'
     | '/app/appointments/$id'
@@ -244,7 +253,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/auth'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -260,6 +268,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/app'
+    | '/auth'
     | '/clinic'
     | '/employer'
     | '/app/appointments/$id'
@@ -284,6 +293,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/app/'
+    | '/auth/'
     | '/clinic/'
     | '/employer/'
     | '/app/appointments/$id'
@@ -343,6 +353,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clinic/'
       preLoaderRoute: typeof ClinicIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/app/': {
       id: '/app/'
@@ -476,11 +493,13 @@ declare module '@tanstack/react-router' {
 interface AuthRouteChildren {
   AuthResetRoute: typeof AuthResetRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
+  AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthResetRoute: AuthResetRoute,
   AuthVerifyRoute: AuthVerifyRoute,
+  AuthIndexRoute: AuthIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
@@ -510,3 +529,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
