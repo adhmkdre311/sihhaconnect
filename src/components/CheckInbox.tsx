@@ -1,4 +1,4 @@
-// BUG-06: post-signup / post-reset-request confirmation with 6-digit code
+// BUG-06: post-signup / post-reset-request confirmation with code
 // entry + resend cooldown. Never surfaces raw Supabase errors.
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -10,6 +10,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { resendSignupEmail, sendPasswordResetEmail } from "@/lib/email.functions";
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const OTP_CODE_LENGTH = 8;
 
 interface CheckInboxProps {
   email: string;
@@ -57,8 +58,8 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();
     const token = code.replace(/\D/g, "");
-    if (token.length !== 6) {
-      setVerifyError("Enter the 6-digit code from your email.");
+    if (token.length !== OTP_CODE_LENGTH) {
+      setVerifyError(`Enter the ${OTP_CODE_LENGTH}-digit code from your email.`);
       return;
     }
     setVerifying(true);
@@ -87,7 +88,7 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
       <div className="text-center space-y-2">
         <h2 className="text-xl font-semibold">{t("check_inbox_title")}</h2>
         <p className="text-sm text-muted-foreground">
-          We emailed a 6-digit code to
+          We emailed an {OTP_CODE_LENGTH}-digit code to
         </p>
         <p className="text-sm font-medium">
           <span dir="ltr" className="[unicode-bidi:isolate]">{email}</span>
@@ -102,13 +103,13 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
           inputMode="numeric"
           pattern="[0-9]*"
           dir="ltr"
-          maxLength={6}
-          placeholder="123456"
+          maxLength={OTP_CODE_LENGTH}
+          placeholder="12345678"
           value={code}
-          onChange={(e) => setCode(e.target.value)}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, OTP_CODE_LENGTH))}
           error={verifyError}
         />
-        <Button type="submit" disabled={verifying || code.replace(/\D/g, "").length !== 6} className="w-full">
+        <Button type="submit" disabled={verifying || code.replace(/\D/g, "").length !== OTP_CODE_LENGTH} className="w-full">
           {verifying ? t("loading") : "Verify code"}
         </Button>
       </form>
