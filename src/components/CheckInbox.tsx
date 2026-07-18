@@ -68,18 +68,22 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
     if (flow === "recovery") {
       ({ error } = await supabase.auth.verifyOtp({ email, token, type: "recovery" }));
     } else {
+      // Try signup first; if that specific code isn't a signup token, try
+      // magiclink. Supabase does NOT consume the token on a type mismatch,
+      // so this fallback is safe.
       ({ error } = await supabase.auth.verifyOtp({ email, token, type: "signup" }));
       if (error) {
         ({ error } = await supabase.auth.verifyOtp({ email, token, type: "magiclink" }));
       }
     }
-    setVerifying(false);
     if (error) {
+      setVerifying(false);
       setVerifyError("That code is invalid or has expired. Try again or resend.");
       return;
     }
-    // Session is now established. Hand off to the flow-specific handler
-    // for post-verify bootstrap or password entry.
+    // Session established. Keep the button in its loading state (do NOT
+    // clear `verifying`) so the user can't re-submit the now-consumed code
+    // while the next route mounts.
     nav({ to: flow === "recovery" ? "/auth/reset" : "/auth/verify" });
   }
 
