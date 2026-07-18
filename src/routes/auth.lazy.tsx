@@ -10,6 +10,7 @@ import { Field } from "@/components/ui/field";
 import { toast } from "sonner";
 import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/roles.functions";
 import { useServerFn } from "@tanstack/react-start";
+import { startEmailSignup, sendPasswordResetEmail } from "@/lib/email.functions";
 import { mapAuthError, isEmailNotConfirmed } from "@/lib/authErrors";
 import { CheckInbox } from "@/components/CheckInbox";
 import {
@@ -60,6 +61,8 @@ function AuthPage() {
   const runBootstrapWorker = useServerFn(bootstrapWorker);
   const runBootstrapEmployer = useServerFn(bootstrapEmployer);
   const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
+  const runStartSignup = useServerFn(startEmailSignup);
+  const runSendPasswordReset = useServerFn(sendPasswordResetEmail);
 
   // BUG-03/10: field-level errors keyed by field name; wired to Field's aria-describedby.
   // Full validation is added in Task 7; this state is used starting Task 5 (forgot flow).
@@ -153,53 +156,20 @@ function AuthPage() {
           return;
         }
       }
-      const { data, error } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { full_name: fullName, preferred_language: lang } },
-      });
-      if (error) throw error;
-      // BUG-04: privileged roles (clinic_staff, employer_admin) are REQUESTED,
-      // never self-granted. Worker signup keeps its immediate grant + invite flow.
-      if (role !== "worker") {
-        if (role === "clinic_staff" && !clinicId) {
-          setFormError(t("validation_required"));
-          return;
-        }
-        const { error: rrErr } = await supabase.rpc("request_privileged_role", {
-          _role: role,
-          _clinic_id: (role === "clinic_staff" ? clinicId : null) as unknown as string,
-          _company_name: (role === "employer_admin" ? companyName : null) as unknown as string,
-        });
-        if (rrErr) {
-          console.warn("request_privileged_role failed", rrErr);
-          setFormError(t("error_signup_generic"));
-          return;
-        }
-        setView("role-pending");
+      if (role === "clinic_staff" && !clinicId) {
+        setFormError(t("validation_required"));
         return;
       }
-      // Worker path.
-      // BUG-06: if a session exists (confirmation off), bootstrap and enter app;
-      // otherwise show the persistent Check-Inbox screen — never auto-login.
-      if (data.session) {
-        await runBootstrapWorker({ data: { fullName, phoneNumber: phone, preferredLanguage: lang, inviteCode: inviteCode || undefined } });
-        await refreshRoles();
-        toast.success("Account ready");
-        nav({ to: targetFor() });
-        return;
-      }
-      // BUG-19: authenticated invite consumption — links employer server-side.
-      // Failure must NOT block onboarding.
-      if (trimmedCode && data.user) {
-        const { error: consumeError } = await (supabase.rpc as unknown as (
-          fn: string,
-          args: Record<string, unknown>,
-        ) => Promise<{ error: unknown }>)("consume_invite", { _code: trimmedCode });
-        if (consumeError) {
-          console.warn("consume_invite failed", consumeError);
-          toast.warning(t("error_invalid_invite"));
-        }
-      }
+      // Custom Resend auth: create account (unconfirmed) and email a
+      // Supabase-signed verification link. Role/invite/etc. travel as
+      // user_metadata and are applied by /auth/verify after confirmation.
+      await runStartSignup({ data: {
+        email, password, fullName, preferredLanguage: lang, role,
+        phoneNumber: role === "worker" ? phone : undefined,
+        inviteCode: role === "worker" ? (inviteCode || undefined) : undefined,
+        companyName: role === "employer_admin" ? companyName : undefined,
+        clinicId: role === "clinic_staff" ? clinicId : undefined,
+      }});
       setSubmittedEmail(email);
       setView("check-inbox");
     } catch (err: unknown) {
@@ -267,9 +237,11 @@ function AuthPage() {
                 setFieldErrors((prev) => ({ ...prev, email: emailError }));
                 if (emailError) return;
                 setBusy(true);
-                await supabase.auth.resetPasswordForEmail(email, {
-                  redirectTo: `${window.location.origin}/auth/reset`,
-                });
+                try {
+                  await runSendPasswordReset({ data: { email } });
+                } catch (err) {
+                  console.warn("password reset send failed", err);
+                }
                 setBusy(false);
                 // Enumeration-safe: show the inbox screen either way.
                 setSubmittedEmail(email);
