@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Field } from "@/components/ui/field";
 import { toast } from "sonner";
-import { bootstrapWorker, bootstrapEmployer, bootstrapClinicStaff } from "@/lib/roles.functions";
 import { useServerFn } from "@tanstack/react-start";
 import { startEmailSignup, sendPasswordResetEmail } from "@/lib/email.functions";
 import { mapAuthError, isEmailNotConfirmed } from "@/lib/authErrors";
@@ -58,9 +57,6 @@ function AuthPage() {
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
 
-  const runBootstrapWorker = useServerFn(bootstrapWorker);
-  const runBootstrapEmployer = useServerFn(bootstrapEmployer);
-  const runBootstrapClinic = useServerFn(bootstrapClinicStaff);
   const runStartSignup = useServerFn(startEmailSignup);
   const runSendPasswordReset = useServerFn(sendPasswordResetEmail);
 
