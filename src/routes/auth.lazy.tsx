@@ -57,6 +57,7 @@ function AuthPage() {
   // BUG-06: view state for post-signup confirmation & inline unconfirmed-login
   const [view, setView] = useState<"form" | "check-inbox" | "role-pending" | "forgot">("form");
   const [submittedEmail, setSubmittedEmail] = useState("");
+  const [checkInboxFlow, setCheckInboxFlow] = useState<"signup" | "recovery">("signup");
   const [formError, setFormError] = useState<string | undefined>();
   const [showResendInline, setShowResendInline] = useState(false);
 
@@ -172,6 +173,7 @@ function AuthPage() {
         },
       });
       setSubmittedEmail(email);
+      setCheckInboxFlow("signup");
       setView("check-inbox");
     } catch (err: unknown) {
       // BUG-10/25: persistent inline error; translated, never raw.
@@ -205,6 +207,7 @@ function AuthPage() {
           {view === "check-inbox" ? (
             <CheckInbox
               email={submittedEmail}
+              flow={checkInboxFlow}
               onBack={() => {
                 setView("form");
                 setMode("login");
@@ -246,6 +249,7 @@ function AuthPage() {
                 setBusy(false);
                 // Enumeration-safe: show the inbox screen either way.
                 setSubmittedEmail(email);
+                setCheckInboxFlow("recovery");
                 setView("check-inbox");
               }}
               className="space-y-4"

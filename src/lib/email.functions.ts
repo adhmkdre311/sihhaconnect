@@ -44,8 +44,8 @@ async function resendSend(payload: Record<string, unknown>) {
 function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
 }
-function brandedEmail(opts: { title: string; intro: string; ctaLabel: string; ctaUrl: string; footer: string }) {
-  const { title, intro, ctaLabel, ctaUrl, footer } = opts;
+function brandedCodeEmail(opts: { title: string; intro: string; code: string; footer: string }) {
+  const { title, intro, code, footer } = opts;
   return `<!doctype html><html><body style="margin:0;padding:0;background:#F6F1E7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Inter,sans-serif;color:#1a1a1a">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F6F1E7;padding:32px 16px">
     <tr><td align="center">
@@ -54,19 +54,15 @@ function brandedEmail(opts: { title: string; intro: string; ctaLabel: string; ct
           <div style="font-family:'Space Grotesk',Inter,sans-serif;font-size:22px;font-weight:700;color:#0E5C56">Sihha</div>
         </td></tr>
         <tr><td style="font-size:20px;font-weight:600;padding-bottom:12px">${esc(title)}</td></tr>
-        <tr><td style="font-size:15px;line-height:1.55;color:#333;padding-bottom:24px">${esc(intro)}</td></tr>
-        <tr><td style="padding-bottom:24px">
-          <a href="${ctaUrl}" style="display:inline-block;background:#0E5C56;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:10px;font-weight:600;font-size:15px">${esc(ctaLabel)}</a>
+        <tr><td style="font-size:15px;line-height:1.55;color:#333;padding-bottom:20px">${esc(intro)}</td></tr>
+        <tr><td align="center" style="padding:8px 0 24px 0">
+          <div style="display:inline-block;background:#F6F1E7;border:1px solid #E4D9BF;border-radius:12px;padding:16px 28px;font-family:'SFMono-Regular',Menlo,monospace;font-size:32px;font-weight:700;letter-spacing:10px;color:#0E5C56">${esc(code)}</div>
         </td></tr>
-        <tr><td style="font-size:13px;line-height:1.5;color:#666;padding-bottom:8px">If the button doesn't work, copy this link:<br/><span style="color:#0E5C56;word-break:break-all">${esc(ctaUrl)}</span></td></tr>
+        <tr><td style="font-size:13px;line-height:1.5;color:#666;padding-bottom:8px">Enter this 6-digit code in the Sihha app to continue. The code expires in 1 hour.</td></tr>
         <tr><td style="font-size:12px;color:#888;padding-top:20px;border-top:1px solid #eee">${esc(footer)}</td></tr>
       </table>
     </td></tr>
   </table></body></html>`;
-}
-
-function siteUrl(): string {
-  return process.env.APP_URL || process.env.SITE_URL || "https://sihhaconnect.lovable.app";
 }
 
 const InputSchema = z.object({
@@ -152,28 +148,24 @@ export const startEmailSignup = createServerFn({ method: "POST" })
       throw createErr;
     }
 
-    // Issue a signup verification link (Supabase-signed token) and email it.
-    const redirectTo = `${siteUrl()}/auth/verify`;
+    // Issue a signup 6-digit verification code (Supabase-signed OTP) and email it.
     const { data: link, error: linkErr } = await supabaseAdmin.auth.admin.generateLink({
       type: "signup",
       email,
       password: data.password,
-      options: { redirectTo },
     });
-    if (linkErr || !link.properties?.hashed_token) {
+    const code = link?.properties?.email_otp;
+    if (linkErr || !code) {
       console.error("generateLink signup failed", linkErr);
-      throw new Error("Could not issue verification link");
+      throw new Error("Could not issue verification code");
     }
-
-    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=signup`;
     await resendSend({
       to: [email],
-      subject: "Confirm your Sihha account",
-      html: brandedEmail({
+      subject: `Your Sihha confirmation code: ${code}`,
+      html: brandedCodeEmail({
         title: "Confirm your email",
-        intro: `Hi ${data.fullName}, tap the button below to confirm your email address and finish setting up your Sihha account.`,
-        ctaLabel: "Confirm email",
-        ctaUrl: verifyUrl,
+        intro: `Hi ${data.fullName}, use the 6-digit code below to confirm your email and finish setting up your Sihha account.`,
+        code,
         footer: "If you didn't create a Sihha account, you can safely ignore this email.",
       }),
     });
@@ -188,23 +180,20 @@ export const resendSignupEmail = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase().trim();
-    const redirectTo = `${siteUrl()}/auth/verify`;
     const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
       type: "magiclink",
       email,
-      options: { redirectTo },
     });
+    const code = link?.properties?.email_otp;
     // Silent success — never leak whether the address exists / is already confirmed.
-    if (error || !link.properties?.hashed_token) return { ok: true };
-    const verifyUrl = `${siteUrl()}/auth/verify?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=magiclink`;
+    if (error || !code) return { ok: true };
     await resendSend({
       to: [email],
-      subject: "Your new Sihha confirmation link",
-      html: brandedEmail({
+      subject: `Your Sihha confirmation code: ${code}`,
+      html: brandedCodeEmail({
         title: "Confirm your email",
-        intro: "Here's a fresh confirmation link for your Sihha account.",
-        ctaLabel: "Confirm email",
-        ctaUrl: verifyUrl,
+        intro: "Here's a fresh confirmation code for your Sihha account.",
+        code,
         footer: "If you didn't request this, you can ignore this email.",
       }),
     });
@@ -216,23 +205,20 @@ export const sendPasswordResetEmail = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const email = data.email.toLowerCase().trim();
-    const redirectTo = `${siteUrl()}/auth/reset`;
     const { data: link, error } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
       email,
-      options: { redirectTo },
     });
-    // Enumeration-safe: always report ok. Skip send only when there's no link.
-    if (error || !link.properties?.hashed_token) return { ok: true };
-    const resetUrl = `${siteUrl()}/auth/reset?token_hash=${encodeURIComponent(link.properties.hashed_token)}&type=recovery`;
+    const code = link?.properties?.email_otp;
+    // Enumeration-safe: always report ok. Skip send only when there's no code.
+    if (error || !code) return { ok: true };
     await resendSend({
       to: [email],
-      subject: "Reset your Sihha password",
-      html: brandedEmail({
+      subject: `Your Sihha password reset code: ${code}`,
+      html: brandedCodeEmail({
         title: "Reset your password",
-        intro: "Tap the button below to choose a new password for your Sihha account. This link expires in 1 hour.",
-        ctaLabel: "Reset password",
-        ctaUrl: resetUrl,
+        intro: "Enter the 6-digit code below in the Sihha app to reset your password. The code expires in 1 hour.",
+        code,
         footer: "If you didn't request a password reset, you can safely ignore this email.",
       }),
     });
