@@ -21,7 +21,7 @@ type Status = "verifying" | "success" | "error";
 function VerifyPage() {
   const { t } = useLang();
   useDocumentTitle("verifying_email");
-  const { token_hash, type } = RouteApi.useSearch();
+  const { token_hash, type, code } = RouteApi.useSearch();
   const nav = useNavigate();
   const { refreshRoles } = useAuth();
   const runBootstrapWorker = useServerFn(bootstrapWorker);
@@ -35,18 +35,24 @@ function VerifyPage() {
     if (ran.current) return;
     ran.current = true;
     (async () => {
-      // Two entry paths:
-      //  1) Legacy magic-link URL with token_hash → exchange for a session.
-      //  2) 6-digit OTP flow → CheckInbox already established the session and
-      //     routed here with no params.
+      // Entry paths from the managed confirmation email:
+      //   1) PKCE style: ?token_hash=...&type=signup → verifyOtp
+      //   2) OAuth code style: ?code=... → exchangeCodeForSession
+      //   3) Already-signed-in (fallback): read the session.
       let userMeta: Record<string, unknown> | undefined;
       if (token_hash && type) {
-        const otpType = type === "magiclink" ? "magiclink" : "signup";
-        const { data, error: verifyErr } = await supabase.auth.verifyOtp({
-          token_hash,
-          type: otpType,
-        });
+        const otpType = (type === "magiclink" ? "magiclink" : type === "recovery" ? "recovery" : "signup") as
+          "signup" | "magiclink" | "recovery";
+        const { data, error: verifyErr } = await supabase.auth.verifyOtp({ token_hash, type: otpType });
         if (verifyErr || !data.session || !data.user) {
+          setStatus("error");
+          setError(t("verify_link_invalid"));
+          return;
+        }
+        userMeta = (data.user.user_metadata ?? {}) as Record<string, unknown>;
+      } else if (code) {
+        const { data, error: exErr } = await supabase.auth.exchangeCodeForSession(code);
+        if (exErr || !data.session || !data.user) {
           setStatus("error");
           setError(t("verify_link_invalid"));
           return;
@@ -107,7 +113,7 @@ function VerifyPage() {
       const home = role === "employer_admin" ? "/employer" : role === "clinic_staff" ? "/clinic" : "/app";
       setTimeout(() => nav({ to: home }), 800);
     })();
-  }, [token_hash, type, nav, refreshRoles, runBootstrapWorker, runBootstrapEmployer, runBootstrapClinic, t]);
+  }, [token_hash, type, code, nav, refreshRoles, runBootstrapWorker, runBootstrapEmployer, runBootstrapClinic, t]);
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col items-center justify-center gap-4 p-6 text-center">
