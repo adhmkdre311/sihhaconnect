@@ -26,7 +26,7 @@ import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AuthMode, Role } from "./auth";
 import { lovable } from "@/integrations/lovable/index";
 import { useServerFn } from "@tanstack/react-start";
-import { startEmailSignup, sendPasswordResetEmail } from "@/lib/email.functions";
+import { bootstrapWorker } from "@/lib/roles.functions";
 
 const RouteApi = getRouteApi("/auth");
 
@@ -39,8 +39,7 @@ function AuthPage() {
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
-  const doSignup = useServerFn(startEmailSignup);
-  const doReset = useServerFn(sendPasswordResetEmail);
+  const runBootstrapWorker = useServerFn(bootstrapWorker);
   const [mode, setMode] = useState<AuthMode>(initialMode);
   useDocumentTitle(mode === "login" ? "login" : "signup");
   const [email, setEmail] = useState("");
@@ -157,21 +156,29 @@ function AuthPage() {
         setFormError(t("validation_required"));
         return;
       }
-      // Custom Resend flow: server fn creates the user (unconfirmed), issues a
-      // Supabase-signed verify link, and delivers via Resend.
-      await doSignup({
-        data: {
-          email,
-          password,
-          fullName,
-          preferredLanguage: lang,
-          role,
-          phoneNumber: role === "worker" ? phone : undefined,
-          inviteCode: role === "worker" ? (inviteCode?.trim() || undefined) : undefined,
-          companyName: role === "employer_admin" ? companyName : undefined,
-          clinicId: role === "clinic_staff" ? clinicId : undefined,
+      // Native Supabase sign-up. Lovable's managed auth email webhook delivers
+      // the branded confirmation email; the link redirects to /auth/verify
+      // which finishes role bootstrap once the session is established.
+      const { error: signUpErr } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/verify`,
+          data: {
+            full_name: fullName,
+            preferred_language: lang,
+            phone_number: role === "worker" ? phone : null,
+            pending_role: role,
+            pending_invite_code: role === "worker" ? (inviteCode?.trim() || null) : null,
+            pending_company_name: role === "employer_admin" ? companyName : null,
+            pending_clinic_id: role === "clinic_staff" ? clinicId : null,
+          },
         },
       });
+      if (signUpErr) {
+        setFormError(mapAuthError(signUpErr, t));
+        return;
+      }
       setSubmittedEmail(email);
       setCheckInboxFlow("signup");
       setView("check-inbox");
@@ -242,7 +249,9 @@ function AuthPage() {
                 if (emailError) return;
                 setBusy(true);
                 try {
-                  await doReset({ data: { email } });
+                  await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo: `${window.location.origin}/auth/reset`,
+                  });
                 } catch (err) {
                   console.warn("password reset send failed", err);
                 }
@@ -463,8 +472,27 @@ function AuthPage() {
                     setFormError(result.error.message);
                     return;
                   }
+                  // Ensure a fresh Google user gets a worker role by default so
+                  // the app shell renders instead of a role-pending dead-end.
+                  const { data: sess } = await supabase.auth.getSession();
+                  const uid = sess.session?.user.id;
+                  if (uid) {
+                    const { data: existing } = await supabase
+                      .from("user_roles").select("role").eq("user_id", uid).limit(1);
+                    if (!existing || existing.length === 0) {
+                      try {
+                        await runBootstrapWorker({ data: {
+                          fullName: (sess.session?.user.user_metadata?.full_name as string) || email || "Worker",
+                          phoneNumber: "0000",
+                          preferredLanguage: lang,
+                        }});
+                      } catch (err) {
+                        console.warn("google bootstrap failed", err);
+                      }
+                    }
+                  }
                   await refreshRoles();
-                  nav({ to: targetFor() });
+                  nav({ to: "/app" });
                 } catch (err) {
                   setFormError(err instanceof Error ? err.message : String(err));
                 } finally {
