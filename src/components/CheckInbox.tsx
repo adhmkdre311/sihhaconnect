@@ -1,16 +1,12 @@
-// BUG-06: post-signup / post-reset-request confirmation with code
-// entry + resend cooldown. Never surfaces raw Supabase errors.
+// Post-signup / post-reset confirmation screen. Uses Supabase's managed
+// email link flow (Lovable branded templates). Users click the link in
+// their inbox; the resend button re-triggers Supabase's send.
 import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { Field } from "@/components/ui/field";
 import { supabase } from "@/integrations/supabase/client";
-import { useServerFn } from "@tanstack/react-start";
-import { resendSignupEmail, sendPasswordResetEmail } from "@/lib/email.functions";
 
 const RESEND_COOLDOWN_SECONDS = 60;
-const OTP_CODE_LENGTH = 8;
 
 interface CheckInboxProps {
   email: string;
@@ -20,13 +16,6 @@ interface CheckInboxProps {
 
 export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) {
   const { t } = useLang();
-  const nav = useNavigate();
-  const doResendSignup = useServerFn(resendSignupEmail);
-  const doResendRecovery = useServerFn(sendPasswordResetEmail);
-  const doResend = flow === "recovery" ? doResendRecovery : doResendSignup;
-  const [code, setCode] = useState("");
-  const [verifying, setVerifying] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | undefined>();
   const [cooldown, setCooldown] = useState(0);
   const [busy, setBusy] = useState(false);
   const [resent, setResent] = useState(false);
@@ -44,7 +33,17 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
     setResent(false);
     setResendError(undefined);
     try {
-      await doResend({ data: { email } });
+      if (flow === "recovery") {
+        await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth/reset`,
+        });
+      } else {
+        await supabase.auth.resend({
+          type: "signup",
+          email,
+          options: { emailRedirectTo: `${window.location.origin}/auth/verify` },
+        });
+      }
     } catch {
       setResendError(t("error_network"));
       setBusy(false);
@@ -55,68 +54,22 @@ export function CheckInbox({ email, onBack, flow = "signup" }: CheckInboxProps) 
     setCooldown(RESEND_COOLDOWN_SECONDS);
   }
 
-  async function handleVerify(e: React.FormEvent) {
-    e.preventDefault();
-    const token = code.replace(/\D/g, "");
-    if (token.length !== OTP_CODE_LENGTH) {
-      setVerifyError(`Enter the ${OTP_CODE_LENGTH}-digit code from your email.`);
-      return;
-    }
-    setVerifying(true);
-    setVerifyError(undefined);
-    let error;
-    if (flow === "recovery") {
-      ({ error } = await supabase.auth.verifyOtp({ email, token, type: "recovery" }));
-    } else {
-      // Try signup first; if that specific code isn't a signup token, try
-      // magiclink. Supabase does NOT consume the token on a type mismatch,
-      // so this fallback is safe.
-      ({ error } = await supabase.auth.verifyOtp({ email, token, type: "signup" }));
-      if (error) {
-        ({ error } = await supabase.auth.verifyOtp({ email, token, type: "magiclink" }));
-      }
-    }
-    if (error) {
-      setVerifying(false);
-      setVerifyError("That code is invalid or has expired. Try again or resend.");
-      return;
-    }
-    // Session established. Keep the button in its loading state (do NOT
-    // clear `verifying`) so the user can't re-submit the now-consumed code
-    // while the next route mounts.
-    nav({ to: flow === "recovery" ? "/auth/reset" : "/auth/verify" });
-  }
-
   return (
     <div className="space-y-4" role="status">
       <div className="text-center space-y-2">
         <h2 className="text-xl font-semibold">{t("check_inbox_title")}</h2>
         <p className="text-sm text-muted-foreground">
-          We emailed an {OTP_CODE_LENGTH}-digit code to
+          {flow === "recovery"
+            ? "We just emailed a password reset link to"
+            : "We just emailed a confirmation link to"}
         </p>
         <p className="text-sm font-medium">
           <span dir="ltr" className="[unicode-bidi:isolate]">{email}</span>
         </p>
+        <p className="text-sm text-muted-foreground">
+          Click the link in that email to continue. It may take a minute to arrive — check your spam folder if you don't see it.
+        </p>
       </div>
-      <form noValidate onSubmit={handleVerify} className="space-y-3">
-        <Field
-          label="Verification code"
-          name="otp"
-          type="text"
-          autoComplete="one-time-code"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          dir="ltr"
-          maxLength={OTP_CODE_LENGTH}
-          placeholder="12345678"
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, OTP_CODE_LENGTH))}
-          error={verifyError}
-        />
-        <Button type="submit" disabled={verifying || code.replace(/\D/g, "").length !== OTP_CODE_LENGTH} className="w-full">
-          {verifying ? t("loading") : "Verify code"}
-        </Button>
-      </form>
       {resendError && (
         <p role="alert" className="text-sm font-medium text-destructive text-center">
           {resendError}
