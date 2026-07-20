@@ -31,6 +31,7 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -145,6 +146,11 @@ const AppBookRoute = AppBookRouteImport.update({
   path: '/app/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminOrgsRoute = AdminOrgsRouteImport.update({
+  id: '/orgs',
+  path: '/orgs',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
   id: '/app/appointments/$id',
   path: '/app/appointments/$id',
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/orgs': typeof AdminOrgsRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -190,6 +197,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/orgs': typeof AdminOrgsRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/admin/orgs': typeof AdminOrgsRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/orgs'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -272,6 +282,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/orgs'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/admin/orgs'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -503,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/orgs': {
+      id: '/admin/orgs'
+      path: '/orgs'
+      fullPath: '/admin/orgs'
+      preLoaderRoute: typeof AdminOrgsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/appointments/$id': {
       id: '/app/appointments/$id'
       path: '/app/appointments/$id'
@@ -528,10 +547,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminOrgsRoute: typeof AdminOrgsRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminOrgsRoute: AdminOrgsRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
