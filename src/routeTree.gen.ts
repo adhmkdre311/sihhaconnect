@@ -9,12 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PharmacyRouteImport } from './routes/pharmacy'
+import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PharmacyIndexRouteImport } from './routes/pharmacy.index'
+import { Route as InsuranceIndexRouteImport } from './routes/insurance.index'
 import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
 import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
@@ -25,23 +31,52 @@ import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPharmacyRouteImport } from './routes/app.pharmacy'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AdminPharmaciesRouteImport } from './routes/admin.pharmacies'
+import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
+import { Route as AdminInsurersRouteImport } from './routes/admin.insurers'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const PharmacyRoute = PharmacyRouteImport.update({
+  id: '/pharmacy',
+  path: '/pharmacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceRoute = InsuranceRouteImport.update({
+  id: '/insurance',
+  path: '/insurance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/auth.lazy').then((d) => d.Route))
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PharmacyIndexRoute = PharmacyIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PharmacyRoute,
+} as any)
+const InsuranceIndexRoute = InsuranceIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => InsuranceRoute,
 } as any)
 const EmployerIndexRoute = EmployerIndexRouteImport.update({
   id: '/employer/',
@@ -62,6 +97,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const EmployerRosterRoute = EmployerRosterRouteImport.update({
   id: '/employer/roster',
@@ -113,6 +153,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/app/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPharmacyRoute = AppPharmacyRouteImport.update({
+  id: '/app/pharmacy',
+  path: '/app/pharmacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/app/notifications',
   path: '/app/notifications',
@@ -133,6 +178,21 @@ const AppBookRoute = AppBookRouteImport.update({
   path: '/app/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPharmaciesRoute = AdminPharmaciesRouteImport.update({
+  id: '/pharmacies',
+  path: '/pharmacies',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOrgsRoute = AdminOrgsRouteImport.update({
+  id: '/orgs',
+  path: '/orgs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInsurersRoute = AdminInsurersRouteImport.update({
+  id: '/insurers',
+  path: '/insurers',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
   id: '/app/appointments/$id',
   path: '/app/appointments/$id',
@@ -151,11 +211,18 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/insurance': typeof InsuranceRouteWithChildren
+  '/pharmacy': typeof PharmacyRouteWithChildren
+  '/admin/insurers': typeof AdminInsurersRoute
+  '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -166,20 +233,27 @@ export interface FileRoutesByFullPath {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
   '/employer/': typeof EmployerIndexRoute
+  '/insurance/': typeof InsuranceIndexRoute
+  '/pharmacy/': typeof PharmacyIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/insurers': typeof AdminInsurersRoute
+  '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -190,10 +264,13 @@ export interface FileRoutesByTo {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
   '/clinic': typeof ClinicIndexRoute
   '/employer': typeof EmployerIndexRoute
+  '/insurance': typeof InsuranceIndexRoute
+  '/pharmacy': typeof PharmacyIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -201,11 +278,18 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/insurance': typeof InsuranceRouteWithChildren
+  '/pharmacy': typeof PharmacyRouteWithChildren
+  '/admin/insurers': typeof AdminInsurersRoute
+  '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -216,10 +300,13 @@ export interface FileRoutesById {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
   '/employer/': typeof EmployerIndexRoute
+  '/insurance/': typeof InsuranceIndexRoute
+  '/pharmacy/': typeof PharmacyIndexRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -228,11 +315,18 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/auth'
+    | '/insurance'
+    | '/pharmacy'
+    | '/admin/insurers'
+    | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -243,20 +337,27 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin/'
     | '/app/'
     | '/auth/'
     | '/clinic/'
     | '/employer/'
+    | '/insurance/'
+    | '/pharmacy/'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/insurers'
+    | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -267,21 +368,31 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin'
     | '/app'
     | '/auth'
     | '/clinic'
     | '/employer'
+    | '/insurance'
+    | '/pharmacy'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/auth'
+    | '/insurance'
+    | '/pharmacy'
+    | '/admin/insurers'
+    | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -292,10 +403,13 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin/'
     | '/app/'
     | '/auth/'
     | '/clinic/'
     | '/employer/'
+    | '/insurance/'
+    | '/pharmacy/'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -303,11 +417,15 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  InsuranceRoute: typeof InsuranceRouteWithChildren
+  PharmacyRoute: typeof PharmacyRouteWithChildren
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
   AppEmergencyRoute: typeof AppEmergencyRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPharmacyRoute: typeof AppPharmacyRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
@@ -326,11 +444,32 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pharmacy': {
+      id: '/pharmacy'
+      path: '/pharmacy'
+      fullPath: '/pharmacy'
+      preLoaderRoute: typeof PharmacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance': {
+      id: '/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof InsuranceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -339,6 +478,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/pharmacy/': {
+      id: '/pharmacy/'
+      path: '/'
+      fullPath: '/pharmacy/'
+      preLoaderRoute: typeof PharmacyIndexRouteImport
+      parentRoute: typeof PharmacyRoute
+    }
+    '/insurance/': {
+      id: '/insurance/'
+      path: '/'
+      fullPath: '/insurance/'
+      preLoaderRoute: typeof InsuranceIndexRouteImport
+      parentRoute: typeof InsuranceRoute
     }
     '/employer/': {
       id: '/employer/'
@@ -367,6 +520,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/employer/roster': {
       id: '/employer/roster'
@@ -438,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/pharmacy': {
+      id: '/app/pharmacy'
+      path: '/app/pharmacy'
+      fullPath: '/app/pharmacy'
+      preLoaderRoute: typeof AppPharmacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/notifications': {
       id: '/app/notifications'
       path: '/app/notifications'
@@ -466,6 +633,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pharmacies': {
+      id: '/admin/pharmacies'
+      path: '/pharmacies'
+      fullPath: '/admin/pharmacies'
+      preLoaderRoute: typeof AdminPharmaciesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/orgs': {
+      id: '/admin/orgs'
+      path: '/orgs'
+      fullPath: '/admin/orgs'
+      preLoaderRoute: typeof AdminOrgsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/insurers': {
+      id: '/admin/insurers'
+      path: '/insurers'
+      fullPath: '/admin/insurers'
+      preLoaderRoute: typeof AdminInsurersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/appointments/$id': {
       id: '/app/appointments/$id'
       path: '/app/appointments/$id'
@@ -490,6 +678,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminInsurersRoute: typeof AdminInsurersRoute
+  AdminOrgsRoute: typeof AdminOrgsRoute
+  AdminPharmaciesRoute: typeof AdminPharmaciesRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminInsurersRoute: AdminInsurersRoute,
+  AdminOrgsRoute: AdminOrgsRoute,
+  AdminPharmaciesRoute: AdminPharmaciesRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AuthRouteChildren {
   AuthResetRoute: typeof AuthResetRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
@@ -504,13 +708,41 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface InsuranceRouteChildren {
+  InsuranceIndexRoute: typeof InsuranceIndexRoute
+}
+
+const InsuranceRouteChildren: InsuranceRouteChildren = {
+  InsuranceIndexRoute: InsuranceIndexRoute,
+}
+
+const InsuranceRouteWithChildren = InsuranceRoute._addFileChildren(
+  InsuranceRouteChildren,
+)
+
+interface PharmacyRouteChildren {
+  PharmacyIndexRoute: typeof PharmacyIndexRoute
+}
+
+const PharmacyRouteChildren: PharmacyRouteChildren = {
+  PharmacyIndexRoute: PharmacyIndexRoute,
+}
+
+const PharmacyRouteWithChildren = PharmacyRoute._addFileChildren(
+  PharmacyRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  InsuranceRoute: InsuranceRouteWithChildren,
+  PharmacyRoute: PharmacyRouteWithChildren,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
   AppEmergencyRoute: AppEmergencyRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPharmacyRoute: AppPharmacyRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
@@ -529,13 +761,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
