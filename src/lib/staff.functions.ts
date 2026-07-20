@@ -58,11 +58,12 @@ export const approveStaffRequest = createServerFn({ method: "POST" })
       insurer_id: orgIds.insurer_id ?? null,
     }, { onConflict: "user_id,role" });
 
-    const patch: Record<string, unknown> = { approved: true };
-    if (orgIds.pharmacy_id) patch.pharmacy_id = orgIds.pharmacy_id;
-    if (orgIds.insurer_id) patch.insurer_id = orgIds.insurer_id;
-    if (orgIds.clinic_id) patch.clinic_id = orgIds.clinic_id;
-    await supabaseAdmin.from("profiles").update(patch).eq("id", req.user_id);
+    await supabaseAdmin.from("profiles").update({
+      approved: true,
+      pharmacy_id: orgIds.pharmacy_id ?? null,
+      insurer_id: orgIds.insurer_id ?? null,
+      clinic_id: orgIds.clinic_id ?? null,
+    }).eq("id", req.user_id);
 
     await supabaseAdmin.from("role_requests")
       .update({ status: "approved", reviewed_by: context.userId, reviewed_at: new Date().toISOString() })
