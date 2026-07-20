@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
+import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
@@ -43,6 +44,11 @@ import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/em
 const PharmacyRoute = PharmacyRouteImport.update({
   id: '/pharmacy',
   path: '/pharmacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceRoute = InsuranceRouteImport.update({
+  id: '/insurance',
+  path: '/insurance',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/insurance': typeof InsuranceRoute
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
@@ -225,6 +232,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/insurance': typeof InsuranceRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
@@ -257,6 +265,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
+  '/insurance': typeof InsuranceRoute
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/insurance'
     | '/pharmacy'
     | '/admin/insurers'
     | '/admin/orgs'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/insurance'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/insurance'
     | '/pharmacy'
     | '/admin/insurers'
     | '/admin/orgs'
@@ -385,6 +397,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
+  InsuranceRoute: typeof InsuranceRoute
   PharmacyRoute: typeof PharmacyRouteWithChildren
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
@@ -413,6 +426,13 @@ declare module '@tanstack/react-router' {
       path: '/pharmacy'
       fullPath: '/pharmacy'
       preLoaderRoute: typeof PharmacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insurance': {
+      id: '/insurance'
+      path: '/insurance'
+      fullPath: '/insurance'
+      preLoaderRoute: typeof InsuranceRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -667,6 +687,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
+  InsuranceRoute: InsuranceRoute,
   PharmacyRoute: PharmacyRouteWithChildren,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
