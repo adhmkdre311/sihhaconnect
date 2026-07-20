@@ -31,6 +31,7 @@ import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppPharmacyRouteImport } from './routes/app.pharmacy'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
@@ -152,6 +153,11 @@ const AppProfileRoute = AppProfileRouteImport.update({
   path: '/app/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPharmacyRoute = AppPharmacyRouteImport.update({
+  id: '/app/pharmacy',
+  path: '/app/pharmacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/app/notifications',
   path: '/app/notifications',
@@ -216,6 +222,7 @@ export interface FileRoutesByFullPath {
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -281,6 +289,7 @@ export interface FileRoutesById {
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
   '/app/notifications': typeof AppNotificationsRoute
+  '/app/pharmacy': typeof AppPharmacyRoute
   '/app/profile': typeof AppProfileRoute
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
@@ -317,6 +326,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -347,6 +357,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -381,6 +392,7 @@ export interface FileRouteTypes {
     | '/app/chat'
     | '/app/emergency'
     | '/app/notifications'
+    | '/app/pharmacy'
     | '/app/profile'
     | '/app/records'
     | '/auth/reset'
@@ -413,6 +425,7 @@ export interface RootRouteChildren {
   AppChatRoute: typeof AppChatRoute
   AppEmergencyRoute: typeof AppEmergencyRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppPharmacyRoute: typeof AppPharmacyRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
@@ -585,6 +598,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/pharmacy': {
+      id: '/app/pharmacy'
+      path: '/app/pharmacy'
+      fullPath: '/app/pharmacy'
+      preLoaderRoute: typeof AppPharmacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/notifications': {
       id: '/app/notifications'
       path: '/app/notifications'
@@ -722,6 +742,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppChatRoute: AppChatRoute,
   AppEmergencyRoute: AppEmergencyRoute,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppPharmacyRoute: AppPharmacyRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
