@@ -31,6 +31,7 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AdminPharmaciesRouteImport } from './routes/admin.pharmacies'
 import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
@@ -146,6 +147,11 @@ const AppBookRoute = AppBookRouteImport.update({
   path: '/app/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPharmaciesRoute = AdminPharmaciesRouteImport.update({
+  id: '/pharmacies',
+  path: '/pharmacies',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrgsRoute = AdminOrgsRouteImport.update({
   id: '/orgs',
   path: '/orgs',
@@ -172,6 +178,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -227,6 +235,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/admin/orgs': typeof AdminOrgsRoute
+  '/admin/pharmacies': typeof AdminPharmaciesRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -257,6 +266,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -311,6 +322,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/admin/orgs'
+    | '/admin/pharmacies'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -515,6 +527,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/pharmacies': {
+      id: '/admin/pharmacies'
+      path: '/pharmacies'
+      fullPath: '/admin/pharmacies'
+      preLoaderRoute: typeof AdminPharmaciesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orgs': {
       id: '/admin/orgs'
       path: '/orgs'
@@ -548,11 +567,13 @@ declare module '@tanstack/react-router' {
 
 interface AdminRouteChildren {
   AdminOrgsRoute: typeof AdminOrgsRoute
+  AdminPharmaciesRoute: typeof AdminPharmaciesRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminOrgsRoute: AdminOrgsRoute,
+  AdminPharmaciesRoute: AdminPharmaciesRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
