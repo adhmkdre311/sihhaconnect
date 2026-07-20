@@ -636,6 +636,8 @@ export type Database = {
           company_name: string | null
           created_at: string
           id: string
+          insurer_id: string | null
+          pharmacy_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           role: Database["public"]["Enums"]["app_role"]
@@ -648,6 +650,8 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: string
+          insurer_id?: string | null
+          pharmacy_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           role: Database["public"]["Enums"]["app_role"]
@@ -660,6 +664,8 @@ export type Database = {
           company_name?: string | null
           created_at?: string
           id?: string
+          insurer_id?: string | null
+          pharmacy_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           role?: Database["public"]["Enums"]["app_role"]
@@ -673,6 +679,20 @@ export type Database = {
             columns: ["clinic_id"]
             isOneToOne: false
             referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_requests_insurer_id_fkey"
+            columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_requests_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
             referencedColumns: ["id"]
           },
         ]
