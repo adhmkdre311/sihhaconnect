@@ -2,12 +2,20 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
-type Role = "worker" | "employer_admin" | "clinic_staff" | "super_admin";
+type Role =
+  | "worker"
+  | "employer_admin"
+  | "clinic_staff"
+  | "pharmacy_staff"
+  | "insurance_staff"
+  | "platform_admin"
+  | "super_admin";
 
 type AuthState = {
   user: User | null;
   session: Session | null;
   roles: Role[];
+  approved: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
@@ -19,11 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
+  const [approved, setApproved] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
 
   const loadRoles = async (uid: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     setRoles((data ?? []).map((r) => r.role as Role));
+    const { data: prof } = await supabase.from("profiles").select("approved").eq("id", uid).maybeSingle();
+    setApproved(!!prof?.approved);
   };
 
   useEffect(() => {
@@ -34,6 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setTimeout(() => void loadRoles(s.user.id), 0);
       } else {
         setRoles([]);
+        setApproved(false);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
@@ -54,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, roles, loading, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, roles, approved, loading, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
