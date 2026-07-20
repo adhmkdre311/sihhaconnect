@@ -16,6 +16,7 @@ import { Route as EmployerIndexRouteImport } from './routes/employer.index'
 import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
 import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
@@ -68,6 +69,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
 } as any)
 const EmployerRosterRoute = EmployerRosterRouteImport.update({
   id: '/employer/roster',
@@ -157,7 +163,7 @@ const LovableEmailAuthPreviewRoute = LovableEmailAuthPreviewRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
@@ -173,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
@@ -183,7 +190,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -198,6 +204,7 @@ export interface FileRoutesByTo {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
   '/clinic': typeof ClinicIndexRoute
@@ -209,7 +216,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
+  '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRouteWithChildren
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
@@ -225,6 +232,7 @@ export interface FileRoutesById {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
   '/clinic/': typeof ClinicIndexRoute
@@ -253,6 +261,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin/'
     | '/app/'
     | '/auth/'
     | '/clinic/'
@@ -263,7 +272,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -278,6 +286,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin'
     | '/app'
     | '/auth'
     | '/clinic'
@@ -304,6 +313,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/admin/'
     | '/app/'
     | '/auth/'
     | '/clinic/'
@@ -315,7 +325,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
+  AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRouteWithChildren
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
@@ -387,6 +397,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
     }
     '/employer/roster': {
       id: '/employer/roster'
@@ -510,6 +527,16 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
 interface AuthRouteChildren {
   AuthResetRoute: typeof AuthResetRoute
   AuthVerifyRoute: typeof AuthVerifyRoute
@@ -526,7 +553,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
+  AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRouteWithChildren,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
