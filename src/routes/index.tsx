@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useLang } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/lib/auth";
-import { Stethoscope, Building2, User } from "lucide-react";
+import { Stethoscope, Building2, User, Pill, Landmark } from "lucide-react";
 import { SihhaLockup, SihhaMark } from "@/components/SihhaLogo";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
 
@@ -22,6 +22,9 @@ function Landing() {
     if (roles.includes("worker")) nav({ to: "/app" });
     else if (roles.includes("employer_admin")) nav({ to: "/employer" });
     else if (roles.includes("clinic_staff")) nav({ to: "/clinic" });
+    else if (roles.includes("pharmacy_staff")) nav({ to: "/pharmacy" });
+    else if (roles.includes("insurance_staff")) nav({ to: "/insurance" });
+    else if (roles.includes("platform_admin") || roles.includes("super_admin")) nav({ to: "/admin" });
   }, [user, roles, loading, nav]);
 
   return (
@@ -79,10 +82,12 @@ function Landing() {
           <LanguageSwitcher />
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <RoleCard icon={<User className="h-6 w-6" />} title={t("worker")} desc={t("role_worker_desc")} to="/auth" search={{ role: "worker", mode: "signup" }} />
           <RoleCard icon={<Building2 className="h-6 w-6" />} title={t("employer_admin")} desc={t("role_employer_desc")} to="/auth" search={{ role: "employer_admin", mode: "signup" }} />
           <RoleCard icon={<Stethoscope className="h-6 w-6" />} title={t("clinic_staff")} desc={t("role_clinic_desc")} to="/auth" search={{ role: "clinic_staff", mode: "signup" }} />
+          <RoleCard icon={<Pill className="h-6 w-6" />} title="Pharmacy staff" desc="List medicine availability — no orders, no prices." to="/staff-signup" search={{ role: "pharmacy_staff" }} />
+          <RoleCard icon={<Landmark className="h-6 w-6" />} title="Insurance staff" desc="See aggregated employer health metrics only." to="/staff-signup" search={{ role: "insurance_staff" }} />
         </div>
         </main>
 

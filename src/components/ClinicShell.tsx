@@ -9,7 +9,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
   const { t } = useLang();
   const loc = useLocation();
   const nav = useNavigate();
-  const { user, loading, roles, signOut } = useAuth();
+  const { user, loading, roles, approved, signOut } = useAuth();
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
   if (!user) {
     const next = loc.pathname + (typeof loc.search === "string" ? loc.search : "");
@@ -17,6 +17,17 @@ export function ClinicShell({ children }: { children: ReactNode }) {
     return null;
   }
   if (!roles.includes("clinic_staff")) { nav({ to: "/" }); return null; }
+  if (!approved) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-6">
+        <div className="max-w-md rounded-2xl border bg-card p-8 shadow-sm text-center">
+          <h1 className="font-display text-xl font-semibold">Awaiting approval</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Your clinic staff access is pending review by a Sihha platform administrator.</p>
+          <button onClick={() => { void signOut(); nav({ to: "/" }); }} className="mt-6 text-sm font-medium text-primary underline">{t("logout")}</button>
+        </div>
+      </div>
+    );
+  }
 
   const items = [
     { to: "/clinic", icon: ListChecks, label: t("queue") },
