@@ -17,6 +17,21 @@ export function AdminShell({ children }: { children: ReactNode }) {
     return null;
   }
   if (!roles.includes("employer_admin")) { nav({ to: "/" }); return null; }
+  // approval gate — employer_admin starts pending until a platform admin approves.
+  {
+    const { approved } = useAuth();
+    if (!approved) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-background p-6">
+          <div className="max-w-md rounded-2xl border bg-card p-8 shadow-sm text-center">
+            <h1 className="font-display text-xl font-semibold">Awaiting approval</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Your employer admin access is pending review by a Sihha platform administrator.</p>
+            <button onClick={() => { void signOut(); nav({ to: "/" }); }} className="mt-6 text-sm font-medium text-primary underline">{t("logout")}</button>
+          </div>
+        </div>
+      );
+    }
+  }
 
   const items = [
     { to: "/employer", icon: BarChart3, label: t("home") },
