@@ -41,7 +41,8 @@ function Chat() {
     setInput("");
     try {
       const r = await ask({ data: { message: text, language: lang } });
-      setMsgs((m) => [...m, { id: "a"+Date.now(), role: "assistant", content: r.reply, created_at: new Date().toISOString() }]);
+      const { safeRender } = await import("@/lib/guardrail");
+      setMsgs((m) => [...m, { id: "a"+Date.now(), role: "assistant", content: safeRender(r.reply), created_at: new Date().toISOString() }]);
     } catch (e) {
       setMsgs((m) => [...m, { id: "err", role: "assistant", content: (e instanceof Error?e.message:"Error"), created_at: new Date().toISOString() }]);
     } finally { setBusy(false); }
