@@ -16,6 +16,7 @@ type AuthState = {
   session: Session | null;
   roles: Role[];
   approved: boolean;
+  isActive: boolean;
   loading: boolean;
   signOut: () => Promise<void>;
   refreshRoles: () => Promise<void>;
@@ -28,13 +29,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [roles, setRoles] = useState<Role[]>([]);
   const [approved, setApproved] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(true);
   const [loading, setLoading] = useState(true);
 
   const loadRoles = async (uid: string) => {
     const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
     setRoles((data ?? []).map((r) => r.role as Role));
-    const { data: prof } = await supabase.from("profiles").select("approved").eq("id", uid).maybeSingle();
+    const { data: prof } = await supabase.from("profiles").select("approved, is_active").eq("id", uid).maybeSingle();
     setApproved(!!prof?.approved);
+    setIsActive(prof?.is_active !== false);
   };
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setRoles([]);
         setApproved(false);
+        setIsActive(true);
       }
     });
     supabase.auth.getSession().then(({ data }) => {
@@ -66,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, roles, approved, loading, signOut, refreshRoles }}>
+    <AuthContext.Provider value={{ user, session, roles, approved, isActive, loading, signOut, refreshRoles }}>
       {children}
     </AuthContext.Provider>
   );
