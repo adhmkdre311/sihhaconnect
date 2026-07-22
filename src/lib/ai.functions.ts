@@ -97,7 +97,7 @@ export const askAssistant = createServerFn({ method: "POST" })
       .select("role, content")
       .eq("worker_id", userId)
       .order("created_at", { ascending: false })
-      .limit(6);
+      .limit(12);
     const messages = [
       { role: "system", content: chatSystemPrompt(data.language) },
       ...(history ?? []).reverse().map((m) => ({ role: m.role, content: m.content })),
