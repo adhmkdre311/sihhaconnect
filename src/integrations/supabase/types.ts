@@ -559,10 +559,12 @@ export type Database = {
           full_name: string | null
           id: string
           insurer_id: string | null
+          is_active: boolean
           notification_prefs: Json
           pharmacy_id: string | null
           phone_number: string | null
           preferred_language: Database["public"]["Enums"]["language_code"]
+          push_token: string | null
           updated_at: string
         }
         Insert: {
@@ -576,10 +578,12 @@ export type Database = {
           full_name?: string | null
           id: string
           insurer_id?: string | null
+          is_active?: boolean
           notification_prefs?: Json
           pharmacy_id?: string | null
           phone_number?: string | null
           preferred_language?: Database["public"]["Enums"]["language_code"]
+          push_token?: string | null
           updated_at?: string
         }
         Update: {
@@ -593,10 +597,12 @@ export type Database = {
           full_name?: string | null
           id?: string
           insurer_id?: string | null
+          is_active?: boolean
           notification_prefs?: Json
           pharmacy_id?: string | null
           phone_number?: string | null
           preferred_language?: Database["public"]["Enums"]["language_code"]
+          push_token?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -802,11 +808,31 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       is_approved: { Args: { _uid: string }; Returns: boolean }
+      my_clinic_id: { Args: never; Returns: string }
+      my_employer_id: { Args: never; Returns: string }
+      my_insurance_company_id: { Args: never; Returns: string }
+      my_pharmacy_id: { Args: never; Returns: string }
+      my_role: { Args: never; Returns: Database["public"]["Enums"]["app_role"] }
+      profile_in_my_employer: { Args: { _profile: string }; Returns: boolean }
       purge_old_documents: { Args: never; Returns: undefined }
       request_privileged_role: {
         Args: { _clinic_id: string; _company_name: string; _role: string }
         Returns: string
+      }
+      send_broadcast: {
+        Args: {
+          _audience?: string
+          _body: string
+          _category?: string
+          _title: string
+        }
+        Returns: number
+      }
+      worker_has_appointment_at_clinic: {
+        Args: { _worker: string }
+        Returns: boolean
       }
     }
     Enums: {
