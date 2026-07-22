@@ -17,12 +17,21 @@ export function StaffFrame({
 }) {
   const loc = useLocation();
   const nav = useNavigate();
-  const { user, loading, roles, approved, signOut } = useAuth();
+  const { user, loading, roles, approved, isActive, signOut } = useAuth();
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
   if (!user) {
     nav({ to: "/auth", search: { role: role === "platform_admin" || role === "super_admin" ? "worker" : role, mode: "login", next: loc.pathname } });
     return null;
+  }
+  if (!isActive) {
+    return (
+      <PendingScreen
+        title="Account deactivated"
+        body="This account has been deactivated by a platform administrator. Contact support to restore access."
+        onSignOut={() => { void signOut(); nav({ to: "/" }); }}
+      />
+    );
   }
   const hasRole = roles.includes(role) || (role === "platform_admin" && roles.includes("super_admin"));
   if (!hasRole) {
