@@ -13,7 +13,7 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
   const { t } = useLang();
   const loc = useLocation();
   const nav = useNavigate();
-  const { user, loading, roles } = useAuth();
+  const { user, loading, roles, isActive } = useAuth();
 
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
   if (!user) {
@@ -22,6 +22,15 @@ export function AppShell({ children, title }: { children: ReactNode; title?: str
     return null;
   }
   if (!roles.includes("worker")) { nav({ to: "/" }); return null; }
+  if (!isActive) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
+        <h1 className="font-display text-xl font-semibold">Account deactivated</h1>
+        <p className="text-sm text-muted-foreground">This account has been deactivated. Contact your employer or Sihha support.</p>
+        <Button variant="ghost" onClick={() => supabase.auth.signOut()}>Sign out</Button>
+      </div>
+    );
+  }
 
   return <WorkerFrame title={title}>{children}</WorkerFrame>;
 }
