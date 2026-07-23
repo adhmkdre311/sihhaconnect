@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
-import type { ComponentType, ReactNode } from "react";
+import { useEffect, type ComponentType, type ReactNode } from "react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { SihhaLockup } from "@/components/SihhaLogo";
@@ -19,11 +19,16 @@ export function StaffFrame({
   const nav = useNavigate();
   const { user, loading, roles, approved, isActive, signOut } = useAuth();
 
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      const authRole = role === "platform_admin" || role === "super_admin" ? "worker" : role;
+      nav({ to: "/auth", search: { role: authRole, mode: "login", next: loc.pathname } });
+    }
+  }, [loading, user, role, loc.pathname, nav]);
+
   if (loading) return <div className="p-6 text-sm text-muted-foreground">Loading…</div>;
-  if (!user) {
-    nav({ to: "/auth", search: { role: role === "platform_admin" || role === "super_admin" ? "worker" : role, mode: "login", next: loc.pathname } });
-    return null;
-  }
+  if (!user) return <div className="p-6 text-sm text-muted-foreground">Redirecting…</div>;
   if (!isActive) {
     return (
       <PendingScreen
