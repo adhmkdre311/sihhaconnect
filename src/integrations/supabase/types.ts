@@ -14,14 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          audience: string
+          body: string
+          created_at: string
+          created_by: string | null
+          employer_id: string | null
+          id: string
+          published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience: string
+          body: string
+          created_at?: string
+          created_by?: string | null
+          employer_id?: string | null
+          id?: string
+          published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          employer_id?: string | null
+          id?: string
+          published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "announcements_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcements_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_employer_aggregates"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "announcements_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
+            referencedColumns: ["employer_id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           ai_context_summary: string | null
           clinic_id: string
+          context_note: string | null
+          context_note_translated: string | null
           created_at: string
           department: string
           id: string
+          reason: Database["public"]["Enums"]["reason_category"] | null
           scheduled_at: string
+          slot_id: string | null
           status: Database["public"]["Enums"]["appointment_status"]
           symptom_category: string | null
           updated_at: string
@@ -32,10 +101,14 @@ export type Database = {
         Insert: {
           ai_context_summary?: string | null
           clinic_id: string
+          context_note?: string | null
+          context_note_translated?: string | null
           created_at?: string
           department: string
           id?: string
+          reason?: Database["public"]["Enums"]["reason_category"] | null
           scheduled_at: string
+          slot_id?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
           symptom_category?: string | null
           updated_at?: string
@@ -46,10 +119,14 @@ export type Database = {
         Update: {
           ai_context_summary?: string | null
           clinic_id?: string
+          context_note?: string | null
+          context_note_translated?: string | null
           created_at?: string
           department?: string
           id?: string
+          reason?: Database["public"]["Enums"]["reason_category"] | null
           scheduled_at?: string
+          slot_id?: string | null
           status?: Database["public"]["Enums"]["appointment_status"]
           symptom_category?: string | null
           updated_at?: string
@@ -65,7 +142,44 @@ export type Database = {
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointments_slot_id_fkey"
+            columns: ["slot_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_slots"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          detail: Json | null
+          id: string
+          record_id: string | null
+          table_name: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          detail?: Json | null
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Relationships: []
       }
       chat_messages: {
         Row: {
@@ -131,6 +245,7 @@ export type Database = {
           created_at: string
           department: string
           id: string
+          is_available: boolean
           slot_at: string
         }
         Insert: {
@@ -140,6 +255,7 @@ export type Database = {
           created_at?: string
           department: string
           id?: string
+          is_available?: boolean
           slot_at: string
         }
         Update: {
@@ -149,6 +265,7 @@ export type Database = {
           created_at?: string
           department?: string
           id?: string
+          is_available?: boolean
           slot_at?: string
         }
         Relationships: [
@@ -316,6 +433,13 @@ export type Database = {
             referencedColumns: ["employer_id"]
           },
           {
+            foreignKeyName: "insurer_employer_scope_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
+            referencedColumns: ["employer_id"]
+          },
+          {
             foreignKeyName: "insurer_employer_scope_insurer_id_fkey"
             columns: ["insurer_id"]
             isOneToOne: false
@@ -426,6 +550,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "insurer_employer_aggregates"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "notifications_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
         ]
@@ -547,6 +678,27 @@ export type Database = {
           },
         ]
       }
+      platform_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approved: boolean
@@ -632,6 +784,13 @@ export type Database = {
             columns: ["employer_id"]
             isOneToOne: false
             referencedRelation: "insurer_employer_aggregates"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "profiles_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
         ]
@@ -763,6 +922,13 @@ export type Database = {
             referencedRelation: "insurer_employer_aggregates"
             referencedColumns: ["employer_id"]
           },
+          {
+            foreignKeyName: "user_roles_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
+            referencedColumns: ["employer_id"]
+          },
         ]
       }
     }
@@ -791,6 +957,26 @@ export type Database = {
           {
             foreignKeyName: "insurer_employer_scope_insurer_id_fkey"
             columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      insurer_network_overview: {
+        Row: {
+          appointments_total: number | null
+          checkups_completed: number | null
+          company_name: string | null
+          employer_id: string | null
+          insurance_company_id: string | null
+          no_show_rate_pct: number | null
+          workers_enrolled: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurer_employer_scope_insurer_id_fkey"
+            columns: ["insurance_company_id"]
             isOneToOne: false
             referencedRelation: "insurers"
             referencedColumns: ["id"]
@@ -844,7 +1030,14 @@ export type Database = {
         | "pharmacy_staff"
         | "insurance_staff"
         | "platform_admin"
-      appointment_status: "booked" | "completed" | "no_show" | "cancelled"
+      appointment_status:
+        | "pending"
+        | "booked"
+        | "confirmed"
+        | "awaiting_checkin"
+        | "completed"
+        | "no_show"
+        | "cancelled"
       chat_role: "user" | "assistant"
       document_type:
         | "prescription"
@@ -859,6 +1052,13 @@ export type Database = {
         | "medication_reminder"
         | "health_advisory"
         | "general"
+      reason_category:
+        | "fever"
+        | "injury"
+        | "dental"
+        | "checkup"
+        | "medication_review"
+        | "other"
       subscription_tier: "pilot" | "standard" | "enterprise"
     }
     CompositeTypes: {
@@ -996,7 +1196,15 @@ export const Constants = {
         "insurance_staff",
         "platform_admin",
       ],
-      appointment_status: ["booked", "completed", "no_show", "cancelled"],
+      appointment_status: [
+        "pending",
+        "booked",
+        "confirmed",
+        "awaiting_checkin",
+        "completed",
+        "no_show",
+        "cancelled",
+      ],
       chat_role: ["user", "assistant"],
       document_type: [
         "prescription",
@@ -1012,6 +1220,14 @@ export const Constants = {
         "medication_reminder",
         "health_advisory",
         "general",
+      ],
+      reason_category: [
+        "fever",
+        "injury",
+        "dental",
+        "checkup",
+        "medication_review",
+        "other",
       ],
       subscription_tier: ["pilot", "standard", "enterprise"],
     },
