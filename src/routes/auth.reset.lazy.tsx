@@ -30,6 +30,13 @@ function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const ranVerify = useRef(false);
 
+  // Resend reset email state
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
+  const [resendError, setResendError] = useState<string | undefined>();
+  const [showResend, setShowResend] = useState(false);
+
   useEffect(() => {
     // Custom Resend flow: exchange the token_hash for a recovery session.
     if (token_hash && type === "recovery" && !ranVerify.current) {
@@ -72,6 +79,53 @@ function ResetPasswordPage() {
     setDone(true);
   }
 
+  async function handleResend(e: React.FormEvent) {
+    e.preventDefault();
+    if (!resendEmail.trim()) {
+      setResendError("Please enter your email address.");
+      return;
+    }
+    setResendLoading(true);
+    setResendError(undefined);
+    setResendSent(false);
+    const { error } = await supabase.auth.resetPasswordForEmail(resendEmail.trim(), {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    setResendLoading(false);
+    if (error) {
+      setResendError(mapAuthError(error, t));
+      return;
+    }
+    setResendSent(true);
+  }
+
+  const ResendForm = (
+    <form noValidate onSubmit={handleResend} className="space-y-3">
+      <Field
+        label="Email"
+        type="email"
+        name="resend-email"
+        autoComplete="email"
+        dir="ltr"
+        value={resendEmail}
+        onChange={(e) => setResendEmail(e.target.value)}
+      />
+      {resendError && (
+        <p role="alert" className="text-sm font-medium text-destructive">
+          {resendError}
+        </p>
+      )}
+      {resendSent && (
+        <p role="status" className="text-sm font-medium text-emerald-600">
+          If an account exists for this email, a new reset link has been sent. Check your inbox.
+        </p>
+      )}
+      <Button type="submit" disabled={resendLoading} className="w-full">
+        {resendLoading ? t("loading") : "Send new reset link"}
+      </Button>
+    </form>
+  );
+
   if (done) {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-4 p-6">
@@ -87,14 +141,24 @@ function ResetPasswordPage() {
     <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-4 p-6">
       <h1 className="text-xl font-semibold">{t("reset_title")}</h1>
       {linkInvalid ? (
-        <>
+        <div className="space-y-4">
           <p className="text-sm text-destructive">{t("verify_link_invalid")}</p>
-          <Button onClick={() => navigate({ to: "/auth", search: { role: "worker", mode: "login" } })}>
+          {ResendForm}
+          <Button variant="ghost" onClick={() => navigate({ to: "/auth", search: { role: "worker", mode: "login" } })} className="w-full">
             {t("back_to_login")}
           </Button>
-        </>
+        </div>
       ) : !ready ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+          {!showResend ? (
+            <Button variant="ghost" onClick={() => setShowResend(true)} className="w-full">
+              Didn’t get the email? Resend reset link
+            </Button>
+          ) : (
+            ResendForm
+          )}
+        </div>
       ) : (
         <form noValidate onSubmit={handleSubmit} className="space-y-4">
           <Field
@@ -126,6 +190,13 @@ function ResetPasswordPage() {
           <Button type="submit" disabled={loading} className="w-full">
             {loading ? t("loading") : t("reset_password")}
           </Button>
+          {!showResend ? (
+            <Button type="button" variant="ghost" onClick={() => setShowResend(true)} className="w-full">
+              Resend reset email
+            </Button>
+          ) : (
+            ResendForm
+          )}
         </form>
       )}
     </main>
