@@ -72,6 +72,28 @@ export const setAnnouncementPublished = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const updateAnnouncement = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    id: z.string().uuid(),
+    title: z.string().min(1).max(200),
+    body: z.string().min(1).max(4000),
+    audience: z.enum(AUDIENCES),
+    employerId: z.string().uuid().nullable().optional(),
+    published: z.boolean(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const employer_id = data.audience === "workers" ? (data.employerId ?? null) : null;
+    const { error } = await supabaseAdmin.from("announcements").update({
+      title: data.title, body: data.body, audience: data.audience,
+      employer_id, published: data.published,
+    }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 export const deleteAnnouncement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
