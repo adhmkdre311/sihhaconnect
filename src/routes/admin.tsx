@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { StaffFrame } from "@/components/StaffFrame";
-import { ShieldCheck, Building2, Pill, Landmark } from "lucide-react";
+import { ShieldCheck, Building2, Pill, Landmark, Megaphone } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   component: () => (
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/admin")({
         { to: "/admin/orgs", icon: Building2, label: "Organisations" },
         { to: "/admin/pharmacies", icon: Pill, label: "Pharmacies & meds" },
         { to: "/admin/insurers", icon: Landmark, label: "Insurers" },
+        { to: "/admin/announcements", icon: Megaphone, label: "Announcements" },
       ]}
     >
       <Outlet />

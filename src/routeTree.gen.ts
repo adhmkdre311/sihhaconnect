@@ -40,6 +40,7 @@ import { Route as AppBookRouteImport } from './routes/app.book'
 import { Route as AdminPharmaciesRouteImport } from './routes/admin.pharmacies'
 import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
 import { Route as AdminInsurersRouteImport } from './routes/admin.insurers'
+import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -199,6 +200,11 @@ const AdminInsurersRoute = AdminInsurersRouteImport.update({
   path: '/insurers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
   id: '/app/appointments/$id',
   path: '/app/appointments/$id',
@@ -222,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
@@ -254,6 +261,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
@@ -291,6 +299,7 @@ export interface FileRoutesById {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/admin/announcements'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
@@ -361,6 +371,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/staff-signup'
+    | '/admin/announcements'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
@@ -397,6 +408,7 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/admin/announcements'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
@@ -674,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInsurersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/announcements': {
+      id: '/admin/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/app/appointments/$id': {
       id: '/app/appointments/$id'
       path: '/app/appointments/$id'
@@ -699,6 +718,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
   AdminInsurersRoute: typeof AdminInsurersRoute
   AdminOrgsRoute: typeof AdminOrgsRoute
   AdminPharmaciesRoute: typeof AdminPharmaciesRoute
@@ -706,6 +726,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnnouncementsRoute: AdminAnnouncementsRoute,
   AdminInsurersRoute: AdminInsurersRoute,
   AdminOrgsRoute: AdminOrgsRoute,
   AdminPharmaciesRoute: AdminPharmaciesRoute,
