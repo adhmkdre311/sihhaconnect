@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   listAnnouncements, createAnnouncement, setAnnouncementPublished,
-  deleteAnnouncement, listEmployersLite,
+  deleteAnnouncement, listEmployersLite, updateAnnouncement,
 } from "@/lib/announcements.functions";
 
 export const Route = createFileRoute("/admin/announcements")({ component: Page });
@@ -24,6 +24,7 @@ function Page() {
   const create = useServerFn(createAnnouncement);
   const setPub = useServerFn(setAnnouncementPublished);
   const del = useServerFn(deleteAnnouncement);
+  const update = useServerFn(updateAnnouncement);
   const emps = useServerFn(listEmployersLite);
   const qc = useQueryClient();
 
@@ -63,6 +64,40 @@ function Page() {
   const mDelete = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
     onSuccess: () => { toast.success("Deleted"); invalidate(); },
+  });
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [eTitle, setETitle] = useState("");
+  const [eBody, setEBody] = useState("");
+  const [eAudience, setEAudience] = useState<Audience>("all");
+  const [eEmployerId, setEEmployerId] = useState<string>("");
+  const [ePublished, setEPublished] = useState(false);
+
+  const startEdit = (r: {
+    id: string; title: string; body: string; audience: string;
+    employer_id: string | null; published: boolean;
+  }) => {
+    setEditingId(r.id);
+    setETitle(r.title);
+    setEBody(r.body);
+    setEAudience(r.audience as Audience);
+    setEEmployerId(r.employer_id ?? "");
+    setEPublished(r.published);
+  };
+  const cancelEdit = () => setEditingId(null);
+
+  const mUpdate = useMutation({
+    mutationFn: () => update({ data: {
+      id: editingId!, title: eTitle, body: eBody, audience: eAudience,
+      employerId: eAudience === "workers" && eEmployerId ? eEmployerId : null,
+      published: ePublished,
+    }}),
+    onSuccess: () => {
+      toast.success(ePublished ? "Announcement updated & published" : "Draft updated");
+      setEditingId(null);
+      invalidate();
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "Failed"),
   });
 
   return (
@@ -152,7 +187,59 @@ function Page() {
         )}
         <ul className="divide-y">
           {(q.data ?? []).map((r) => (
-            <li key={r.id} className="flex flex-wrap items-start justify-between gap-3 py-3">
+            <li key={r.id} className="py-3">
+            {editingId === r.id ? (
+              <div className="grid gap-3 rounded-xl border bg-muted/30 p-3">
+                <div>
+                  <Label>Title</Label>
+                  <Input value={eTitle} onChange={(e) => setETitle(e.target.value)} maxLength={200} />
+                </div>
+                <div>
+                  <Label>Body</Label>
+                  <Textarea value={eBody} onChange={(e) => setEBody(e.target.value)} rows={4} maxLength={4000} />
+                </div>
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <Label>Audience</Label>
+                    <select
+                      className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                      value={eAudience}
+                      onChange={(ev) => setEAudience(ev.target.value as Audience)}
+                    >
+                      {AUDIENCES.map((a) => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </div>
+                  {eAudience === "workers" && (
+                    <div>
+                      <Label>Employer (optional)</Label>
+                      <select
+                        className="mt-1 w-full rounded-md border bg-background p-2 text-sm"
+                        value={eEmployerId}
+                        onChange={(ev) => setEEmployerId(ev.target.value)}
+                      >
+                        <option value="">All employers</option>
+                        {(qEmps.data ?? []).map((e) => (
+                          <option key={e.id} value={e.id}>{e.company_name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" checked={ePublished} onChange={(e) => setEPublished(e.target.checked)} />
+                  Published
+                </label>
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => mUpdate.mutate()} disabled={!eTitle || !eBody || mUpdate.isPending}>
+                    {mUpdate.isPending ? "Saving…" : "Save changes"}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={cancelEdit} disabled={mUpdate.isPending}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <p className="font-medium">{r.title}</p>
@@ -170,6 +257,9 @@ function Page() {
                 </p>
               </div>
               <div className="flex gap-2">
+                <Button size="sm" variant="ghost" onClick={() => startEdit(r)}>
+                  Edit
+                </Button>
                 <Button size="sm" variant="ghost"
                   onClick={() => mToggle.mutate({ id: r.id, published: !r.published })}
                   disabled={mToggle.isPending}>
@@ -181,6 +271,8 @@ function Page() {
                   Delete
                 </Button>
               </div>
+              </div>
+            )}
             </li>
           ))}
         </ul>
