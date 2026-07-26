@@ -76,7 +76,29 @@ function AuthPage() {
     clinic_staff: "/clinic",
   };
   // BUG-27: honor validated `next` on login, sanitized by parseNext (Task 3).
-  const targetFor = () => next ?? ROLE_HOME[role as Role];
+  // A2: route by the user's actual roles from the DB, not the URL param.
+  const HOME_BY_ROLE: Record<string, string> = {
+    worker: "/app",
+    employer_admin: "/employer",
+    clinic_staff: "/clinic",
+    pharmacy_staff: "/pharmacy",
+    insurance_staff: "/insurance",
+    platform_admin: "/admin",
+    super_admin: "/admin",
+  };
+  async function resolveLoginTarget(): Promise<string> {
+    if (next) return next;
+    const { data: sess } = await supabase.auth.getSession();
+    const uid = sess.session?.user.id;
+    if (uid) {
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      const priority = ["platform_admin","super_admin","employer_admin","clinic_staff","pharmacy_staff","insurance_staff","worker"];
+      const owned = (data ?? []).map((r) => r.role as string);
+      const picked = priority.find((r) => owned.includes(r));
+      if (picked) return HOME_BY_ROLE[picked];
+    }
+    return ROLE_HOME[role as Role] ?? "/app";
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -131,7 +153,8 @@ function AuthPage() {
         }
         await refreshRoles();
         toast.success("Welcome back");
-        nav({ to: targetFor() });
+        const target = await resolveLoginTarget();
+        nav({ to: target });
         return;
       }
       // signup
