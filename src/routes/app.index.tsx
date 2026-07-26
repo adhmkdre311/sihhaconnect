@@ -71,7 +71,7 @@ function WorkerHome() {
                 <div className="mt-0.5 text-xs capitalize text-muted-foreground">{next.department}</div>
                 <div className="mt-2 flex items-center gap-1.5 text-xs text-foreground/70">
                   <BadgeCheck className="h-3.5 w-3.5 text-accent" />
-                  <span>{t("bring_id")}</span>
+                  <span>Bring your ID</span>
                 </div>
                 {next.clinic?.address && (
                   <a
@@ -80,7 +80,7 @@ function WorkerHome() {
                     onClick={(e) => e.stopPropagation()}
                     className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary underline underline-offset-4"
                   >
-                    <Navigation className="h-3.5 w-3.5" /> {t("directions")}
+                    <Navigation className="h-3.5 w-3.5" /> Directions
                   </a>
                 )}
               </div>
@@ -121,7 +121,7 @@ function WorkerHome() {
       {announcements.length > 0 && (
         <section className="mt-6">
           <h2 className="mb-2 flex items-center gap-2 font-display text-sm font-semibold text-foreground">
-            <Megaphone className="h-4 w-4 text-accent" /> {t("announcements")}
+            <Megaphone className="h-4 w-4 text-accent" /> Announcements
           </h2>
           <ul className="space-y-2">
             {announcements.map((a) => (
