@@ -4,26 +4,34 @@ import { AppShell } from "@/components/AppShell";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { supabase } from "@/integrations/supabase/client";
-import { CalendarPlus, MessageCircle, MapPin, ChevronRight } from "lucide-react";
+import { CalendarPlus, MessageCircle, MapPin, ChevronRight, Navigation, Megaphone, BadgeCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({ component: WorkerHome });
+
+type Announcement = { id: string; title: string; body: string; created_at: string };
 
 function WorkerHome() {
   const { t } = useLang();
   const { user } = useAuth();
   const [next, setNext] = useState<{ id: string; scheduled_at: string; department: string; clinic: { name: string; address: string | null } | null } | null>(null);
   const [firstName, setFirstName] = useState<string>("");
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
     if (!user) return;
     void supabase.from("appointments")
       .select("id, scheduled_at, department, clinic:clinics(name, address)")
       .eq("worker_id", user.id).gte("scheduled_at", new Date().toISOString())
-      .in("status", ["booked"])
+      .in("status", ["pending", "booked", "confirmed", "awaiting_checkin"])
       .order("scheduled_at").limit(1).maybeSingle()
       .then(({ data }) => setNext(data as never));
     void supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle()
       .then(({ data }) => setFirstName(((data?.full_name as string | null) ?? "").split(" ")[0] ?? ""));
+    void supabase.from("announcements")
+      .select("id, title, body, created_at")
+      .eq("published", true)
+      .order("created_at", { ascending: false }).limit(5)
+      .then(({ data }) => setAnnouncements((data ?? []) as Announcement[]));
   }, [user]);
 
   const when = next ? new Date(next.scheduled_at) : null;
@@ -61,6 +69,20 @@ function WorkerHome() {
                   <span>{next.clinic?.name}</span>
                 </div>
                 <div className="mt-0.5 text-xs capitalize text-muted-foreground">{next.department}</div>
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-foreground/70">
+                  <BadgeCheck className="h-3.5 w-3.5 text-accent" />
+                  <span>Bring your ID</span>
+                </div>
+                {next.clinic?.address && (
+                  <a
+                    href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(next.clinic.address)}`}
+                    target="_blank" rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-primary underline underline-offset-4"
+                  >
+                    <Navigation className="h-3.5 w-3.5" /> Directions
+                  </a>
+                )}
               </div>
               <ChevronRight className="mt-1 h-5 w-5 text-primary transition group-hover:translate-x-0.5 rtl:rotate-180" aria-hidden="true" />
             </div>
@@ -95,6 +117,22 @@ function WorkerHome() {
       <div className="mt-6 rounded-xl border border-dashed p-3 text-center text-[11px] leading-relaxed text-muted-foreground">
         {t("ai_disclaimer")}
       </div>
+
+      {announcements.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-2 flex items-center gap-2 font-display text-sm font-semibold text-foreground">
+            <Megaphone className="h-4 w-4 text-accent" /> Announcements
+          </h2>
+          <ul className="space-y-2">
+            {announcements.map((a) => (
+              <li key={a.id} className="rounded-xl border bg-card p-3">
+                <div className="text-sm font-medium">{a.title}</div>
+                <p className="mt-1 whitespace-pre-line text-xs text-muted-foreground">{a.body}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </AppShell>
   );
 }
