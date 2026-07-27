@@ -28,6 +28,7 @@ import { Route as EmployerComplianceRouteImport } from './routes/employer.compli
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
+import { Route as ClinicSettingsRouteImport } from './routes/clinic.settings'
 import { Route as ClinicPatientsRouteImport } from './routes/clinic.patients'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
@@ -141,6 +142,11 @@ const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
   path: '/clinic/slots',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicSettingsRoute = ClinicSettingsRouteImport.update({
+  id: '/clinic/settings',
+  path: '/clinic/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClinicPatientsRoute = ClinicPatientsRouteImport.update({
   id: '/clinic/patients',
   path: '/clinic/patients',
@@ -248,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/patients': typeof ClinicPatientsRoute
+  '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -282,6 +289,7 @@ export interface FileRoutesByTo {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/patients': typeof ClinicPatientsRoute
+  '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -321,6 +329,7 @@ export interface FileRoutesById {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/patients': typeof ClinicPatientsRoute
+  '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -361,6 +370,7 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/patients'
+    | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/patients'
+    | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -433,6 +444,7 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/patients'
+    | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   ClinicPatientsRoute: typeof ClinicPatientsRoute
+  ClinicSettingsRoute: typeof ClinicSettingsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
   EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
   EmployerBillingRoute: typeof EmployerBillingRoute
@@ -613,6 +626,13 @@ declare module '@tanstack/react-router' {
       path: '/clinic/slots'
       fullPath: '/clinic/slots'
       preLoaderRoute: typeof ClinicSlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/settings': {
+      id: '/clinic/settings'
+      path: '/clinic/settings'
+      fullPath: '/clinic/settings'
+      preLoaderRoute: typeof ClinicSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clinic/patients': {
@@ -808,6 +828,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   ClinicPatientsRoute: ClinicPatientsRoute,
+  ClinicSettingsRoute: ClinicSettingsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
   EmployerAppointmentsRoute: EmployerAppointmentsRoute,
   EmployerBillingRoute: EmployerBillingRoute,
