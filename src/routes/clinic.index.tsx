@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ClinicShell } from "@/components/ClinicShell";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { translateVisitSummary } from "@/lib/ai.functions";
+import { translateContextNote } from "@/lib/clinic.functions";
 import { Languages, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/clinic/")({ component: Queue });
@@ -16,8 +17,25 @@ export const Route = createFileRoute("/clinic/")({ component: Queue });
 type Q = {
   id: string; scheduled_at: string; department: string; status: string;
   ai_context_summary: string | null; worker_notes: string | null; symptom_category: string | null; visit_summary: string | null;
+  context_note: string | null; context_note_translated: string | null;
   worker: { full_name: string | null; preferred_language: string | null } | null;
 };
+
+const STATUS_OPTIONS = ["pending","booked","confirmed","awaiting_checkin","completed","no_show","cancelled"] as const;
+type Status = typeof STATUS_OPTIONS[number];
+
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    pending: "bg-muted text-muted-foreground",
+    booked: "bg-primary/10 text-primary",
+    confirmed: "bg-emerald-100 text-emerald-700",
+    awaiting_checkin: "bg-amber-100 text-amber-700",
+    completed: "bg-secondary text-secondary-foreground",
+    no_show: "bg-destructive/10 text-destructive",
+    cancelled: "bg-muted text-muted-foreground line-through",
+  };
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${map[status] ?? "bg-muted"}`}>{status.replace("_"," ")}</span>;
+}
 
 function Queue() {
   const { t } = useLang();
@@ -25,16 +43,38 @@ function Queue() {
   const [items, setItems] = useState<Q[]>([]);
   const [drafts, setDrafts] = useState<Record<string,string>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  const [dayFilter, setDayFilter] = useState<string>("today");
   const run = useServerFn(translateVisitSummary);
+  const translateCtx = useServerFn(translateContextNote);
 
   const reload = () => {
     if (!user) return;
     void supabase.from("appointments")
-      .select("id, scheduled_at, department, status, ai_context_summary, worker_notes, symptom_category, visit_summary, worker:profiles!appointments_worker_id_fkey(full_name, preferred_language)")
+      .select("id, scheduled_at, department, status, ai_context_summary, worker_notes, symptom_category, visit_summary, context_note, context_note_translated, worker:profiles!appointments_worker_id_fkey(full_name, preferred_language)")
       .order("scheduled_at", { ascending: true })
-      .then(({ data }) => setItems((data ?? []) as never));
+      .then(({ data }) => {
+        const rows = (data ?? []) as unknown as Q[];
+        setItems(rows);
+        // Lazy-translate missing context notes
+        rows.filter(r => r.context_note && !r.context_note_translated).forEach(async r => {
+          try { await translateCtx({ data: { appointmentId: r.id } }); } catch { /* ignore */ }
+        });
+      });
   };
   useEffect(reload, [user]);
+
+  const days = useMemo(() => {
+    const set = new Set<string>();
+    items.forEach(i => set.add(new Date(i.scheduled_at).toDateString()));
+    return Array.from(set).slice(0, 7);
+  }, [items]);
+
+  const filtered = useMemo(() => {
+    const today = new Date().toDateString();
+    if (dayFilter === "all") return items;
+    if (dayFilter === "today") return items.filter(i => new Date(i.scheduled_at).toDateString() === today);
+    return items.filter(i => new Date(i.scheduled_at).toDateString() === dayFilter);
+  }, [items, dayFilter]);
 
   async function save(id: string) {
     setBusy(id);
@@ -43,22 +83,53 @@ function Queue() {
     finally { setBusy(null); }
   }
 
-  async function markStatus(id: string, status: "completed"|"no_show"|"cancelled") {
-    await supabase.from("appointments").update({ status }).eq("id", id);
-    toast.success(status);
+  async function markStatus(row: Q, status: Status) {
+    const { error } = await supabase.from("appointments").update({ status }).eq("id", row.id);
+    if (error) { toast.error(error.message); return; }
+    // Notify worker on meaningful transitions
+    if (["confirmed","awaiting_checkin","cancelled","no_show"].includes(status)) {
+      const titles: Record<string,string> = {
+        confirmed: "Appointment confirmed",
+        awaiting_checkin: "You can check in now",
+        cancelled: "Appointment cancelled",
+        no_show: "Marked as no-show",
+      };
+      await supabase.from("appointments").select("worker_id").eq("id", row.id).single().then(async ({ data }) => {
+        if (!data?.worker_id) return;
+        await supabase.from("notifications").insert({
+          worker_id: data.worker_id, type: "appointment_reminder", channel: "in_app",
+          title: titles[status], content: `${row.department} · ${new Date(row.scheduled_at).toLocaleString()}`,
+        });
+      });
+    }
+    toast.success(status.replace("_"," "));
     reload();
   }
 
   return (
     <ClinicShell>
       <h1 className="mb-4 text-xl font-semibold">{t("incoming_appointments")}</h1>
+      <div className="mb-4 flex flex-wrap gap-2">
+        <button onClick={()=>setDayFilter("today")} className={`chip ${dayFilter==="today"?"bg-primary text-primary-foreground":"bg-muted"}`}>Today</button>
+        <button onClick={()=>setDayFilter("all")} className={`chip ${dayFilter==="all"?"bg-primary text-primary-foreground":"bg-muted"}`}>All</button>
+        {days.filter(d => d !== new Date().toDateString()).map(d => (
+          <button key={d} onClick={()=>setDayFilter(d)} className={`chip ${dayFilter===d?"bg-primary text-primary-foreground":"bg-muted"}`}>
+            {new Date(d).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}
+          </button>
+        ))}
+      </div>
       <ul className="space-y-3">
-        {items.map((q) => (
+        {filtered.map((q) => (
           <li key={q.id} className="rounded-2xl border bg-card p-4">
             <div className="flex items-start justify-between">
               <div>
                 <div className="text-lg font-semibold">{q.worker?.full_name ?? "—"}</div>
-                <div className="text-xs text-muted-foreground">{new Date(q.scheduled_at).toLocaleString()} · {q.department} · {q.status}</div>
+                <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  <span>{new Date(q.scheduled_at).toLocaleString()}</span>
+                  <span>·</span>
+                  <span>{q.department}</span>
+                  <StatusBadge status={q.status} />
+                </div>
               </div>
               <div className="flex flex-col items-end gap-1">
                 <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 text-xs font-medium text-accent-foreground">
@@ -71,21 +142,29 @@ function Queue() {
                 )}
               </div>
             </div>
-            {q.ai_context_summary && (
+            {(q.context_note || q.ai_context_summary) && (
               <div className="mt-3 rounded-lg bg-secondary p-3 text-sm">
-                <div className="mb-1 flex items-center gap-1 text-xs font-medium text-secondary-foreground"><Sparkles className="h-3 w-3" /> AI context</div>
-                {q.ai_context_summary}
+                <div className="mb-1 flex items-center gap-1 text-xs font-medium text-secondary-foreground"><Sparkles className="h-3 w-3" /> Patient note (translated)</div>
+                <div>{q.context_note_translated ?? q.ai_context_summary ?? q.context_note}</div>
+                {q.context_note && q.context_note_translated && q.context_note !== q.context_note_translated && (
+                  <div className="mt-2 border-t border-border/50 pt-2 text-xs text-muted-foreground" dir="auto">
+                    <span className="font-medium">Original:</span> {q.context_note}
+                  </div>
+                )}
               </div>
             )}
             {q.worker_notes && <div className="mt-2 text-xs text-muted-foreground">Patient note: {q.worker_notes}</div>}
 
-            {q.status === "booked" && (
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button size="sm" variant="outline" onClick={()=>markStatus(q.id,"completed")}>Mark completed</Button>
-                <Button size="sm" variant="outline" onClick={()=>markStatus(q.id,"no_show")}>No-show</Button>
-                <Button size="sm" variant="ghost" onClick={()=>markStatus(q.id,"cancelled")}>Cancel</Button>
-              </div>
-            )}
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <label className="text-xs text-muted-foreground">Update status</label>
+              <select
+                value={q.status}
+                onChange={(e)=>markStatus(q, e.target.value as Status)}
+                className="rounded-md border bg-background px-2 py-1 text-sm"
+              >
+                {STATUS_OPTIONS.map(s => <option key={s} value={s}>{s.replace("_"," ")}</option>)}
+              </select>
+            </div>
 
             <div className="mt-3">
               <div className="mb-1 text-xs font-medium">{t("post_visit_summary")} (English)</div>
@@ -94,7 +173,7 @@ function Queue() {
             </div>
           </li>
         ))}
-        {items.length === 0 && <li className="text-sm text-muted-foreground">—</li>}
+        {filtered.length === 0 && <li className="text-sm text-muted-foreground">No appointments for this day.</li>}
       </ul>
     </ClinicShell>
   );
