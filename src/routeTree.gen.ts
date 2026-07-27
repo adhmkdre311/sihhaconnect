@@ -28,6 +28,7 @@ import { Route as EmployerComplianceRouteImport } from './routes/employer.compli
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
+import { Route as ClinicPatientsRouteImport } from './routes/clinic.patients'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
@@ -140,6 +141,11 @@ const ClinicSlotsRoute = ClinicSlotsRouteImport.update({
   path: '/clinic/slots',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicPatientsRoute = ClinicPatientsRouteImport.update({
+  id: '/clinic/patients',
+  path: '/clinic/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -241,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -274,6 +281,7 @@ export interface FileRoutesByTo {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
@@ -351,6 +360,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/patients'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/patients'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -421,6 +432,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/patients'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
@@ -453,6 +465,7 @@ export interface RootRouteChildren {
   AppPharmacyRoute: typeof AppPharmacyRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
+  ClinicPatientsRoute: typeof ClinicPatientsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
   EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
   EmployerBillingRoute: typeof EmployerBillingRoute
@@ -600,6 +613,13 @@ declare module '@tanstack/react-router' {
       path: '/clinic/slots'
       fullPath: '/clinic/slots'
       preLoaderRoute: typeof ClinicSlotsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/patients': {
+      id: '/clinic/patients'
+      path: '/clinic/patients'
+      fullPath: '/clinic/patients'
+      preLoaderRoute: typeof ClinicPatientsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/verify': {
@@ -787,6 +807,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppPharmacyRoute: AppPharmacyRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
+  ClinicPatientsRoute: ClinicPatientsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
   EmployerAppointmentsRoute: EmployerAppointmentsRoute,
   EmployerBillingRoute: EmployerBillingRoute,

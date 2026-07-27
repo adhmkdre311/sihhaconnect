@@ -33,7 +33,8 @@ function Patients() {
       .select("worker_id, scheduled_at, worker:profiles!appointments_worker_id_fkey(full_name, preferred_language)")
       .order("scheduled_at", { ascending: false });
     const map = new Map<string, Patient>();
-    (data ?? []).forEach((r: { worker_id: string; scheduled_at: string; worker: { full_name?: string | null; preferred_language?: string | null } | null }) => {
+    type Row = { worker_id: string; scheduled_at: string; worker: { full_name?: string | null; preferred_language?: string | null } | null };
+    ((data ?? []) as unknown as Row[]).forEach((r) => {
       const existing = map.get(r.worker_id);
       if (existing) existing.visit_count += 1;
       else map.set(r.worker_id, {
