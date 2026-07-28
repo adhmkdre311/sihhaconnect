@@ -30,6 +30,7 @@ import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appo
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
 import { Route as ClinicSettingsRouteImport } from './routes/clinic.settings'
 import { Route as ClinicPatientsRouteImport } from './routes/clinic.patients'
+import { Route as ClinicAcceptInviteRouteImport } from './routes/clinic.accept-invite'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
 import { Route as AppRecordsRouteImport } from './routes/app.records'
@@ -152,6 +153,11 @@ const ClinicPatientsRoute = ClinicPatientsRouteImport.update({
   path: '/clinic/patients',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClinicAcceptInviteRoute = ClinicAcceptInviteRouteImport.update({
+  id: '/clinic/accept-invite',
+  path: '/clinic/accept-invite',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
@@ -253,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
@@ -288,6 +295,7 @@ export interface FileRoutesByTo {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
@@ -328,6 +336,7 @@ export interface FileRoutesById {
   '/app/records': typeof AppRecordsRoute
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
+  '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/accept-invite'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
@@ -404,6 +414,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/accept-invite'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/app/records'
     | '/auth/reset'
     | '/auth/verify'
+    | '/clinic/accept-invite'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
@@ -477,6 +489,7 @@ export interface RootRouteChildren {
   AppPharmacyRoute: typeof AppPharmacyRoute
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
+  ClinicAcceptInviteRoute: typeof ClinicAcceptInviteRoute
   ClinicPatientsRoute: typeof ClinicPatientsRoute
   ClinicSettingsRoute: typeof ClinicSettingsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
@@ -640,6 +653,13 @@ declare module '@tanstack/react-router' {
       path: '/clinic/patients'
       fullPath: '/clinic/patients'
       preLoaderRoute: typeof ClinicPatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/accept-invite': {
+      id: '/clinic/accept-invite'
+      path: '/clinic/accept-invite'
+      fullPath: '/clinic/accept-invite'
+      preLoaderRoute: typeof ClinicAcceptInviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/verify': {
@@ -827,6 +847,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppPharmacyRoute: AppPharmacyRoute,
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
+  ClinicAcceptInviteRoute: ClinicAcceptInviteRoute,
   ClinicPatientsRoute: ClinicPatientsRoute,
   ClinicSettingsRoute: ClinicSettingsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
