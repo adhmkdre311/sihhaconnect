@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { useClinicPerms } from "@/lib/useClinicPerms";
 
 export const Route = createFileRoute("/clinic/slots")({ component: Slots });
 
@@ -17,6 +18,8 @@ type Slot = { id: string; department: string; slot_at: string; capacity: number;
 function Slots() {
   const { t } = useLang();
   const { user } = useAuth();
+  const { perms } = useClinicPerms();
+  const canEdit = perms?.can_edit_slots ?? false;
   const [clinicId, setClinicId] = useState<string>("");
   const [departments, setDepartments] = useState<string[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -75,6 +78,12 @@ function Slots() {
   return (
     <ClinicShell>
       <h1 className="mb-4 text-xl font-semibold">{t("slots")}</h1>
+      {!canEdit && (
+        <div className="mb-4 rounded-lg border bg-muted p-3 text-xs text-muted-foreground">
+          You have view-only access to slots. Ask a clinic manager for the "Edit slots" permission to make changes.
+        </div>
+      )}
+      <fieldset disabled={!canEdit} className="disabled:opacity-60">
       <form onSubmit={add} className="mb-6 grid gap-3 rounded-2xl border bg-card p-4 sm:grid-cols-5">
         <div>
           <Label>{t("department")}</Label>
@@ -88,6 +97,7 @@ function Slots() {
         <div><Label>Capacity</Label><Input type="number" min={1} value={form.capacity} onChange={(e)=>setForm({...form, capacity:Number(e.target.value)})} /></div>
         <div className="flex items-end sm:col-span-5"><Button type="submit">{t("add_slot")}</Button></div>
       </form>
+      </fieldset>
 
       <div className="space-y-4">
         {grouped.map(([day, list]) => (
@@ -106,8 +116,8 @@ function Slots() {
                     </span>
                   </div>
                   <div className="mt-2 flex gap-2">
-                    <Button size="sm" variant="outline" onClick={()=>toggle(s)}>{s.is_available ? "Close" : "Open"}</Button>
-                    <button onClick={()=>del(s.id)} aria-label="delete" className="ml-auto"><Trash2 className="h-4 w-4 text-destructive" /></button>
+                    <Button size="sm" variant="outline" onClick={()=>toggle(s)} disabled={!canEdit}>{s.is_available ? "Close" : "Open"}</Button>
+                    {canEdit && <button onClick={()=>del(s.id)} aria-label="delete" className="ml-auto"><Trash2 className="h-4 w-4 text-destructive" /></button>}
                   </div>
                 </div>
               ))}

@@ -20,7 +20,7 @@ export const Route = createFileRoute("/clinic/settings")({ component: Settings }
 
 type Perms = { can_view_queue: boolean; can_edit_slots: boolean; can_add_documents: boolean; can_manage_staff: boolean };
 type Staff = Perms & { user_id: string; is_self: boolean; profile: { full_name: string | null; email: string | null } | null };
-type Invite = Perms & { id: string; email: string; status: string; expires_at: string; accepted_at: string | null; created_at: string };
+type Invite = Perms & { id: string; email: string; token: string; status: string; expires_at: string; accepted_at: string | null; created_at: string };
 const DEFAULT_PERMS: Perms = { can_view_queue: true, can_edit_slots: false, can_add_documents: false, can_manage_staff: false };
 
 function Settings() {
@@ -196,8 +196,8 @@ function TeamSection() {
                 <div className="flex gap-2">
                   {i.status === "pending" && (
                     <>
-                      <Button size="sm" variant="outline" onClick={async ()=>{ try { await navigator.clipboard.writeText(`${window.location.origin}/clinic/accept-invite?token=${(i as unknown as { token?: string }).token ?? ""}`); toast.success("Link copied (from email)"); } catch { /* noop */ } }}>
-                        <Copy className="mr-1 h-3 w-3" />Link
+                      <Button size="sm" variant="outline" onClick={async ()=>{ try { await navigator.clipboard.writeText(`${window.location.origin}/clinic/accept-invite?token=${i.token}`); toast.success("Invite link copied"); } catch { /* noop */ } }}>
+                        <Copy className="mr-1 h-3 w-3" />Copy link
                       </Button>
                       <Button size="sm" variant="ghost" onClick={async ()=>{ await revoke({ data: { inviteId: i.id } }); toast.success("Revoked"); await reload(); }}>Revoke</Button>
                     </>

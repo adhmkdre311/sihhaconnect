@@ -56,7 +56,7 @@ export const listClinicTeam = createServerFn({ method: "GET" })
         .order("created_at", { ascending: true }),
       supabaseAdmin
         .from("clinic_invites")
-        .select("id, email, status, can_view_queue, can_edit_slots, can_add_documents, can_manage_staff, created_at, expires_at, accepted_at")
+        .select("id, email, token, status, can_view_queue, can_edit_slots, can_add_documents, can_manage_staff, created_at, expires_at, accepted_at")
         .eq("clinic_id", clinicId)
         .order("created_at", { ascending: false }),
     ]);
