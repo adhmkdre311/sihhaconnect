@@ -237,6 +237,68 @@ export type Database = {
         }
         Relationships: []
       }
+      clinic_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          can_add_documents: boolean
+          can_edit_slots: boolean
+          can_manage_staff: boolean
+          can_view_queue: boolean
+          clinic_id: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invited_by: string | null
+          status: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          can_add_documents?: boolean
+          can_edit_slots?: boolean
+          can_manage_staff?: boolean
+          can_view_queue?: boolean
+          clinic_id: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          status?: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          can_add_documents?: boolean
+          can_edit_slots?: boolean
+          can_manage_staff?: boolean
+          can_view_queue?: boolean
+          clinic_id?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_invites_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_slots: {
         Row: {
           booked: number
@@ -271,6 +333,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "clinic_slots_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinic_staff_permissions: {
+        Row: {
+          can_add_documents: boolean
+          can_edit_slots: boolean
+          can_manage_staff: boolean
+          can_view_queue: boolean
+          clinic_id: string
+          created_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          can_add_documents?: boolean
+          can_edit_slots?: boolean
+          can_manage_staff?: boolean
+          can_view_queue?: boolean
+          clinic_id: string
+          created_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          can_add_documents?: boolean
+          can_edit_slots?: boolean
+          can_manage_staff?: boolean
+          can_view_queue?: boolean
+          clinic_id?: string
+          created_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinic_staff_permissions_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
             referencedRelation: "clinics"
@@ -985,8 +1088,10 @@ export type Database = {
       }
     }
     Functions: {
+      can_manage_clinic: { Args: { _clinic: string }; Returns: boolean }
       current_clinic_id: { Args: never; Returns: string }
       current_employer_id: { Args: never; Returns: string }
+      has_clinic_perm: { Args: { _perm: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
