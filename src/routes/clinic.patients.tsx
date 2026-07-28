@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { clinicAddDocument } from "@/lib/clinic.functions";
 import { Languages, FileText, X } from "lucide-react";
+import { useClinicPerms } from "@/lib/useClinicPerms";
 
 export const Route = createFileRoute("/clinic/patients")({ component: Patients });
 
@@ -19,6 +20,8 @@ type Doc = { id: string; type: string; original_text: string | null; ai_plain_la
 
 function Patients() {
   const { user } = useAuth();
+  const { perms } = useClinicPerms();
+  const canAddDocs = perms?.can_add_documents ?? false;
   const [rows, setRows] = useState<Patient[]>([]);
   const [q, setQ] = useState("");
   const [open, setOpen] = useState<Patient | null>(null);
@@ -128,6 +131,7 @@ function Patients() {
               {docs.length === 0 && <li className="text-xs text-muted-foreground">No documents yet.</li>}
             </ul>
 
+            {canAddDocs ? (
             <form onSubmit={submitDoc} className="space-y-3 rounded-lg border bg-secondary/30 p-4">
               <h3 className="text-sm font-semibold">Add document</h3>
               <div>
@@ -144,6 +148,11 @@ function Patients() {
               <div><Label>Text</Label><Textarea rows={6} value={form.text} onChange={(e)=>setForm({...form, text:e.target.value})} required /></div>
               <Button type="submit" disabled={busy}>{busy ? "Saving…" : "Save and explain to patient"}</Button>
             </form>
+            ) : (
+              <div className="rounded-lg border bg-muted p-3 text-xs text-muted-foreground">
+                Ask a clinic manager for the "Add documents" permission to upload patient records.
+              </div>
+            )}
           </div>
         </div>
       )}
