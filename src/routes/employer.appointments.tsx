@@ -4,6 +4,9 @@ import { AdminShell } from "@/components/AdminShell";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 
 export const Route = createFileRoute("/employer/appointments")({ component: EmpAppts });
 
@@ -14,6 +17,7 @@ function EmpAppts() {
   const { user } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [filter, setFilter] = useState<string>("all");
+  const [query, setQuery] = useState("");
   useEffect(() => {
     if (!user) return;
     void supabase.from("appointments")
@@ -22,14 +26,45 @@ function EmpAppts() {
       .then(({ data }) => setRows((data ?? []) as never));
   }, [user]);
 
-  const filtered = filter === "all" ? rows : rows.filter(r => r.status === filter);
+  const q = query.trim().toLowerCase();
+  const filtered = rows
+    .filter(r => filter === "all" || r.status === filter)
+    .filter(r => !q
+      || (r.worker?.full_name ?? "").toLowerCase().includes(q)
+      || (r.clinic?.name ?? "").toLowerCase().includes(q));
+
+  function exportCsv() {
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const header = ["Date","Worker","Clinic","Department","Status"].join(",");
+    const lines = filtered.map(r => [
+      new Date(r.scheduled_at).toISOString(),
+      r.worker?.full_name ?? "",
+      r.clinic?.name ?? "",
+      r.department,
+      r.status,
+    ].map(esc).join(","));
+    const blob = new Blob([[header, ...lines].join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `appointments-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  }
+
   return (
     <AdminShell>
-      <h1 className="mb-4 text-xl font-semibold">{t("book_appointment")}</h1>
-      <div className="mb-3 flex gap-2 text-xs">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="text-xl font-semibold">{t("book_appointment")}</h1>
+        <Button size="sm" variant="outline" onClick={exportCsv} disabled={!filtered.length}>
+          <Download className="mr-1 h-4 w-4" /> Export CSV
+        </Button>
+      </div>
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
         {(["all","booked","completed","no_show","cancelled"] as const).map((f)=>(
           <button key={f} onClick={()=>setFilter(f)} className={`rounded-full border px-3 py-1 ${filter===f?"bg-primary text-primary-foreground border-primary":""}`}>{f}</button>
         ))}
+        <div className="ml-auto w-full max-w-xs">
+          <Input placeholder="Search worker or clinic" value={query} onChange={(e)=>setQuery(e.target.value)} />
+        </div>
       </div>
       <div className="rounded-2xl border bg-card">
         <table className="w-full text-sm">

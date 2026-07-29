@@ -12,23 +12,40 @@ function Compliance() {
   const { t } = useLang();
   const { user } = useAuth();
   const [data, setData] = useState({ total: 0, enrolled: 0, annualCheckup: 0, noShow: 0, completed: 0 });
+  const [workers, setWorkers] = useState<{ id: string; full_name: string | null; preferred_language: string; is_active: boolean; last_checkup: string | null }[]>([]);
+  const [upcoming, setUpcoming] = useState(0);
   useEffect(() => {
     if (!user) return;
     (async () => {
       const { data: role } = await supabase.from("user_roles").select("employer_id").eq("user_id", user.id).eq("role","employer_admin").maybeSingle();
       const empId = role?.employer_id; if (!empId) return;
       const { data: emp } = await supabase.from("employers").select("worker_count").eq("id", empId).single();
-      const { data: ws } = await supabase.from("profiles").select("id").eq("employer_id", empId);
+      const { data: ws } = await supabase.from("profiles")
+        .select("id, full_name, preferred_language, is_active")
+        .eq("employer_id", empId);
       const total = emp?.worker_count ?? ws?.length ?? 0;
       const enrolled = ws?.length ?? 0;
       const yearAgo = new Date(); yearAgo.setFullYear(yearAgo.getFullYear() - 1);
       const { data: appts } = await supabase.from("appointments")
         .select("worker_id, department, status, scheduled_at")
         .gte("scheduled_at", yearAgo.toISOString());
-      const checkups = new Set((appts ?? []).filter(a => a.department === "routine_checkup").map(a => a.worker_id));
+      const checkupRows = (appts ?? []).filter(a => a.department === "routine_checkup" && a.status === "completed");
+      const checkups = new Set(checkupRows.map(a => a.worker_id));
       const completed = (appts ?? []).filter(a => a.status === "completed").length;
       const noShow = (appts ?? []).filter(a => a.status === "no_show").length;
+      const now = new Date().toISOString();
+      const upcomingCount = (appts ?? []).filter(a => a.scheduled_at > now && (a.status === "booked" || a.status === "confirmed" || a.status === "pending")).length;
+      const lastByWorker = new Map<string, string>();
+      for (const a of checkupRows) {
+        const prev = lastByWorker.get(a.worker_id);
+        if (!prev || a.scheduled_at > prev) lastByWorker.set(a.worker_id, a.scheduled_at);
+      }
       setData({ total, enrolled, annualCheckup: checkups.size, noShow, completed });
+      setUpcoming(upcomingCount);
+      setWorkers((ws ?? []).map(w => ({
+        id: w.id, full_name: w.full_name, preferred_language: w.preferred_language, is_active: w.is_active,
+        last_checkup: lastByWorker.get(w.id) ?? null,
+      })));
     })();
   }, [user]);
 
@@ -66,7 +83,7 @@ function Compliance() {
               icon={<Stethoscope className="h-5 w-5" />}
               label="Checkups completed"
               value={`${data.annualCheckup}`}
-              foot={`${pct(data.annualCheckup, data.total)}% of workforce, last 12 mo.`}
+              foot={`${pct(data.annualCheckup, data.total)}% of workforce · ${upcoming} upcoming`}
               tone="accent"
             />
             <StatCard
@@ -86,6 +103,38 @@ function Compliance() {
         <Row label="Annual checkup completed" pct={pct(data.annualCheckup, data.total)} note={`${data.annualCheckup} / ${data.total}`} />
         <Row label={t("completion_rate")} pct={pct(data.completed, data.completed + data.noShow)} note={`${data.completed} / ${data.completed + data.noShow}`} />
         <Row label={t("no_show_rate")} pct={pct(data.noShow, data.completed + data.noShow)} note={`${data.noShow} / ${data.completed + data.noShow}`} />
+      </div>
+
+      <h2 className="mt-8 mb-3 font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">Workers</h2>
+      <div className="rounded-2xl border bg-card overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="border-b text-left text-xs text-muted-foreground">
+            <tr>
+              <th className="p-3">Name</th>
+              <th className="p-3">Language</th>
+              <th className="p-3">Last checkup</th>
+              <th className="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {workers.map(w => {
+              const compliant = !!w.last_checkup;
+              return (
+                <tr key={w.id} className="border-b last:border-0">
+                  <td className="p-3">{w.full_name ?? "—"}</td>
+                  <td className="p-3 uppercase">{w.preferred_language}</td>
+                  <td className="p-3">{w.last_checkup ? new Date(w.last_checkup).toLocaleDateString() : "—"}</td>
+                  <td className="p-3">
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${compliant ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
+                      {compliant ? "Compliant" : "No checkup yet"}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
+            {workers.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-xs text-muted-foreground">—</td></tr>}
+          </tbody>
+        </table>
       </div>
     </AdminShell>
   );

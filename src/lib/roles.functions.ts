@@ -129,20 +129,44 @@ export const addWorkerToEmployer = createServerFn({ method: "POST" })
 export const sendBroadcast = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d) => z.object({
-    title: z.string().min(1),
-    content: z.string().min(1),
+    title: z.string().trim().min(1).max(120),
+    content: z.string().trim().min(1).max(500),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { userId, supabase } = context;
     const { data: role } = await supabase.from("user_roles").select("employer_id").eq("user_id", userId).eq("role","employer_admin").maybeSingle();
     if (!role?.employer_id) throw new Error("Not an employer admin");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    // insert per-worker
-    const { data: workers } = await supabaseAdmin.from("profiles").select("id").eq("employer_id", role.employer_id);
+    // only active workers in caller's employer scope (server-forced)
+    const { data: workers } = await supabaseAdmin
+      .from("profiles")
+      .select("id, push_token")
+      .eq("employer_id", role.employer_id)
+      .eq("is_active", true);
     const rows = (workers ?? []).map((w) => ({
       worker_id: w.id, employer_id: role.employer_id!, type: "health_advisory" as const,
       channel: "in_app" as const, title: data.title, content: data.content,
     }));
     if (rows.length) await supabaseAdmin.from("notifications").insert(rows);
-    return { sent: rows.length };
+    const pushes = (workers ?? []).filter((w) => w.push_token).length;
+    return { sent: rows.length, pushes };
+  });
+
+export const setWorkerActive = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) => z.object({
+    workerId: z.string().uuid(),
+    isActive: z.boolean(),
+  }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId, supabase } = context;
+    const { data: role } = await supabase.from("user_roles").select("employer_id").eq("user_id", userId).eq("role","employer_admin").maybeSingle();
+    if (!role?.employer_id) throw new Error("Not an employer admin");
+    // protect_profile_privileges trigger enforces same-employer scope; RLS also gates the update.
+    const { error } = await supabase.from("profiles")
+      .update({ is_active: data.isActive })
+      .eq("id", data.workerId)
+      .eq("employer_id", role.employer_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });
