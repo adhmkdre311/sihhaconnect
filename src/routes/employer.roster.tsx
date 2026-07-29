@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { addWorkerToEmployer } from "@/lib/roles.functions";
+import { addWorkerToEmployer, setWorkerActive } from "@/lib/roles.functions";
 import { Copy, Plus } from "lucide-react";
 
 export const Route = createFileRoute("/employer/roster")({ component: Roster });
@@ -17,11 +17,13 @@ export const Route = createFileRoute("/employer/roster")({ component: Roster });
 function Roster() {
   const { t, lang } = useLang();
   const { user } = useAuth();
-  const [workers, setWorkers] = useState<{id:string; full_name:string|null; phone_number:string|null; preferred_language:string}[]>([]);
+  const [workers, setWorkers] = useState<{id:string; full_name:string|null; phone_number:string|null; preferred_language:string; is_active:boolean; created_at:string}[]>([]);
   const [invite, setInvite] = useState<string>("");
   const [form, setForm] = useState({ fullName: "", email: "", phone: "" });
   const [busy, setBusy] = useState(false);
+  const [query, setQuery] = useState("");
   const runAdd = useServerFn(addWorkerToEmployer);
+  const runToggle = useServerFn(setWorkerActive);
 
   const reload = async () => {
     if (!user) return;
@@ -29,8 +31,11 @@ function Roster() {
     if (!role?.employer_id) return;
     const { data: emp } = await supabase.from("employers").select("invite_code").eq("id", role.employer_id).single();
     setInvite(emp?.invite_code ?? "");
-    const { data: ws } = await supabase.from("profiles").select("id, full_name, phone_number, preferred_language").eq("employer_id", role.employer_id);
-    setWorkers(ws ?? []);
+    const { data: ws } = await supabase.from("profiles")
+      .select("id, full_name, phone_number, preferred_language, is_active, created_at")
+      .eq("employer_id", role.employer_id)
+      .order("created_at", { ascending: false });
+    setWorkers((ws ?? []) as never);
   };
   useEffect(() => { void reload(); }, [user]);
 
@@ -56,6 +61,16 @@ function Roster() {
     }
     toast.success(`Imported ${added}`); reload();
   }
+
+  async function toggle(id: string, next: boolean) {
+    try { await runToggle({ data: { workerId: id, isActive: next } }); toast.success(next ? "Reactivated" : "Deactivated"); await reload(); }
+    catch (e: unknown) { toast.error(e instanceof Error ? e.message : "Failed"); }
+  }
+
+  const q = query.trim().toLowerCase();
+  const filtered = q ? workers.filter(w =>
+    (w.full_name ?? "").toLowerCase().includes(q) || (w.phone_number ?? "").toLowerCase().includes(q)
+  ) : workers;
 
   return (
     <AdminShell>
@@ -84,18 +99,40 @@ function Roster() {
       </div>
 
       <div className="rounded-2xl border bg-card">
+        <div className="border-b p-3">
+          <Input placeholder="Search by name or phone" value={query} onChange={(e)=>setQuery(e.target.value)} />
+        </div>
         <table className="w-full text-sm">
           <thead className="border-b text-left text-xs text-muted-foreground">
-            <tr><th className="p-3">{t("full_name")}</th><th className="p-3">{t("phone")}</th><th className="p-3">{t("language")}</th></tr>
+            <tr>
+              <th className="p-3">{t("full_name")}</th>
+              <th className="p-3">{t("phone")}</th>
+              <th className="p-3">{t("language")}</th>
+              <th className="p-3">Joined</th>
+              <th className="p-3">Status</th>
+              <th className="p-3"></th>
+            </tr>
           </thead>
           <tbody>
-            {workers.map((w) => (
+            {filtered.map((w) => (
               <tr key={w.id} className="border-b last:border-0">
                 <td className="p-3">{w.full_name}</td>
                 <td className="p-3">{w.phone_number}</td>
                 <td className="p-3">{w.preferred_language}</td>
+                <td className="p-3">{new Date(w.created_at).toLocaleDateString()}</td>
+                <td className="p-3">
+                  <span className={`rounded-full px-2 py-0.5 text-xs ${w.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    {w.is_active ? "Active" : "Deactivated"}
+                  </span>
+                </td>
+                <td className="p-3 text-right">
+                  <Button size="sm" variant={w.is_active ? "outline" : "default"} onClick={()=>toggle(w.id, !w.is_active)}>
+                    {w.is_active ? "Deactivate" : "Reactivate"}
+                  </Button>
+                </td>
               </tr>
             ))}
+            {filtered.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-xs text-muted-foreground">—</td></tr>}
           </tbody>
         </table>
       </div>
