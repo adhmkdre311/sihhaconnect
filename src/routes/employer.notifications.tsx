@@ -21,7 +21,11 @@ function EmpNotifs() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true);
-    try { const r = await run({ data: { title: subject, content: msg } }); toast.success(`Sent to ${r.sent} workers`); setSubject(""); setMsg(""); }
+    try {
+      const r = await run({ data: { title: subject, content: msg } });
+      toast.success(`Sent to ${r.sent} workers · ${r.pushes} pushes`);
+      setSubject(""); setMsg("");
+    }
     catch (e: unknown) { toast.error(e instanceof Error ? e.message : "Failed"); }
     finally { setBusy(false); }
   }
@@ -30,9 +34,17 @@ function EmpNotifs() {
     <AdminShell>
       <h1 className="mb-4 text-xl font-semibold">{t("broadcast")}</h1>
       <form onSubmit={submit} className="max-w-xl space-y-3 rounded-2xl border bg-card p-5">
-        <div><Label>{t("subject")}</Label><Input value={subject} onChange={(e)=>setSubject(e.target.value)} required /></div>
-        <div><Label>{t("message")}</Label><Textarea value={msg} onChange={(e)=>setMsg(e.target.value)} rows={5} required /></div>
-        <Button type="submit" disabled={busy}>{busy?t("saving"):t("send")}</Button>
+        <div>
+          <Label>{t("subject")}</Label>
+          <Input value={subject} onChange={(e)=>setSubject(e.target.value.slice(0,120))} maxLength={120} required />
+          <div className="mt-1 text-right text-[10px] text-muted-foreground">{subject.length}/120</div>
+        </div>
+        <div>
+          <Label>{t("message")}</Label>
+          <Textarea value={msg} onChange={(e)=>setMsg(e.target.value.slice(0,500))} maxLength={500} rows={5} required />
+          <div className="mt-1 text-right text-[10px] text-muted-foreground">{msg.length}/500</div>
+        </div>
+        <Button type="submit" disabled={busy || !subject.trim() || !msg.trim()}>{busy?t("saving"):t("send")}</Button>
         <p className="text-xs text-muted-foreground">Sent as in-app notification to every worker in your roster.</p>
       </form>
     </AdminShell>
