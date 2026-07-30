@@ -22,6 +22,7 @@ import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as InsuranceClaimsRouteImport } from './routes/insurance.claims'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
 import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
@@ -112,6 +113,11 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const InsuranceClaimsRoute = InsuranceClaimsRouteImport.update({
+  id: '/claims',
+  path: '/claims',
+  getParentRoute: () => InsuranceRoute,
 } as any)
 const EmployerRosterRoute = EmployerRosterRouteImport.update({
   id: '/employer/roster',
@@ -268,6 +274,7 @@ export interface FileRoutesByFullPath {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/insurance/claims': typeof InsuranceClaimsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
@@ -304,6 +311,7 @@ export interface FileRoutesByTo {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/insurance/claims': typeof InsuranceClaimsRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/employer/compliance': typeof EmployerComplianceRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
+  '/insurance/claims': typeof InsuranceClaimsRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
@@ -387,6 +396,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/insurance/claims'
     | '/admin/'
     | '/app/'
     | '/auth/'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/insurance/claims'
     | '/admin'
     | '/app'
     | '/auth'
@@ -463,6 +474,7 @@ export interface FileRouteTypes {
     | '/employer/compliance'
     | '/employer/notifications'
     | '/employer/roster'
+    | '/insurance/claims'
     | '/admin/'
     | '/app/'
     | '/auth/'
@@ -598,6 +610,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/insurance/claims': {
+      id: '/insurance/claims'
+      path: '/claims'
+      fullPath: '/insurance/claims'
+      preLoaderRoute: typeof InsuranceClaimsRouteImport
+      parentRoute: typeof InsuranceRoute
     }
     '/employer/roster': {
       id: '/employer/roster'
@@ -810,10 +829,12 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface InsuranceRouteChildren {
+  InsuranceClaimsRoute: typeof InsuranceClaimsRoute
   InsuranceIndexRoute: typeof InsuranceIndexRoute
 }
 
 const InsuranceRouteChildren: InsuranceRouteChildren = {
+  InsuranceClaimsRoute: InsuranceClaimsRoute,
   InsuranceIndexRoute: InsuranceIndexRoute,
 }
 

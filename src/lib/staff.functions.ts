@@ -261,6 +261,40 @@ export const getInsurerAggregates = createServerFn({ method: "GET" })
 
 // ---------- Admin: list orgs (for linking/creating) ----------
 
+export const listInsurerClaims = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        status: z.enum(["all", "submitted", "in_review", "approved", "rejected", "paid"]).default("all"),
+        from: z.string().optional(),
+        to: z.string().optional(),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: role } = await supabase
+      .from("user_roles").select("insurer_id").eq("user_id", userId).eq("role", "insurance_staff").maybeSingle();
+    if (!role?.insurer_id) return { insurer: null, rows: [] };
+
+    let q = supabase
+      .from("claims")
+      .select("id, claim_ref, service_date, submitted_at, decided_at, amount, currency, category, status, employer:employers(company_name), clinic:clinics(name)")
+      .eq("insurer_id", role.insurer_id)
+      .order("service_date", { ascending: false })
+      .limit(1000);
+    if (data.status !== "all") q = q.eq("status", data.status);
+    if (data.from) q = q.gte("service_date", data.from);
+    if (data.to) q = q.lte("service_date", data.to);
+
+    const [{ data: insurer }, { data: rows }] = await Promise.all([
+      supabase.from("insurers").select("id, name").eq("id", role.insurer_id).single(),
+      q,
+    ]);
+    return { insurer, rows: rows ?? [] };
+  });
+
 export const listOrgs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
