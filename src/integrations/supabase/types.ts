@@ -237,6 +237,100 @@ export type Database = {
         }
         Relationships: []
       }
+      claims: {
+        Row: {
+          amount: number
+          category: string | null
+          claim_ref: string
+          clinic_id: string | null
+          created_at: string
+          currency: string
+          decided_at: string | null
+          employer_id: string | null
+          id: string
+          insurer_id: string
+          service_date: string
+          status: Database["public"]["Enums"]["claim_status"]
+          submitted_at: string
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          category?: string | null
+          claim_ref: string
+          clinic_id?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          employer_id?: string | null
+          id?: string
+          insurer_id: string
+          service_date: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          submitted_at?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string | null
+          claim_ref?: string
+          clinic_id?: string | null
+          created_at?: string
+          currency?: string
+          decided_at?: string | null
+          employer_id?: string | null
+          id?: string
+          insurer_id?: string
+          service_date?: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          submitted_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "claims_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "claims_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "claims_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_employer_aggregates"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "claims_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "claims_insurer_id_fkey"
+            columns: ["insurer_id"]
+            isOneToOne: false
+            referencedRelation: "insurers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clinic_invites: {
         Row: {
           accepted_at: string | null
@@ -1144,6 +1238,7 @@ export type Database = {
         | "no_show"
         | "cancelled"
       chat_role: "user" | "assistant"
+      claim_status: "submitted" | "in_review" | "approved" | "rejected" | "paid"
       document_type:
         | "prescription"
         | "lab_report"
@@ -1311,6 +1406,7 @@ export const Constants = {
         "cancelled",
       ],
       chat_role: ["user", "assistant"],
+      claim_status: ["submitted", "in_review", "approved", "rejected", "paid"],
       document_type: [
         "prescription",
         "lab_report",
