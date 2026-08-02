@@ -27,6 +27,7 @@ import type { AuthMode, Role } from "./auth";
 import { lovable } from "@/integrations/lovable/index";
 import { useServerFn } from "@tanstack/react-start";
 import { bootstrapWorker } from "@/lib/roles.functions";
+import { listClinicDirectory } from "@/lib/directory.functions";
 
 const RouteApi = getRouteApi("/auth");
 
@@ -66,7 +67,7 @@ function AuthPage() {
 
   useEffect(() => {
     if (role === "clinic_staff") {
-      void supabase.from("clinics").select("id,name").then(({ data }) => setClinics(data ?? []));
+      void listClinicDirectory().then((data) => setClinics(data ?? [])).catch(() => setClinics([]));
     }
   }, [role]);
 
