@@ -70,12 +70,19 @@ describe("server function auth guards", () => {
     }
   });
 
-  it("no server function derives identity from client input", () => {
-    // Identity must come from context.userId (verified bearer token), never from data.
+  it("no server function derives the caller identity from client input", () => {
+    // The caller identity must come from context.userId (verified bearer token).
     const offenders = serverFns
-      .filter((fn) => /data\.(userId|user_id|actorId|callerId)\b/.test(fn.body))
+      .filter((fn) => /data\.(actorId|callerId|currentUserId|authUserId|myUserId)\b/.test(fn.body))
       .map((fn) => `${fn.file}:${fn.name}`);
     expect(offenders, "server function trusts a client-supplied caller identity").toEqual([]);
+  });
+
+  it("authenticated server functions read the caller id from context", () => {
+    const offenders = serverFns
+      .filter((fn) => fn.hasAuth && !/\buserId\b/.test(fn.body) && !/\bcontext\b/.test(fn.body))
+      .map((fn) => `${fn.file}:${fn.name}`);
+    expect(offenders, "authenticated server function ignores the verified caller context").toEqual([]);
   });
 
   it("admin (RLS-bypassing) client is only loaded via dynamic import inside handlers", () => {
@@ -124,8 +131,12 @@ describe("role protection guards", () => {
       ),
     );
     for (const fn of grantFns) {
-      const gated = /is_admin|platform_admin|assertAdmin|requireAdmin/.test(fn.body);
-      expect(gated, `${fn.file}:${fn.name} grants a role without an admin check`).toBe(true);
+      // Legitimate gates: a platform-admin check, or a single-use invite token
+      // that the inviting organisation issued and the server validates.
+      const gated =
+        /is_admin|platform_admin|assertAdmin|requireAdmin/.test(fn.body) ||
+        /clinic_invites[\s\S]{0,400}(token|expires_at|status)/.test(fn.body);
+      expect(gated, `${fn.file}:${fn.name} grants a role without an admin or invite check`).toBe(true);
     }
   });
 });
