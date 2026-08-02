@@ -97,10 +97,16 @@ describe("anonymous role RLS regressions", () => {
     },
   );
 
-  it.each(ANON_WRITE_PROBES.map((p) => p.table))("anon cannot delete from %s", async (table) => {
-    const { error } = await anonClient().from(table).delete().neq("created_at", "1970-01-01");
-    // Either an outright denial, or a no-op because RLS matched no rows.
-    if (error) expect(isDenied(error), `${table}: ${error.code} ${error.message}`).toBe(true);
+  it.each(ANON_WRITE_PROBES.map((p) => p.table))("anon cannot delete rows from %s", async (table) => {
+    // Deleting everything the anon role can see: must remove zero rows.
+    const { data, error } = await anonClient()
+      .from(table)
+      .delete()
+      .not("created_at", "is", null)
+      .select();
+    if (!error) {
+      expect(data ?? [], `anonymous delete removed rows from ${table}`).toHaveLength(0);
+    }
   });
 
   it.each(NO_ANON_RPCS.map((r) => [r.fn, r.args] as const))(
