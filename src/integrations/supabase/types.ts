@@ -139,13 +139,6 @@ export type Database = {
             foreignKeyName: "appointments_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -298,13 +291,6 @@ export type Database = {
             foreignKeyName: "claims_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -402,13 +388,6 @@ export type Database = {
             foreignKeyName: "clinic_invites_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clinic_invites_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -450,13 +429,6 @@ export type Database = {
             foreignKeyName: "clinic_slots_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "clinic_slots_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -494,13 +466,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "clinic_staff_permissions_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "clinic_staff_permissions_clinic_id_fkey"
             columns: ["clinic_id"]
@@ -994,13 +959,6 @@ export type Database = {
             foreignKeyName: "profiles_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "profiles_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -1082,13 +1040,6 @@ export type Database = {
             foreignKeyName: "role_requests_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "role_requests_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -1144,13 +1095,6 @@ export type Database = {
             foreignKeyName: "user_roles_clinic_id_fkey"
             columns: ["clinic_id"]
             isOneToOne: false
-            referencedRelation: "clinic_directory"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "user_roles_clinic_id_fkey"
-            columns: ["clinic_id"]
-            isOneToOne: false
             referencedRelation: "clinics"
             referencedColumns: ["id"]
           },
@@ -1186,21 +1130,6 @@ export type Database = {
       }
     }
     Views: {
-      clinic_directory: {
-        Row: {
-          id: string | null
-          name: string | null
-        }
-        Insert: {
-          id?: string | null
-          name?: string | null
-        }
-        Update: {
-          id?: string | null
-          name?: string | null
-        }
-        Relationships: []
-      }
       employer_compliance_stats: {
         Row: {
           checkups_completed: number | null
