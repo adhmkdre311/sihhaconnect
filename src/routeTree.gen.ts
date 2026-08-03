@@ -24,6 +24,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PharmacyVisibilityRouteImport } from './routes/pharmacy.visibility'
 import { Route as PharmacySettingsRouteImport } from './routes/pharmacy.settings'
+import { Route as InsuranceComplianceRouteImport } from './routes/insurance.compliance'
 import { Route as InsuranceClaimsRouteImport } from './routes/insurance.claims'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
@@ -125,6 +126,11 @@ const PharmacySettingsRoute = PharmacySettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => PharmacyRoute,
+} as any)
+const InsuranceComplianceRoute = InsuranceComplianceRouteImport.update({
+  id: '/compliance',
+  path: '/compliance',
+  getParentRoute: () => InsuranceRoute,
 } as any)
 const InsuranceClaimsRoute = InsuranceClaimsRouteImport.update({
   id: '/claims',
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/insurance/compliance': typeof InsuranceComplianceRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
@@ -326,6 +333,7 @@ export interface FileRoutesByTo {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/insurance/compliance': typeof InsuranceComplianceRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin': typeof AdminIndexRoute
@@ -370,6 +378,7 @@ export interface FileRoutesById {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/insurance/compliance': typeof InsuranceComplianceRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
@@ -415,6 +424,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/insurance/compliance'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin/'
@@ -454,6 +464,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/insurance/compliance'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin'
@@ -497,6 +508,7 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/insurance/compliance'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin/'
@@ -648,6 +660,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/pharmacy/settings'
       preLoaderRoute: typeof PharmacySettingsRouteImport
       parentRoute: typeof PharmacyRoute
+    }
+    '/insurance/compliance': {
+      id: '/insurance/compliance'
+      path: '/compliance'
+      fullPath: '/insurance/compliance'
+      preLoaderRoute: typeof InsuranceComplianceRouteImport
+      parentRoute: typeof InsuranceRoute
     }
     '/insurance/claims': {
       id: '/insurance/claims'
@@ -868,11 +887,13 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface InsuranceRouteChildren {
   InsuranceClaimsRoute: typeof InsuranceClaimsRoute
+  InsuranceComplianceRoute: typeof InsuranceComplianceRoute
   InsuranceIndexRoute: typeof InsuranceIndexRoute
 }
 
 const InsuranceRouteChildren: InsuranceRouteChildren = {
   InsuranceClaimsRoute: InsuranceClaimsRoute,
+  InsuranceComplianceRoute: InsuranceComplianceRoute,
   InsuranceIndexRoute: InsuranceIndexRoute,
 }
 
