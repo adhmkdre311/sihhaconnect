@@ -22,6 +22,8 @@ import { Route as ClinicIndexRouteImport } from './routes/clinic.index'
 import { Route as AuthIndexRouteImport } from './routes/auth.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
+import { Route as PharmacyVisibilityRouteImport } from './routes/pharmacy.visibility'
+import { Route as PharmacySettingsRouteImport } from './routes/pharmacy.settings'
 import { Route as InsuranceClaimsRouteImport } from './routes/insurance.claims'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
@@ -113,6 +115,16 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
+} as any)
+const PharmacyVisibilityRoute = PharmacyVisibilityRouteImport.update({
+  id: '/visibility',
+  path: '/visibility',
+  getParentRoute: () => PharmacyRoute,
+} as any)
+const PharmacySettingsRoute = PharmacySettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PharmacyRoute,
 } as any)
 const InsuranceClaimsRoute = InsuranceClaimsRouteImport.update({
   id: '/claims',
@@ -275,6 +287,8 @@ export interface FileRoutesByFullPath {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/pharmacy/settings': typeof PharmacySettingsRoute
+  '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
@@ -312,6 +326,8 @@ export interface FileRoutesByTo {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/pharmacy/settings': typeof PharmacySettingsRoute
+  '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin': typeof AdminIndexRoute
   '/app': typeof AppIndexRoute
   '/auth': typeof AuthIndexRoute
@@ -354,6 +370,8 @@ export interface FileRoutesById {
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
+  '/pharmacy/settings': typeof PharmacySettingsRoute
+  '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
   '/app/': typeof AppIndexRoute
   '/auth/': typeof AuthIndexRoute
@@ -397,6 +415,8 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/pharmacy/settings'
+    | '/pharmacy/visibility'
     | '/admin/'
     | '/app/'
     | '/auth/'
@@ -434,6 +454,8 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/pharmacy/settings'
+    | '/pharmacy/visibility'
     | '/admin'
     | '/app'
     | '/auth'
@@ -475,6 +497,8 @@ export interface FileRouteTypes {
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
+    | '/pharmacy/settings'
+    | '/pharmacy/visibility'
     | '/admin/'
     | '/app/'
     | '/auth/'
@@ -610,6 +634,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/pharmacy/visibility': {
+      id: '/pharmacy/visibility'
+      path: '/visibility'
+      fullPath: '/pharmacy/visibility'
+      preLoaderRoute: typeof PharmacyVisibilityRouteImport
+      parentRoute: typeof PharmacyRoute
+    }
+    '/pharmacy/settings': {
+      id: '/pharmacy/settings'
+      path: '/settings'
+      fullPath: '/pharmacy/settings'
+      preLoaderRoute: typeof PharmacySettingsRouteImport
+      parentRoute: typeof PharmacyRoute
     }
     '/insurance/claims': {
       id: '/insurance/claims'
@@ -843,10 +881,14 @@ const InsuranceRouteWithChildren = InsuranceRoute._addFileChildren(
 )
 
 interface PharmacyRouteChildren {
+  PharmacySettingsRoute: typeof PharmacySettingsRoute
+  PharmacyVisibilityRoute: typeof PharmacyVisibilityRoute
   PharmacyIndexRoute: typeof PharmacyIndexRoute
 }
 
 const PharmacyRouteChildren: PharmacyRouteChildren = {
+  PharmacySettingsRoute: PharmacySettingsRoute,
+  PharmacyVisibilityRoute: PharmacyVisibilityRoute,
   PharmacyIndexRoute: PharmacyIndexRoute,
 }
 
