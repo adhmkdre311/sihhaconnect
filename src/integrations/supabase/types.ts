@@ -181,6 +181,35 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_lookup_events: {
+        Row: {
+          created_at: string
+          id: string
+          medication_name: string | null
+          pharmacy_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          medication_name?: string | null
+          pharmacy_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          medication_name?: string | null
+          pharmacy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_lookup_events_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           attached_document_id: string | null
@@ -662,6 +691,44 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      medication_availability: {
+        Row: {
+          created_at: string
+          id: string
+          in_stock: boolean
+          last_updated_by: string | null
+          medication_name: string
+          pharmacy_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          in_stock?: boolean
+          last_updated_by?: string | null
+          medication_name: string
+          pharmacy_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          in_stock?: boolean
+          last_updated_by?: string | null
+          medication_name?: string
+          pharmacy_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medication_availability_pharmacy_id_fkey"
+            columns: ["pharmacy_id"]
+            isOneToOne: false
+            referencedRelation: "pharmacies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medications: {
         Row: {
