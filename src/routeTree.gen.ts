@@ -45,6 +45,7 @@ import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
 import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminRecordsRouteImport } from './routes/admin.records'
 import { Route as AdminPharmaciesRouteImport } from './routes/admin.pharmacies'
 import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
 import { Route as AdminInsurersRouteImport } from './routes/admin.insurers'
@@ -234,6 +235,11 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRecordsRoute = AdminRecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPharmaciesRoute = AdminPharmaciesRouteImport.update({
   id: '/pharmacies',
   path: '/pharmacies',
@@ -287,6 +293,7 @@ export interface FileRoutesByFullPath {
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
@@ -329,6 +336,7 @@ export interface FileRoutesByTo {
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
@@ -376,6 +384,7 @@ export interface FileRoutesById {
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
   '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
     | '/admin/users'
     | '/app/book'
     | '/app/chat'
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
     | '/admin/users'
     | '/app/book'
     | '/app/chat'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
     | '/admin/users'
     | '/app/book'
     | '/app/chat'
@@ -832,6 +844,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/records': {
+      id: '/admin/records'
+      path: '/records'
+      fullPath: '/admin/records'
+      preLoaderRoute: typeof AdminRecordsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pharmacies': {
       id: '/admin/pharmacies'
       path: '/pharmacies'
@@ -897,6 +916,7 @@ interface AdminRouteChildren {
   AdminInsurersRoute: typeof AdminInsurersRoute
   AdminOrgsRoute: typeof AdminOrgsRoute
   AdminPharmaciesRoute: typeof AdminPharmaciesRoute
+  AdminRecordsRoute: typeof AdminRecordsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
@@ -907,6 +927,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminInsurersRoute: AdminInsurersRoute,
   AdminOrgsRoute: AdminOrgsRoute,
   AdminPharmaciesRoute: AdminPharmaciesRoute,
+  AdminRecordsRoute: AdminRecordsRoute,
   AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
