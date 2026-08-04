@@ -9,6 +9,17 @@ export const Route = createFileRoute("/admin/users")({ component: UsersPage });
 
 type Role = "worker" | "employer_admin" | "clinic_staff" | "pharmacy_staff" | "insurance_staff" | "platform_admin" | "super_admin";
 
+type AccessPayload = {
+  userId: string;
+  role?: Role;
+  approved?: boolean;
+  isActive?: boolean;
+  employerId?: string | null;
+  clinicId?: string | null;
+  pharmacyId?: string | null;
+  insurerId?: string | null;
+};
+
 const ROLES: Role[] = ["worker", "employer_admin", "clinic_staff", "pharmacy_staff", "insurance_staff", "platform_admin", "super_admin"];
 
 const MATRIX: { role: string; can: string[] }[] = [
@@ -33,7 +44,7 @@ function UsersPage() {
 
   const q = useQuery({ queryKey: ["admin-users", search, role, status], queryFn: () => load({ data: { search, role, status } }) });
   const m = useMutation({
-    mutationFn: (input: Parameters<typeof save>[0]["data"]) => save({ data: input }),
+    mutationFn: (input: AccessPayload) => save({ data: input }),
     onSuccess: () => { setErr(null); setEditing(null); qc.invalidateQueries({ queryKey: ["admin-users"] }); },
     onError: (e: Error) => setErr(e.message),
   });
