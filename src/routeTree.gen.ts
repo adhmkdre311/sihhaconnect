@@ -44,10 +44,16 @@ import { Route as AppNotificationsRouteImport } from './routes/app.notifications
 import { Route as AppEmergencyRouteImport } from './routes/app.emergency'
 import { Route as AppChatRouteImport } from './routes/app.chat'
 import { Route as AppBookRouteImport } from './routes/app.book'
+import { Route as AdminUsersRouteImport } from './routes/admin.users'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminRecordsRouteImport } from './routes/admin.records'
 import { Route as AdminPharmaciesRouteImport } from './routes/admin.pharmacies'
 import { Route as AdminOrgsRouteImport } from './routes/admin.orgs'
 import { Route as AdminInsurersRouteImport } from './routes/admin.insurers'
+import { Route as AdminAuditRouteImport } from './routes/admin.audit'
+import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
@@ -227,6 +233,21 @@ const AppBookRoute = AppBookRouteImport.update({
   path: '/app/book',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRecordsRoute = AdminRecordsRouteImport.update({
+  id: '/records',
+  path: '/records',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPharmaciesRoute = AdminPharmaciesRouteImport.update({
   id: '/pharmacies',
   path: '/pharmacies',
@@ -242,9 +263,24 @@ const AdminInsurersRoute = AdminInsurersRouteImport.update({
   path: '/insurers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAuditRoute = AdminAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminApprovalsRoute = AdminApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnnouncementsRoute = AdminAnnouncementsRouteImport.update({
   id: '/announcements',
   path: '/announcements',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
   getParentRoute: () => AdminRoute,
 } as any)
 const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
@@ -270,10 +306,16 @@ export interface FileRoutesByFullPath {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -310,10 +352,16 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -355,10 +403,16 @@ export interface FileRoutesById {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
+  '/admin/approvals': typeof AdminApprovalsRoute
+  '/admin/audit': typeof AdminAuditRoute
   '/admin/insurers': typeof AdminInsurersRoute
   '/admin/orgs': typeof AdminOrgsRoute
   '/admin/pharmacies': typeof AdminPharmaciesRoute
+  '/admin/records': typeof AdminRecordsRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/users': typeof AdminUsersRoute
   '/app/book': typeof AppBookRoute
   '/app/chat': typeof AppChatRoute
   '/app/emergency': typeof AppEmergencyRoute
@@ -401,10 +455,16 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/approvals'
+    | '/admin/audit'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
+    | '/admin/settings'
+    | '/admin/users'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -441,10 +501,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/staff-signup'
+    | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/approvals'
+    | '/admin/audit'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
+    | '/admin/settings'
+    | '/admin/users'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -485,10 +551,16 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/admin/analytics'
     | '/admin/announcements'
+    | '/admin/approvals'
+    | '/admin/audit'
     | '/admin/insurers'
     | '/admin/orgs'
     | '/admin/pharmacies'
+    | '/admin/records'
+    | '/admin/settings'
+    | '/admin/users'
     | '/app/book'
     | '/app/chat'
     | '/app/emergency'
@@ -801,6 +873,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppBookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/records': {
+      id: '/admin/records'
+      path: '/records'
+      fullPath: '/admin/records'
+      preLoaderRoute: typeof AdminRecordsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/pharmacies': {
       id: '/admin/pharmacies'
       path: '/pharmacies'
@@ -822,11 +915,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInsurersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/audit': {
+      id: '/admin/audit'
+      path: '/audit'
+      fullPath: '/admin/audit'
+      preLoaderRoute: typeof AdminAuditRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/approvals': {
+      id: '/admin/approvals'
+      path: '/approvals'
+      fullPath: '/admin/approvals'
+      preLoaderRoute: typeof AdminApprovalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/announcements': {
       id: '/admin/announcements'
       path: '/announcements'
       fullPath: '/admin/announcements'
       preLoaderRoute: typeof AdminAnnouncementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/app/appointments/$id': {
@@ -854,18 +968,30 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAnnouncementsRoute: typeof AdminAnnouncementsRoute
+  AdminApprovalsRoute: typeof AdminApprovalsRoute
+  AdminAuditRoute: typeof AdminAuditRoute
   AdminInsurersRoute: typeof AdminInsurersRoute
   AdminOrgsRoute: typeof AdminOrgsRoute
   AdminPharmaciesRoute: typeof AdminPharmaciesRoute
+  AdminRecordsRoute: typeof AdminRecordsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAnnouncementsRoute: AdminAnnouncementsRoute,
+  AdminApprovalsRoute: AdminApprovalsRoute,
+  AdminAuditRoute: AdminAuditRoute,
   AdminInsurersRoute: AdminInsurersRoute,
   AdminOrgsRoute: AdminOrgsRoute,
   AdminPharmaciesRoute: AdminPharmaciesRoute,
+  AdminRecordsRoute: AdminRecordsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminUsersRoute: AdminUsersRoute,
   AdminIndexRoute: AdminIndexRoute,
 }
 
