@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertPlatformAdmin, audit, weekKey, lastWeeks } from "@/lib/adminConsole.server";
+import { assertPlatformAdmin, audit, weekKey, lastWeeks, filterRows, nameMap } from "@/lib/adminConsole.server";
 
 // ---------- G1: Dashboard ----------
 
@@ -294,54 +294,58 @@ export const listAdminRecords = createServerFn({ method: "GET" })
     const db = await assertPlatformAdmin(context.userId);
     if (data.table === "appointments") {
       let q = db.from("appointments")
-        .select("id, scheduled_at, status, department, created_at, worker:profiles!appointments_worker_id_fkey(full_name, email), clinic:clinics(name)")
+        .select("id, scheduled_at, status, department, worker_id, clinic_id")
         .order("scheduled_at", { ascending: false }).limit(300);
       if (data.status !== "any") q = q.eq("status", data.status as never);
-      const { data: rows, error } = await q;
+      const [{ data: rows, error }, { data: clinics }] = await Promise.all([q, db.from("clinics").select("id, name")]);
       if (error) throw new Error(error.message);
-      const mapped = (rows ?? []).map((r) => ({
+      const workers = await nameMap(db, (rows ?? []).map((r) => r.worker_id));
+      const clinicMap = new Map((clinics ?? []).map((c) => [c.id, c.name]));
+      return filterRows((rows ?? []).map((r) => ({
         id: r.id, when: r.scheduled_at, status: r.status,
-        a: (r.worker as { full_name: string | null; email: string | null } | null)?.full_name ?? "—",
-        b: (r.clinic as { name: string } | null)?.name ?? "—",
-        c: r.department,
-      }));
-      return filterRows(mapped, data.search);
+        a: workers.get(r.worker_id) ?? "—", b: clinicMap.get(r.clinic_id) ?? "—", c: r.department,
+      })), data.search);
     }
     if (data.table === "documents") {
-      const { data: rows, error } = await db.from("documents")
-        .select("id, created_at, type, flagged_for_human_review, worker:profiles!documents_worker_id_fkey(full_name)")
+      let q = db.from("documents")
+        .select("id, created_at, type, flagged_for_human_review, worker_id")
         .order("created_at", { ascending: false }).limit(300);
+      if (data.status === "flagged") q = q.eq("flagged_for_human_review", true);
+      const { data: rows, error } = await q;
       if (error) throw new Error(error.message);
-      const mapped = (rows ?? []).map((r) => ({
+      const workers = await nameMap(db, (rows ?? []).map((r) => r.worker_id));
+      return filterRows((rows ?? []).map((r) => ({
         id: r.id, when: r.created_at, status: r.flagged_for_human_review ? "flagged" : "ok",
-        a: (r.worker as { full_name: string | null } | null)?.full_name ?? "—", b: r.type, c: "",
-      }));
-      return filterRows(mapped, data.search);
+        a: workers.get(r.worker_id) ?? "—", b: r.type, c: "",
+      })), data.search);
     }
     if (data.table === "medication_availability") {
       let q = db.from("medication_availability")
-        .select("id, updated_at, medication_name, in_stock, pharmacy:pharmacies(name)")
+        .select("id, updated_at, medication_name, in_stock, pharmacy_id")
         .order("updated_at", { ascending: false }).limit(500);
       if (data.status === "in_stock") q = q.eq("in_stock", true);
       if (data.status === "out_of_stock") q = q.eq("in_stock", false);
-      const { data: rows, error } = await q;
+      const [{ data: rows, error }, { data: pharmacies }] = await Promise.all([q, db.from("pharmacies").select("id, name")]);
       if (error) throw new Error(error.message);
-      const mapped = (rows ?? []).map((r) => ({
+      const pmap = new Map((pharmacies ?? []).map((p) => [p.id, p.name]));
+      return filterRows((rows ?? []).map((r) => ({
         id: r.id, when: r.updated_at, status: r.in_stock ? "in stock" : "out of stock",
-        a: r.medication_name, b: (r.pharmacy as { name: string } | null)?.name ?? "—", c: "",
-      }));
-      return filterRows(mapped, data.search);
+        a: r.medication_name, b: pmap.get(r.pharmacy_id) ?? "—", c: "",
+      })), data.search);
     }
-    const { data: rows, error } = await db.from("notifications")
-      .select("id, sent_at, title, content, type, read_at, worker:profiles!notifications_worker_id_fkey(full_name)")
+    let q = db.from("notifications")
+      .select("id, sent_at, title, content, type, read_at, worker_id")
       .order("sent_at", { ascending: false }).limit(300);
+    if (data.status === "unread") q = q.is("read_at", null);
+    if (data.status === "read") q = q.not("read_at", "is", null);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    const mapped = (rows ?? []).map((r) => ({
+    const workers = await nameMap(db, (rows ?? []).map((r) => r.worker_id).filter(Boolean) as string[]);
+    return filterRows((rows ?? []).map((r) => ({
       id: r.id, when: r.sent_at, status: r.read_at ? "read" : "unread",
-      a: (r.worker as { full_name: string | null } | null)?.full_name ?? "—",
+      a: (r.worker_id ? workers.get(r.worker_id) : null) ?? "—",
       b: r.title ?? r.type, c: r.content.slice(0, 80),
-    }));
-    return filterRows(mapped, data.search);
+    })), data.search);
   });
 
 export const deleteAdminRecord = createServerFn({ method: "POST" })
