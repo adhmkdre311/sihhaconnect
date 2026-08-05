@@ -133,7 +133,7 @@ function VerifyPage() {
         <>
           <h1 className="text-xl font-semibold text-destructive">{t("verify_link_invalid")}</h1>
           {error && <p className="text-sm text-muted-foreground">{error}</p>}
-          <Button onClick={() => nav({ to: "/auth", search: { role: "worker", mode: "login" } })}>
+          <Button onClick={() => nav({ to: "/auth", search: { role: "worker" as const, mode: "login" as const, next: undefined } })}>
             {t("back_to_login")}
           </Button>
         </>

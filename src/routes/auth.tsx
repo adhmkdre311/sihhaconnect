@@ -2,7 +2,7 @@
 // component ships from auth.lazy.tsx and is fetched only when /auth is visited.
 import { createFileRoute } from "@tanstack/react-router";
 
-const ROLES = ["worker", "employer_admin", "clinic_staff"] as const;
+const ROLES = ["worker", "employer_admin", "clinic_staff", "pharmacy_staff", "insurance_staff"] as const;
 export type Role = (typeof ROLES)[number];
 export type AuthMode = "login" | "signup";
 
