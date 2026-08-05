@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { requestStaffRole } from "@/lib/staff.functions";
+import { requestStaffRole, listStaffOrgDirectory } from "@/lib/staff.functions";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -26,12 +26,14 @@ function StaffSignup() {
   const { user, refreshRoles } = useAuth();
   const nav = useNavigate();
   const submitRole = useServerFn(requestStaffRole);
+  const loadOrgs = useServerFn(listStaffOrgDirectory);
 
   const [mode, setMode] = useState<"signup" | "login">(user ? "login" : "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [orgId, setOrgId] = useState("");
+  const [orgName, setOrgName] = useState("");
   const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -41,9 +43,10 @@ function StaffSignup() {
   const orgLabel = isPharm ? "Pharmacy" : "Insurer";
 
   useEffect(() => {
-    const table = isPharm ? "pharmacies" : "insurers";
-    void supabase.from(table).select("id, name").order("name").then(({ data }) => setOrgs(data ?? []));
-  }, [isPharm]);
+    void loadOrgs({ data: { kind: isPharm ? "pharmacies" : "insurers" } })
+      .then((rows) => setOrgs(rows))
+      .catch(() => setOrgs([]));
+  }, [isPharm, loadOrgs]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,8 +71,8 @@ function StaffSignup() {
         if (e2) throw e2;
         await refreshRoles();
       }
-      if (!orgId) {
-        setError(`Please select your ${orgLabel.toLowerCase()}.`);
+      if (!orgId && orgName.trim().length < 2) {
+        setError(`Please select your ${orgLabel.toLowerCase()} or type its name.`);
         setBusy(false);
         return;
       }
@@ -77,8 +80,9 @@ function StaffSignup() {
         data: {
           role,
           fullName: fullName || (user?.user_metadata?.full_name as string) || "Staff",
-          pharmacyId: isPharm ? orgId : undefined,
-          insurerId: isPharm ? undefined : orgId,
+          pharmacyId: isPharm && orgId ? orgId : undefined,
+          insurerId: !isPharm && orgId ? orgId : undefined,
+          orgName: orgId ? undefined : orgName.trim(),
         },
       });
       setDone(true);
