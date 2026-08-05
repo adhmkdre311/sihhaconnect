@@ -130,7 +130,7 @@ function ResetPasswordPage() {
     return (
       <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center gap-4 p-6">
         <h1 className="text-xl font-semibold">{t("password_updated")}</h1>
-        <Button onClick={() => navigate({ to: "/auth", search: { role: "worker", mode: "login" } })}>
+        <Button onClick={() => navigate({ to: "/auth", search: { role: "worker" as const, mode: "login" as const, next: undefined } })}>
           {t("back_to_login")}
         </Button>
       </main>
@@ -144,7 +144,7 @@ function ResetPasswordPage() {
         <div className="space-y-4">
           <p className="text-sm text-destructive">{t("verify_link_invalid")}</p>
           {ResendForm}
-          <Button variant="ghost" onClick={() => navigate({ to: "/auth", search: { role: "worker", mode: "login" } })} className="w-full">
+          <Button variant="ghost" onClick={() => navigate({ to: "/auth", search: { role: "worker" as const, mode: "login" as const, next: undefined } })} className="w-full">
             {t("back_to_login")}
           </Button>
         </div>
