@@ -165,17 +165,19 @@ export const requestStaffRole = createServerFn({ method: "POST" })
     role: z.enum(["pharmacy_staff", "insurance_staff", "platform_admin"]),
     pharmacyId: z.string().uuid().optional(),
     insurerId: z.string().uuid().optional(),
+    orgName: z.string().trim().min(2).max(120).optional(),
     fullName: z.string().min(1),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    if (data.role === "pharmacy_staff" && !data.pharmacyId) throw new Error("pharmacy required");
-    if (data.role === "insurance_staff" && !data.insurerId) throw new Error("insurer required");
+    if (data.role === "pharmacy_staff" && !data.pharmacyId && !data.orgName) throw new Error("pharmacy required");
+    if (data.role === "insurance_staff" && !data.insurerId && !data.orgName) throw new Error("insurer required");
     await supabase.from("profiles").upsert({ id: userId, full_name: data.fullName });
     const { data: row, error } = await supabaseAdmin.from("role_requests").insert({
       user_id: userId, role: data.role,
       pharmacy_id: data.pharmacyId ?? null, insurer_id: data.insurerId ?? null,
+      company_name: data.pharmacyId || data.insurerId ? null : (data.orgName ?? null),
     }).select("id").single();
     if (error) throw new Error(error.message);
     return { requestId: row!.id };
