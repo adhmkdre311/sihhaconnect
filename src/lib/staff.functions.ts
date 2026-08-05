@@ -61,6 +61,16 @@ export const approveStaffRequest = createServerFn({ method: "POST" })
       }
     }
 
+    // Create the pharmacy / insurer when the requester typed a name that wasn't listed
+    if (req.role === "pharmacy_staff" && !orgIds.pharmacy_id && req.company_name) {
+      const { data: ph } = await supabaseAdmin.from("pharmacies").insert({ name: req.company_name }).select("id").single();
+      orgIds.pharmacy_id = ph?.id ?? null;
+    }
+    if (req.role === "insurance_staff" && !orgIds.insurer_id && req.company_name) {
+      const { data: ins } = await supabaseAdmin.from("insurers").insert({ name: req.company_name }).select("id").single();
+      orgIds.insurer_id = ins?.id ?? null;
+    }
+
     await supabaseAdmin.from("user_roles").upsert({
       user_id: req.user_id, role: req.role,
       employer_id: orgIds.employer_id ?? null,
