@@ -140,15 +140,26 @@ function StaffSignup() {
                 )}
                 <div className="space-y-1.5">
                   <Label htmlFor="org">Your {orgLabel.toLowerCase()}</Label>
-                  <select id="org" value={orgId} onChange={(e) => setOrgId(e.target.value)}
+                  <select id="org" value={orgId} onChange={(e) => { setOrgId(e.target.value); if (e.target.value) setOrgName(""); }}
                     className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm">
-                    <option value="" disabled>Choose your {orgLabel.toLowerCase()}…</option>
+                    <option value="">{orgs.length ? `Choose your ${orgLabel.toLowerCase()}…` : `No ${orgLabel.toLowerCase()} listed yet`}</option>
                     {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    <option value="">— My {orgLabel.toLowerCase()} isn't listed —</option>
                   </select>
-                  {orgs.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      No {orgLabel.toLowerCase()}s registered yet. Contact a Sihha platform administrator to add yours.
-                    </p>
+                  {!orgId && (
+                    <div className="space-y-1.5 rounded-lg border border-dashed p-3">
+                      <Field
+                        label={`${orgLabel} name`}
+                        name="orgName"
+                        value={orgName}
+                        onChange={(e) => setOrgName(e.target.value)}
+                        placeholder={isPharm ? "e.g. Al Sadd Pharmacy" : "e.g. Qatar Health Insurance"}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Not in the list? Type its name — a Sihha administrator will register it and link your
+                        account when they approve your request.
+                      </p>
+                    </div>
                   )}
                 </div>
                 {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
