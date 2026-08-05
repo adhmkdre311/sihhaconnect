@@ -75,6 +75,8 @@ function AuthPage() {
     worker: "/app",
     employer_admin: "/employer",
     clinic_staff: "/clinic",
+    pharmacy_staff: "/pharmacy",
+    insurance_staff: "/insurance",
   };
   // BUG-27: honor validated `next` on login, sanitized by parseNext (Task 3).
   // A2: route by the user's actual roles from the DB, not the URL param.
