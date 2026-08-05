@@ -2,6 +2,17 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// ---------- Public org directory for staff sign-up ----------
+
+export const listStaffOrgDirectory = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ kind: z.enum(["pharmacies", "insurers"]) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from(data.kind).select("id, name").order("name");
+    return (rows ?? []) as { id: string; name: string }[];
+  });
+
 // ---------- Platform admin: approvals & organisations ----------
 
 async function assertAdmin(userId: string) {
