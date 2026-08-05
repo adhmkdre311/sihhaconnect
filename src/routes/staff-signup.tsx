@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
-import { requestStaffRole } from "@/lib/staff.functions";
+import { requestStaffRole, listStaffOrgDirectory } from "@/lib/staff.functions";
 import { Button } from "@/components/ui/button";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -26,12 +26,14 @@ function StaffSignup() {
   const { user, refreshRoles } = useAuth();
   const nav = useNavigate();
   const submitRole = useServerFn(requestStaffRole);
+  const loadOrgs = useServerFn(listStaffOrgDirectory);
 
   const [mode, setMode] = useState<"signup" | "login">(user ? "login" : "signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [orgId, setOrgId] = useState("");
+  const [orgName, setOrgName] = useState("");
   const [orgs, setOrgs] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
@@ -41,9 +43,10 @@ function StaffSignup() {
   const orgLabel = isPharm ? "Pharmacy" : "Insurer";
 
   useEffect(() => {
-    const table = isPharm ? "pharmacies" : "insurers";
-    void supabase.from(table).select("id, name").order("name").then(({ data }) => setOrgs(data ?? []));
-  }, [isPharm]);
+    void loadOrgs({ data: { kind: isPharm ? "pharmacies" : "insurers" } })
+      .then((rows) => setOrgs(rows))
+      .catch(() => setOrgs([]));
+  }, [isPharm, loadOrgs]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,8 +71,8 @@ function StaffSignup() {
         if (e2) throw e2;
         await refreshRoles();
       }
-      if (!orgId) {
-        setError(`Please select your ${orgLabel.toLowerCase()}.`);
+      if (!orgId && orgName.trim().length < 2) {
+        setError(`Please select your ${orgLabel.toLowerCase()} or type its name.`);
         setBusy(false);
         return;
       }
@@ -77,8 +80,9 @@ function StaffSignup() {
         data: {
           role,
           fullName: fullName || (user?.user_metadata?.full_name as string) || "Staff",
-          pharmacyId: isPharm ? orgId : undefined,
-          insurerId: isPharm ? undefined : orgId,
+          pharmacyId: isPharm && orgId ? orgId : undefined,
+          insurerId: !isPharm && orgId ? orgId : undefined,
+          orgName: orgId ? undefined : orgName.trim(),
         },
       });
       setDone(true);
@@ -136,15 +140,26 @@ function StaffSignup() {
                 )}
                 <div className="space-y-1.5">
                   <Label htmlFor="org">Your {orgLabel.toLowerCase()}</Label>
-                  <select id="org" value={orgId} onChange={(e) => setOrgId(e.target.value)}
+                  <select id="org" value={orgId} onChange={(e) => { setOrgId(e.target.value); if (e.target.value) setOrgName(""); }}
                     className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm">
-                    <option value="" disabled>Choose your {orgLabel.toLowerCase()}…</option>
+                    <option value="">{orgs.length ? `Choose your ${orgLabel.toLowerCase()}…` : `No ${orgLabel.toLowerCase()} listed yet`}</option>
                     {orgs.map((o) => <option key={o.id} value={o.id}>{o.name}</option>)}
+                    <option value="">— My {orgLabel.toLowerCase()} isn't listed —</option>
                   </select>
-                  {orgs.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      No {orgLabel.toLowerCase()}s registered yet. Contact a Sihha platform administrator to add yours.
-                    </p>
+                  {!orgId && (
+                    <div className="space-y-1.5 rounded-lg border border-dashed p-3">
+                      <Field
+                        label={`${orgLabel} name`}
+                        name="orgName"
+                        value={orgName}
+                        onChange={(e) => setOrgName(e.target.value)}
+                        placeholder={isPharm ? "e.g. Al Sadd Pharmacy" : "e.g. Qatar Health Insurance"}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Not in the list? Type its name — a Sihha administrator will register it and link your
+                        account when they approve your request.
+                      </p>
+                    </div>
                   )}
                 </div>
                 {error && <p role="alert" className="text-sm text-destructive">{error}</p>}

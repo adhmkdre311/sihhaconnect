@@ -2,6 +2,17 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
+// ---------- Public org directory for staff sign-up ----------
+
+export const listStaffOrgDirectory = createServerFn({ method: "GET" })
+  .inputValidator((d) => z.object({ kind: z.enum(["pharmacies", "insurers"]) }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows } = await supabaseAdmin
+      .from(data.kind).select("id, name").order("name");
+    return (rows ?? []) as { id: string; name: string }[];
+  });
+
 // ---------- Platform admin: approvals & organisations ----------
 
 async function assertAdmin(userId: string) {
@@ -48,6 +59,16 @@ export const approveStaffRequest = createServerFn({ method: "POST" })
       if (orgIds.employer_id) {
         await supabaseAdmin.from("profiles").update({ employer_id: orgIds.employer_id }).eq("id", req.user_id);
       }
+    }
+
+    // Create the pharmacy / insurer when the requester typed a name that wasn't listed
+    if (req.role === "pharmacy_staff" && !orgIds.pharmacy_id && req.company_name) {
+      const { data: ph } = await supabaseAdmin.from("pharmacies").insert({ name: req.company_name }).select("id").single();
+      orgIds.pharmacy_id = ph?.id ?? null;
+    }
+    if (req.role === "insurance_staff" && !orgIds.insurer_id && req.company_name) {
+      const { data: ins } = await supabaseAdmin.from("insurers").insert({ name: req.company_name }).select("id").single();
+      orgIds.insurer_id = ins?.id ?? null;
     }
 
     await supabaseAdmin.from("user_roles").upsert({
@@ -144,17 +165,19 @@ export const requestStaffRole = createServerFn({ method: "POST" })
     role: z.enum(["pharmacy_staff", "insurance_staff", "platform_admin"]),
     pharmacyId: z.string().uuid().optional(),
     insurerId: z.string().uuid().optional(),
+    orgName: z.string().trim().min(2).max(120).optional(),
     fullName: z.string().min(1),
   }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    if (data.role === "pharmacy_staff" && !data.pharmacyId) throw new Error("pharmacy required");
-    if (data.role === "insurance_staff" && !data.insurerId) throw new Error("insurer required");
+    if (data.role === "pharmacy_staff" && !data.pharmacyId && !data.orgName) throw new Error("pharmacy required");
+    if (data.role === "insurance_staff" && !data.insurerId && !data.orgName) throw new Error("insurer required");
     await supabase.from("profiles").upsert({ id: userId, full_name: data.fullName });
     const { data: row, error } = await supabaseAdmin.from("role_requests").insert({
       user_id: userId, role: data.role,
       pharmacy_id: data.pharmacyId ?? null, insurer_id: data.insurerId ?? null,
+      company_name: data.pharmacyId || data.insurerId ? null : (data.orgName ?? null),
     }).select("id").single();
     if (error) throw new Error(error.message);
     return { requestId: row!.id };
