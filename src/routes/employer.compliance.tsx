@@ -108,7 +108,7 @@ function Compliance() {
       <h2 className="mt-8 mb-3 font-display text-sm font-semibold uppercase tracking-wider text-muted-foreground">Workers</h2>
       <div className="rounded-2xl border bg-card overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="border-b text-left text-xs text-muted-foreground">
+          <thead className="border-b text-start text-xs text-muted-foreground">
             <tr>
               <th className="p-3">Name</th>
               <th className="p-3">Language</th>

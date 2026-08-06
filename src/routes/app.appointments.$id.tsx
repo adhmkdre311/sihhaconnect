@@ -53,12 +53,12 @@ function ApptDetail() {
       )}
 
       <a href={ics} download="appointment.ics" className="mt-3 block">
-        <Button variant="outline" className="w-full"><CalendarClock className="mr-2 h-4 w-4" />{t("add_calendar")}</Button>
+        <Button variant="outline" className="w-full"><CalendarClock className="me-2 h-4 w-4" />{t("add_calendar")}</Button>
       </a>
 
       <div className="mt-4 rounded-2xl border p-4">
         <div className="mb-2 flex items-center gap-2 text-sm font-medium"><ListChecks className="h-4 w-4" />{t("what_to_bring")}</div>
-        <ul className="ml-1 space-y-1.5 text-sm text-foreground/80">
+        <ul className="ms-1 space-y-1.5 text-sm text-foreground/80">
           <li className="flex gap-2"><span className="text-primary">•</span> Qatar ID (or passport)</li>
           <li className="flex gap-2"><span className="text-primary">•</span> Any medicines you currently take</li>
           <li className="flex gap-2"><span className="text-primary">•</span> Previous reports for this issue, if any</li>

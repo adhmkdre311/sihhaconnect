@@ -37,12 +37,12 @@ function EmpNotifs() {
         <div>
           <Label>{t("subject")}</Label>
           <Input value={subject} onChange={(e)=>setSubject(e.target.value.slice(0,120))} maxLength={120} required />
-          <div className="mt-1 text-right text-[10px] text-muted-foreground">{subject.length}/120</div>
+          <div className="mt-1 text-end text-[10px] text-muted-foreground">{subject.length}/120</div>
         </div>
         <div>
           <Label>{t("message")}</Label>
           <Textarea value={msg} onChange={(e)=>setMsg(e.target.value.slice(0,500))} maxLength={500} rows={5} required />
-          <div className="mt-1 text-right text-[10px] text-muted-foreground">{msg.length}/500</div>
+          <div className="mt-1 text-end text-[10px] text-muted-foreground">{msg.length}/500</div>
         </div>
         <Button type="submit" disabled={busy || !subject.trim() || !msg.trim()}>{busy?t("saving"):t("send")}</Button>
         <p className="text-xs text-muted-foreground">Sent as in-app notification to every worker in your roster.</p>

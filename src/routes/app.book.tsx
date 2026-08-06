@@ -165,7 +165,7 @@ function Book() {
           </div>
           <label className="text-sm">{t("notes")}</label>
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value.slice(0, 500))} rows={4} maxLength={500} className="mb-1" />
-          <div className="mb-3 text-right text-[10px] text-muted-foreground">{notes.length}/500</div>
+          <div className="mb-3 text-end text-[10px] text-muted-foreground">{notes.length}/500</div>
           <Button className="w-full" onClick={confirm} disabled={busy}>{busy ? t("saving") : t("confirm_booking")}</Button>
         </>
       )}

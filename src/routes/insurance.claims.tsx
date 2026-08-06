@@ -94,7 +94,7 @@ function Page() {
           </p>
         </div>
         <Button size="sm" variant="outline" onClick={exportCsv} disabled={!rows.length}>
-          <Download className="mr-1 h-4 w-4" /> Export CSV
+          <Download className="me-1 h-4 w-4" /> Export CSV
         </Button>
       </div>
 
@@ -142,13 +142,13 @@ function Page() {
         <table className="min-w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-2 text-left">Claim ref</th>
-              <th className="px-4 py-2 text-left">Employer</th>
-              <th className="px-4 py-2 text-left">Clinic</th>
-              <th className="px-4 py-2 text-left">Service date</th>
-              <th className="px-4 py-2 text-left">Category</th>
-              <th className="px-4 py-2 text-left">Status</th>
-              <th className="px-4 py-2 text-right">Amount</th>
+              <th className="px-4 py-2 text-start">Claim ref</th>
+              <th className="px-4 py-2 text-start">Employer</th>
+              <th className="px-4 py-2 text-start">Clinic</th>
+              <th className="px-4 py-2 text-start">Service date</th>
+              <th className="px-4 py-2 text-start">Category</th>
+              <th className="px-4 py-2 text-start">Status</th>
+              <th className="px-4 py-2 text-end">Amount</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -164,7 +164,7 @@ function Page() {
                     {LABEL[r.status] ?? r.status}
                   </span>
                 </td>
-                <td className="px-4 py-2 text-right">{money(Number(r.amount) || 0)} {r.currency}</td>
+                <td className="px-4 py-2 text-end">{money(Number(r.amount) || 0)} {r.currency}</td>
               </tr>
             ))}
             {rows.length === 0 && !q.isLoading && (

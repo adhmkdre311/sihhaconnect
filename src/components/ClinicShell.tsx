@@ -49,7 +49,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-background">
-      <aside className="hidden w-64 border-r border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
+      <aside className="hidden w-64 border-e border-sidebar-border bg-sidebar text-sidebar-foreground md:flex md:flex-col">
         <div className="border-b border-sidebar-border p-4">
           <SihhaLockup variant="reversed" size="md" />
           <p className="mt-1 text-xs text-sidebar-foreground/70">{t("clinic_staff")}</p>

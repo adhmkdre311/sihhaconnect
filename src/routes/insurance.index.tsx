@@ -59,11 +59,11 @@ function Page() {
         <table className="min-w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-2 text-left">Employer group</th>
-              <th className="px-4 py-2 text-right">Workers</th>
-              <th className="px-4 py-2 text-right">Completed</th>
-              <th className="px-4 py-2 text-right">No-show %</th>
-              <th className="px-4 py-2 text-left">Status</th>
+              <th className="px-4 py-2 text-start">Employer group</th>
+              <th className="px-4 py-2 text-end">Workers</th>
+              <th className="px-4 py-2 text-end">Completed</th>
+              <th className="px-4 py-2 text-end">No-show %</th>
+              <th className="px-4 py-2 text-start">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -73,9 +73,9 @@ function Page() {
               return (
                 <tr key={r.employer_id}>
                   <td className="px-4 py-2">{r.company_name}</td>
-                  <td className="px-4 py-2 text-right">{r.workers_enrolled}</td>
-                  <td className="px-4 py-2 text-right">{r.checkups_completed}</td>
-                  <td className="px-4 py-2 text-right">{pct}%</td>
+                  <td className="px-4 py-2 text-end">{r.workers_enrolled}</td>
+                  <td className="px-4 py-2 text-end">{r.checkups_completed}</td>
+                  <td className="px-4 py-2 text-end">{pct}%</td>
                   <td className="px-4 py-2">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${review ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
                       {review ? "Review needed" : "On track"}

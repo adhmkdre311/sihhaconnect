@@ -82,7 +82,7 @@ function Records() {
 
       <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted/50 text-start text-xs uppercase text-muted-foreground">
             <tr>
               <th className="p-3">When</th>
               <th className="p-3">{tab.cols[0]}</th>

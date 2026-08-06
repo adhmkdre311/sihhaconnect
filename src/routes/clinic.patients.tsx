@@ -91,14 +91,14 @@ function Patients() {
       <Input placeholder="Search by name…" value={q} onChange={(e)=>setQ(e.target.value)} className="mb-4 max-w-sm" />
       <div className="rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="border-b text-left text-xs text-muted-foreground">
+          <thead className="border-b text-start text-xs text-muted-foreground">
             <tr><th className="p-3">Name</th><th className="p-3">Language</th><th className="p-3">Visits</th><th className="p-3">Last visit</th><th></th></tr>
           </thead>
           <tbody>
             {filtered.map(r => (
               <tr key={r.worker_id} className="border-b last:border-0">
                 <td className="p-3 font-medium">{r.full_name ?? "—"}</td>
-                <td className="p-3"><span className="chip bg-accent/20 text-accent-foreground"><Languages className="mr-1 inline h-3 w-3" />{r.preferred_language ?? "en"}</span></td>
+                <td className="p-3"><span className="chip bg-accent/20 text-accent-foreground"><Languages className="me-1 inline h-3 w-3" />{r.preferred_language ?? "en"}</span></td>
                 <td className="p-3">{r.visit_count}</td>
                 <td className="p-3">{new Date(r.last_visit).toLocaleDateString()}</td>
                 <td className="p-3"><Button size="sm" variant="outline" onClick={()=>openPatient(r)}>Open</Button></td>

@@ -89,7 +89,7 @@ function Roster() {
           <div><Label>{t("full_name")}</Label><Input value={form.fullName} onChange={e=>setForm({...form, fullName:e.target.value})} required /></div>
           <div><Label>{t("email")}</Label><Input type="email" value={form.email} onChange={e=>setForm({...form, email:e.target.value})} required /></div>
           <div><Label>{t("phone")}</Label><Input value={form.phone} onChange={e=>setForm({...form, phone:e.target.value})} required /></div>
-          <Button type="submit" disabled={busy}><Plus className="mr-1 h-4 w-4" />{busy?t("saving"):t("add_worker")}</Button>
+          <Button type="submit" disabled={busy}><Plus className="me-1 h-4 w-4" />{busy?t("saving"):t("add_worker")}</Button>
         </form>
         <div className="rounded-2xl border bg-card p-4">
           <div className="text-sm font-semibold">{t("import_csv")}</div>
@@ -103,7 +103,7 @@ function Roster() {
           <Input placeholder="Search by name or phone" value={query} onChange={(e)=>setQuery(e.target.value)} />
         </div>
         <table className="w-full text-sm">
-          <thead className="border-b text-left text-xs text-muted-foreground">
+          <thead className="border-b text-start text-xs text-muted-foreground">
             <tr>
               <th className="p-3">{t("full_name")}</th>
               <th className="p-3">{t("phone")}</th>
@@ -125,7 +125,7 @@ function Roster() {
                     {w.is_active ? "Active" : "Deactivated"}
                   </span>
                 </td>
-                <td className="p-3 text-right">
+                <td className="p-3 text-end">
                   <Button size="sm" variant={w.is_active ? "outline" : "default"} onClick={()=>toggle(w.id, !w.is_active)}>
                     {w.is_active ? "Deactivate" : "Reactivate"}
                   </Button>
