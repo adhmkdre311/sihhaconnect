@@ -84,7 +84,7 @@ function WorkerHome() {
                   </a>
                 )}
               </div>
-              <ChevronRight className="mt-1 h-5 w-5 text-primary transition group-hover:translate-x-0.5 rtl:rotate-180" aria-hidden="true" />
+              <ChevronRight className="mt-1 h-5 w-5 text-primary transition group-hover:translate-x-0.5 rtl:-scale-x-100" aria-hidden="true" />
             </div>
           </Link>
         ) : (

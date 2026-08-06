@@ -55,7 +55,7 @@ function EmpAppts() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold">{t("book_appointment")}</h1>
         <Button size="sm" variant="outline" onClick={exportCsv} disabled={!filtered.length}>
-          <Download className="mr-1 h-4 w-4" /> Export CSV
+          <Download className="me-1 h-4 w-4" /> Export CSV
         </Button>
       </div>
       <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
@@ -68,7 +68,7 @@ function EmpAppts() {
       </div>
       <div className="rounded-2xl border bg-card">
         <table className="w-full text-sm">
-          <thead className="border-b text-left text-xs text-muted-foreground">
+          <thead className="border-b text-start text-xs text-muted-foreground">
             <tr><th className="p-3">{t("date")}</th><th className="p-3">{t("patient")}</th><th className="p-3">Clinic</th><th className="p-3">{t("department")}</th><th className="p-3">{t("status")}</th></tr>
           </thead>
           <tbody>

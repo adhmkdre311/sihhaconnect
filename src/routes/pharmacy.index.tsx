@@ -79,7 +79,7 @@ function Page() {
           onChange={(e) => setName(e.target.value)}
         />
         <Button type="submit" disabled={name.trim().length < 2 || add.isPending}>
-          <Plus className="mr-1 h-4 w-4" /> Add
+          <Plus className="me-1 h-4 w-4" /> Add
         </Button>
       </form>
 
@@ -97,9 +97,9 @@ function Page() {
         <table className="min-w-full text-sm">
           <thead className="bg-muted/40 text-xs uppercase text-muted-foreground">
             <tr>
-              <th className="px-4 py-2 text-left">Medication</th>
-              <th className="px-4 py-2 text-left">In stock</th>
-              <th className="px-4 py-2 text-left">Last updated</th>
+              <th className="px-4 py-2 text-start">Medication</th>
+              <th className="px-4 py-2 text-start">In stock</th>
+              <th className="px-4 py-2 text-start">Last updated</th>
               <th className="px-4 py-2" />
             </tr>
           </thead>
@@ -120,7 +120,7 @@ function Page() {
                 <td className="px-4 py-2 text-xs text-muted-foreground">
                   {r.updated_at ? new Date(r.updated_at).toLocaleString() : "—"}
                 </td>
-                <td className="px-4 py-2 text-right">
+                <td className="px-4 py-2 text-end">
                   <Button size="sm" variant="ghost" onClick={() => remove.mutate(r.id)} aria-label={`Remove ${r.medication_name}`}>
                     <Trash2 className="h-4 w-4" />
                   </Button>

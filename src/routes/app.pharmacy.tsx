@@ -76,7 +76,7 @@ function Page() {
                     <p className="font-medium">{row.medication_name}</p>
                     <p className="mt-0.5">{p.name}</p>
                     <p className="text-xs text-muted-foreground">
-                      <MapPin className="mr-1 inline h-3 w-3" />{[p.area, p.address].filter(Boolean).join(" · ") || "Address not listed"}
+                      <MapPin className="me-1 inline h-3 w-3" />{[p.area, p.address].filter(Boolean).join(" · ") || "Address not listed"}
                     </p>
                     {p.hours && <p className="text-xs text-muted-foreground">Hours: {p.hours}</p>}
                     <p className="text-xs text-muted-foreground">

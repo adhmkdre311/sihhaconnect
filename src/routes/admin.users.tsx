@@ -79,7 +79,7 @@ function UsersPage() {
 
       <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-left text-xs uppercase text-muted-foreground">
+          <thead className="bg-muted/50 text-start text-xs uppercase text-muted-foreground">
             <tr>
               <th className="p-3">Name</th><th className="p-3">Role</th><th className="p-3">Organization</th>
               <th className="p-3">Language</th><th className="p-3">Status</th><th className="p-3">Joined</th><th className="p-3">Actions</th>
@@ -134,7 +134,7 @@ function UsersPage() {
               {MATRIX.map((r) => (
                 <div key={r.role}>
                   <p className="text-sm font-medium">{r.role}</p>
-                  <ul className="mt-1 list-disc pl-5 text-sm text-muted-foreground">
+                  <ul className="mt-1 list-disc ps-5 text-sm text-muted-foreground">
                     {r.can.map((c) => <li key={c}>{c}</li>)}
                   </ul>
                 </div>

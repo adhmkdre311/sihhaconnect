@@ -70,7 +70,7 @@ function Records() {
         <input type="file" accept="image/*,application/pdf" onChange={(e) => void uploadAndSummarize(e.target.files?.[0] ?? null, text)} className="mb-2 block w-full text-xs" />
         <Textarea placeholder="Paste text from the document (temporary until OCR)" rows={3} value={text} onChange={(e)=>setText(e.target.value)} />
         <Button disabled={busy || !text} className="mt-2 w-full" onClick={() => void uploadAndSummarize(null, text)}>
-          <Upload className="mr-2 h-4 w-4" />{busy ? t("saving") : t("send")}
+          <Upload className="me-2 h-4 w-4" />{busy ? t("saving") : t("send")}
         </Button>
       </div>
 

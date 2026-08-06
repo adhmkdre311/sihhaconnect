@@ -142,7 +142,7 @@ const CarouselContent = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HT
           ref={ref}
           className={cn(
             "flex",
-            orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+            orientation === "horizontal" ? "-ms-4" : "-mt-4 flex-col",
             className,
           )}
           {...props}
@@ -164,7 +164,7 @@ const CarouselItem = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
         aria-roledescription="slide"
         className={cn(
           "min-w-0 shrink-0 grow-0 basis-full",
-          orientation === "horizontal" ? "pl-4" : "pt-4",
+          orientation === "horizontal" ? "ps-4" : "pt-4",
           className,
         )}
         {...props}
@@ -194,7 +194,7 @@ const CarouselPrevious = React.forwardRef<HTMLButtonElement, React.ComponentProp
         onClick={scrollPrev}
         {...props}
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4 rtl-flip" />
         <span className="sr-only">Previous slide</span>
       </Button>
     );
@@ -222,7 +222,7 @@ const CarouselNext = React.forwardRef<HTMLButtonElement, React.ComponentProps<ty
         onClick={scrollNext}
         {...props}
       >
-        <ArrowRight className="h-4 w-4" />
+        <ArrowRight className="h-4 w-4 rtl-flip" />
         <span className="sr-only">Next slide</span>
       </Button>
     );

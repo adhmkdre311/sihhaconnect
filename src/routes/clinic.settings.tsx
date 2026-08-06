@@ -177,7 +177,7 @@ function TeamSection() {
               ))}
             </div>
           </div>
-          <Button type="submit" disabled={busy}><Mail className="mr-2 h-4 w-4" />{busy ? "Sending…" : "Send invitation"}</Button>
+          <Button type="submit" disabled={busy}><Mail className="me-2 h-4 w-4" />{busy ? "Sending…" : "Send invitation"}</Button>
         </form>
       </div>
 
@@ -197,7 +197,7 @@ function TeamSection() {
                   {i.status === "pending" && (
                     <>
                       <Button size="sm" variant="outline" onClick={async ()=>{ try { await navigator.clipboard.writeText(`${window.location.origin}/clinic/accept-invite?token=${i.token}`); toast.success("Invite link copied"); } catch { /* noop */ } }}>
-                        <Copy className="mr-1 h-3 w-3" />Copy link
+                        <Copy className="me-1 h-3 w-3" />Copy link
                       </Button>
                       <Button size="sm" variant="ghost" onClick={async ()=>{ await revoke({ data: { inviteId: i.id } }); toast.success("Revoked"); await reload(); }}>Revoke</Button>
                     </>
@@ -213,7 +213,7 @@ function TeamSection() {
         <h2 className="mb-3 text-lg font-semibold">Team</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b text-left text-xs text-muted-foreground">
+            <thead className="border-b text-start text-xs text-muted-foreground">
               <tr>
                 <th className="p-2">Member</th>
                 {PERM_LABELS.map(([k,l])=><th key={k} className="p-2 text-center">{l}</th>)}
@@ -232,7 +232,7 @@ function TeamSection() {
                       <input type="checkbox" checked={s[key]} onChange={()=>togglePerm(s, key)} />
                     </td>
                   ))}
-                  <td className="p-2 text-right">
+                  <td className="p-2 text-end">
                     {!s.is_self && (
                       <button aria-label="remove" onClick={async ()=>{
                         if (!confirm("Remove this staff member from your clinic?")) return;

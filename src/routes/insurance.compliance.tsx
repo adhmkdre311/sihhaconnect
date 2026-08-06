@@ -83,7 +83,7 @@ function Page() {
           <p className="text-sm text-muted-foreground">Aggregated, anonymized data only — no worker identity is ever shown (PDPPL).</p>
         </div>
         <Button size="sm" variant="outline" onClick={exportCsv} disabled={!rows.length}>
-          <Download className="mr-1 h-4 w-4" /> Export summary CSV
+          <Download className="me-1 h-4 w-4" /> Export summary CSV
         </Button>
       </div>
 
