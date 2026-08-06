@@ -277,7 +277,12 @@ export const getInsurerAggregates = createServerFn({ method: "GET" })
     if (!role?.insurer_id) return { insurer: null, rows: [] };
     const [{ data: insurer }, { data: rows }] = await Promise.all([
       supabase.from("insurers").select("*").eq("id", role.insurer_id).single(),
-      supabase.from("insurer_employer_aggregates").select("*").eq("insurer_id", role.insurer_id),
+      // BUG-4a: must read the security-definer overview view; the old
+      // security_invoker aggregate view returned zeros for insurers.
+      supabase
+        .from("insurer_network_overview")
+        .select("*")
+        .eq("insurance_company_id", role.insurer_id),
     ]);
     return { insurer, rows: rows ?? [] };
   });
