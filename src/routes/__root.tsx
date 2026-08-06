@@ -142,7 +142,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // lang/dir are set pre-hydration by the inline locale script (and kept in
+    // sync by LanguageProvider), so React must not warn about the diff.
+    <html lang="en" dir="ltr" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
