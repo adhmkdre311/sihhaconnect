@@ -67,13 +67,6 @@ export type Database = {
             foreignKeyName: "announcements_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
-          },
-          {
-            foreignKeyName: "announcements_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
             referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
@@ -336,13 +329,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employers"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
           },
           {
             foreignKeyName: "claims_employer_id_fkey"
@@ -655,13 +641,6 @@ export type Database = {
             foreignKeyName: "insurer_employer_scope_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
-          },
-          {
-            foreignKeyName: "insurer_employer_scope_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
             referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
@@ -808,13 +787,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employers"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "notifications_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
           },
           {
             foreignKeyName: "notifications_employer_id_fkey"
@@ -1047,13 +1019,6 @@ export type Database = {
             foreignKeyName: "profiles_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
-          },
-          {
-            foreignKeyName: "profiles_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
             referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
@@ -1183,13 +1148,6 @@ export type Database = {
             foreignKeyName: "user_roles_employer_id_fkey"
             columns: ["employer_id"]
             isOneToOne: false
-            referencedRelation: "insurer_employer_aggregates"
-            referencedColumns: ["employer_id"]
-          },
-          {
-            foreignKeyName: "user_roles_employer_id_fkey"
-            columns: ["employer_id"]
-            isOneToOne: false
             referencedRelation: "insurer_network_overview"
             referencedColumns: ["employer_id"]
           },
@@ -1206,26 +1164,6 @@ export type Database = {
           workers_enrolled: number | null
         }
         Relationships: []
-      }
-      insurer_employer_aggregates: {
-        Row: {
-          appointments_total: number | null
-          checkups_completed: number | null
-          company_name: string | null
-          employer_id: string | null
-          insurer_id: string | null
-          no_shows: number | null
-          workers_enrolled: number | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "insurer_employer_scope_insurer_id_fkey"
-            columns: ["insurer_id"]
-            isOneToOne: false
-            referencedRelation: "insurers"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       insurer_network_overview: {
         Row: {
