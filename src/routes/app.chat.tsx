@@ -98,7 +98,7 @@ function Chat() {
 
       <form onSubmit={(e)=>{e.preventDefault(); void send(input);}} className="flex gap-2">
         <Input value={input} onChange={(e)=>setInput(e.target.value)} placeholder={t("chat_placeholder")} />
-        <Button type="submit" size="icon" disabled={busy}><Send className="h-4 w-4" /></Button>
+        <Button type="submit" size="icon" disabled={busy}><Send className="h-4 w-4 rtl-flip" /></Button>
       </form>
     </AppShell>
   );
