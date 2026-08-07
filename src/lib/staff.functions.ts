@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertAdmin } from "./staff.server";
 
 // ---------- Public org directory for staff sign-up ----------
 
@@ -14,13 +15,6 @@ export const listStaffOrgDirectory = createServerFn({ method: "GET" })
   });
 
 // ---------- Platform admin: approvals & organisations ----------
-
-async function assertAdmin(userId: string) {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
-    .from("user_roles").select("role").eq("user_id", userId).in("role", ["platform_admin", "super_admin"]).maybeSingle();
-  if (!data) throw new Error("Not authorised");
-}
 
 export const listPendingStaff = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
