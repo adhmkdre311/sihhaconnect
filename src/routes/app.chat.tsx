@@ -6,9 +6,12 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, Sparkles, CalendarPlus } from "lucide-react";
+import { Send, Sparkles, CalendarPlus, Mic, Square, Loader2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { askAssistant } from "@/lib/ai.functions";
+import { transcribeVoiceNote } from "@/lib/speech.functions";
+import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/app/chat")({ component: Chat });
 
@@ -21,6 +24,9 @@ function Chat() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const ask = useServerFn(askAssistant);
+  const transcribe = useServerFn(transcribeVoiceNote);
+  const { recording, start, stop } = useVoiceRecorder();
+  const [transcribing, setTranscribing] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -46,6 +52,26 @@ function Chat() {
     } catch (e) {
       setMsgs((m) => [...m, { id: "err", role: "assistant", content: (e instanceof Error?e.message:"Error"), created_at: new Date().toISOString() }]);
     } finally { setBusy(false); }
+  }
+
+  const quick = [
+
+  async function toggleVoice() {
+    if (transcribing) return;
+    if (!recording) {
+      try { await start(); } catch { toast.error(t("mic_denied")); }
+      return;
+    }
+    const clip = await stop();
+    if (!clip) { toast.error(t("voice_empty")); return; }
+    setTranscribing(true);
+    try {
+      const r = await transcribe({ data: { audioBase64: clip.base64, mimeType: clip.mimeType, language: lang } });
+      if (!r.text) { toast.error(t("voice_empty")); return; }
+      setInput((prev) => (prev ? `${prev} ${r.text}` : r.text));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : t("voice_failed"));
+    } finally { setTranscribing(false); }
   }
 
   const quick = [
