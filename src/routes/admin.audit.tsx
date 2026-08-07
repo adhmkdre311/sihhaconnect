@@ -4,17 +4,42 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listAuditLogs } from "@/lib/adminConsole.functions";
 import { Button } from "@/components/ui/button";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { useFormat } from "@/lib/format";
 
 export const Route = createFileRoute("/admin/audit")({ component: Audit });
 
 function Audit() {
   const load = useServerFn(listAuditLogs);
+  const fmt = useFormat();
   const [search, setSearch] = useState("");
   const [action, setAction] = useState("any");
   const [table, setTable] = useState("any");
   const [open, setOpen] = useState<string | null>(null);
   const q = useQuery({ queryKey: ["admin-audit", search, action, table], queryFn: () => load({ data: { search, action, table } }) });
   const logs = q.data?.logs ?? [];
+  type Log = (typeof logs)[number];
+
+  const columns: DataTableColumn<Log>[] = [
+    { key: "created_at", header: "When", className: "text-xs text-muted-foreground", cell: (l) => fmt.dateTime(l.created_at) },
+    { key: "actor", header: "Actor", cell: (l) => l.actor },
+    { key: "action", header: "Action", cell: (l) => <span className="rounded-full bg-muted px-2 py-0.5 text-xs">{l.action}</span> },
+    { key: "table_name", header: "Table", className: "text-xs", cell: (l) => l.table_name ?? "—" },
+    {
+      key: "detail",
+      header: "Detail",
+      cell: (l) => (
+        <>
+          <button className="text-xs font-medium text-primary underline" onClick={() => setOpen(open === l.id ? null : l.id)}>
+            {open === l.id ? "Hide" : "View"}
+          </button>
+          {open === l.id && (
+            <pre className="mt-2 max-w-md overflow-x-auto rounded-lg bg-muted p-2 text-[11px]">{JSON.stringify(l.detail ?? {}, null, 2)}</pre>
+          )}
+        </>
+      ),
+    },
+  ];
 
   function exportCsv() {
     const lines = [["When", "Actor", "Action", "Table", "Record"], ...logs.map((l) => [
@@ -50,33 +75,14 @@ function Audit() {
         </select>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border bg-card shadow-sm">
-        <table className="w-full text-sm">
-          <thead className="bg-muted/50 text-start text-xs uppercase text-muted-foreground">
-            <tr><th className="p-3">When</th><th className="p-3">Actor</th><th className="p-3">Action</th><th className="p-3">Table</th><th className="p-3">Detail</th></tr>
-          </thead>
-          <tbody className="divide-y">
-            {logs.map((l) => (
-              <tr key={l.id} className="align-top">
-                <td className="p-3 text-xs text-muted-foreground">{new Date(l.created_at).toLocaleString()}</td>
-                <td className="p-3">{l.actor}</td>
-                <td className="p-3"><span className="rounded-full bg-muted px-2 py-0.5 text-xs">{l.action}</span></td>
-                <td className="p-3 text-xs">{l.table_name ?? "—"}</td>
-                <td className="p-3">
-                  <button className="text-xs font-medium text-primary underline" onClick={() => setOpen(open === l.id ? null : l.id)}>
-                    {open === l.id ? "Hide" : "View"}
-                  </button>
-                  {open === l.id && (
-                    <pre className="mt-2 max-w-md overflow-x-auto rounded-lg bg-muted p-2 text-[11px]">{JSON.stringify(l.detail ?? {}, null, 2)}</pre>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {q.isLoading && <p className="p-4 text-sm text-muted-foreground">Loading…</p>}
-        {!q.isLoading && logs.length === 0 && <p className="p-4 text-sm text-muted-foreground">No audit entries match these filters.</p>}
-      </div>
+      <DataTable
+        className="shadow-sm"
+        columns={columns}
+        rows={logs}
+        rowKey={(l) => l.id}
+        loading={q.isLoading}
+        empty="No audit entries match these filters."
+      />
     </div>
   );
 }
