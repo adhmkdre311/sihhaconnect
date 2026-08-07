@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { generateVisitContext } from "@/lib/ai.functions";
+import { translateContextNote } from "@/lib/clinic.functions";
 import { Thermometer, Bandage, Smile, Stethoscope, Sparkles, HeartPulse } from "lucide-react";
 
 export const Route = createFileRoute("/app/book")({ component: Book });
@@ -39,6 +40,7 @@ function Book() {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const runCtx = useServerFn(generateVisitContext);
+  const runTranslateNote = useServerFn(translateContextNote);
 
   useEffect(() => {
     void supabase.from("clinics").select("id, name, departments, address").then(({ data }) => setClinics((data ?? []) as Clinic[]));
@@ -68,10 +70,16 @@ function Book() {
     try {
       const { data: appt, error } = await supabase.from("appointments").insert({
         worker_id: user.id, clinic_id: clinicId, department, symptom_category: category,
-        worker_notes: notes, scheduled_at: slot.slot_at, slot_id: slot.id, status: "pending",
+        worker_notes: notes, context_note: notes || null,
+        scheduled_at: slot.slot_at, slot_id: slot.id, status: "pending",
       }).select("id").single();
       if (error || !appt) throw error ?? new Error("Failed");
       try { await runCtx({ data: { appointmentId: appt.id, symptomCategory: category, workerNotes: notes, sourceLanguage: lang } }); } catch {}
+      // E2: translate the worker's own note at insert time so clinic staff never
+      // wait on a lazy translation when the queue loads.
+      if (notes.trim()) {
+        try { await runTranslateNote({ data: { appointmentId: appt.id } }); } catch {}
+      }
       toast.success(t("booking_confirmed"));
       nav({ to: "/app/appointments/$id", params: { id: appt.id } });
     } catch (e: unknown) {
