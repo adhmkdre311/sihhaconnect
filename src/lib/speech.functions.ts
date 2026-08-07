@@ -13,8 +13,14 @@ export const transcribeVoiceNote = createServerFn({ method: "POST" })
       language: z.string().min(2).max(5).optional(),
     }).parse(d),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
     const { blob, filename } = decodeAudio(data.audioBase64, data.mimeType);
-    const text = await transcribeWithLovableAi(blob, filename, data.language);
-    return { text };
+    try {
+      const text = await transcribeWithLovableAi(blob, filename, data.language);
+      return { text };
+    } catch (err) {
+      console.error(`transcribeVoiceNote failed for ${userId}`, err);
+      throw err;
+    }
   });
