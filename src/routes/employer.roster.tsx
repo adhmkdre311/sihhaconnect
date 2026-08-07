@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { AdminShell } from "@/components/AdminShell";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { useEmployerWorkers, type WorkerRow } from "@/hooks/useEmployerWorkers";
+import { useFormat } from "@/lib/format";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { addWorkerToEmployer, setWorkerActive } from "@/lib/roles.functions";
@@ -17,27 +19,13 @@ export const Route = createFileRoute("/employer/roster")({ component: Roster });
 function Roster() {
   const { t, lang } = useLang();
   const { user } = useAuth();
-  const [workers, setWorkers] = useState<{id:string; full_name:string|null; phone_number:string|null; preferred_language:string; is_active:boolean; created_at:string}[]>([]);
-  const [invite, setInvite] = useState<string>("");
+  const fmt = useFormat();
+  const { filtered, inviteCode: invite, loading, query, setQuery, reload } =
+    useEmployerWorkers(user?.id);
   const [form, setForm] = useState({ fullName: "", email: "", phone: "" });
   const [busy, setBusy] = useState(false);
-  const [query, setQuery] = useState("");
   const runAdd = useServerFn(addWorkerToEmployer);
   const runToggle = useServerFn(setWorkerActive);
-
-  const reload = async () => {
-    if (!user) return;
-    const { data: role } = await supabase.from("user_roles").select("employer_id").eq("user_id", user.id).eq("role","employer_admin").maybeSingle();
-    if (!role?.employer_id) return;
-    const { data: emp } = await supabase.from("employers").select("invite_code").eq("id", role.employer_id).single();
-    setInvite(emp?.invite_code ?? "");
-    const { data: ws } = await supabase.from("profiles")
-      .select("id, full_name, phone_number, preferred_language, is_active, created_at")
-      .eq("employer_id", role.employer_id)
-      .order("created_at", { ascending: false });
-    setWorkers((ws ?? []) as never);
-  };
-  useEffect(() => { void reload(); }, [user]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault(); setBusy(true);
@@ -59,7 +47,7 @@ function Roster() {
       if (!fullName || !email || !phone) continue;
       try { await runAdd({ data: { fullName, email, phoneNumber: phone, preferredLanguage: lang } }); added++; } catch {}
     }
-    toast.success(`Imported ${added}`); reload();
+    toast.success(`Imported ${added}`); void reload();
   }
 
   async function toggle(id: string, next: boolean) {
@@ -67,10 +55,31 @@ function Roster() {
     catch (e: unknown) { toast.error(e instanceof Error ? e.message : "Failed"); }
   }
 
-  const q = query.trim().toLowerCase();
-  const filtered = q ? workers.filter(w =>
-    (w.full_name ?? "").toLowerCase().includes(q) || (w.phone_number ?? "").toLowerCase().includes(q)
-  ) : workers;
+  const columns: DataTableColumn<WorkerRow>[] = [
+    { key: "full_name", header: t("full_name"), cell: (w) => w.full_name ?? "—" },
+    { key: "phone_number", header: t("phone"), cell: (w) => <span dir="ltr">{w.phone_number ?? "—"}</span> },
+    { key: "preferred_language", header: t("language") },
+    { key: "created_at", header: "Joined", cell: (w) => fmt.date(w.created_at) },
+    {
+      key: "is_active",
+      header: "Status",
+      cell: (w) => (
+        <span className={`rounded-full px-2 py-0.5 text-xs ${w.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+          {w.is_active ? "Active" : "Deactivated"}
+        </span>
+      ),
+    },
+    {
+      key: "actions",
+      header: "",
+      className: "text-end",
+      cell: (w) => (
+        <Button size="sm" variant={w.is_active ? "outline" : "default"} onClick={() => toggle(w.id, !w.is_active)}>
+          {w.is_active ? "Deactivate" : "Reactivate"}
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <AdminShell>
@@ -98,43 +107,11 @@ function Roster() {
         </div>
       </div>
 
-      <div className="rounded-2xl border bg-card">
-        <div className="border-b p-3">
+      <div className="space-y-3">
+        <div className="rounded-2xl border bg-card p-3">
           <Input placeholder="Search by name or phone" value={query} onChange={(e)=>setQuery(e.target.value)} />
         </div>
-        <table className="w-full text-sm">
-          <thead className="border-b text-start text-xs text-muted-foreground">
-            <tr>
-              <th className="p-3">{t("full_name")}</th>
-              <th className="p-3">{t("phone")}</th>
-              <th className="p-3">{t("language")}</th>
-              <th className="p-3">Joined</th>
-              <th className="p-3">Status</th>
-              <th className="p-3"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((w) => (
-              <tr key={w.id} className="border-b last:border-0">
-                <td className="p-3">{w.full_name}</td>
-                <td className="p-3">{w.phone_number}</td>
-                <td className="p-3">{w.preferred_language}</td>
-                <td className="p-3">{new Date(w.created_at).toLocaleDateString()}</td>
-                <td className="p-3">
-                  <span className={`rounded-full px-2 py-0.5 text-xs ${w.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
-                    {w.is_active ? "Active" : "Deactivated"}
-                  </span>
-                </td>
-                <td className="p-3 text-end">
-                  <Button size="sm" variant={w.is_active ? "outline" : "default"} onClick={()=>toggle(w.id, !w.is_active)}>
-                    {w.is_active ? "Deactivate" : "Reactivate"}
-                  </Button>
-                </td>
-              </tr>
-            ))}
-            {filtered.length === 0 && <tr><td colSpan={6} className="p-4 text-center text-xs text-muted-foreground">—</td></tr>}
-          </tbody>
-        </table>
+        <DataTable columns={columns} rows={filtered} rowKey={(w) => w.id} loading={loading} empty="No workers yet" />
       </div>
     </AdminShell>
   );

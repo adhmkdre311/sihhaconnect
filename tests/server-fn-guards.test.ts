@@ -44,7 +44,7 @@ const serverFns = functionFiles.flatMap(({ file, source }) => parseServerFns(fil
  * Server functions intentionally callable without a session.
  * Anything added here must expose no tenant or personal data.
  */
-const PUBLIC_SERVER_FNS = new Set(["listClinicDirectory", "sendEmail"]);
+const PUBLIC_SERVER_FNS = new Set(["listClinicDirectory", "listStaffOrgDirectory", "sendEmail"]);
 
 describe("server function auth guards", () => {
   it("discovers the server functions", () => {

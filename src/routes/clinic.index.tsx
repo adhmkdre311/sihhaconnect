@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { ClinicShell } from "@/components/ClinicShell";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
@@ -9,17 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { translateVisitSummary } from "@/lib/ai.functions";
-import { translateContextNote } from "@/lib/clinic.functions";
+import { useClinicQueue, type QueueRow } from "@/hooks/useClinicQueue";
+import { useFormat } from "@/lib/format";
 import { Languages, Sparkles } from "lucide-react";
 
 export const Route = createFileRoute("/clinic/")({ component: Queue });
 
-type Q = {
-  id: string; scheduled_at: string; department: string; status: string;
-  ai_context_summary: string | null; worker_notes: string | null; symptom_category: string | null; visit_summary: string | null;
-  context_note: string | null; context_note_translated: string | null;
-  worker: { full_name: string | null; preferred_language: string | null } | null;
-};
+type Q = QueueRow;
 
 const STATUS_OPTIONS = ["pending","booked","confirmed","awaiting_checkin","completed","no_show","cancelled"] as const;
 type Status = typeof STATUS_OPTIONS[number];
@@ -40,45 +36,16 @@ function StatusBadge({ status }: { status: string }) {
 function Queue() {
   const { t } = useLang();
   const { user } = useAuth();
-  const [items, setItems] = useState<Q[]>([]);
+  const fmt = useFormat();
   const [drafts, setDrafts] = useState<Record<string,string>>({});
   const [busy, setBusy] = useState<string | null>(null);
-  const [dayFilter, setDayFilter] = useState<string>("today");
   const run = useServerFn(translateVisitSummary);
-  const translateCtx = useServerFn(translateContextNote);
-
-  const reload = () => {
-    if (!user) return;
-    void supabase.from("appointments")
-      .select("id, scheduled_at, department, status, ai_context_summary, worker_notes, symptom_category, visit_summary, context_note, context_note_translated, worker:profiles!appointments_worker_id_fkey(full_name, preferred_language)")
-      .order("scheduled_at", { ascending: true })
-      .then(({ data }) => {
-        const rows = (data ?? []) as unknown as Q[];
-        setItems(rows);
-        // Lazy-translate missing context notes
-        rows.filter(r => r.context_note && !r.context_note_translated).forEach(async r => {
-          try { await translateCtx({ data: { appointmentId: r.id } }); } catch { /* ignore */ }
-        });
-      });
-  };
-  useEffect(reload, [user]);
-
-  const days = useMemo(() => {
-    const set = new Set<string>();
-    items.forEach(i => set.add(new Date(i.scheduled_at).toDateString()));
-    return Array.from(set).slice(0, 7);
-  }, [items]);
-
-  const filtered = useMemo(() => {
-    const today = new Date().toDateString();
-    if (dayFilter === "all") return items;
-    if (dayFilter === "today") return items.filter(i => new Date(i.scheduled_at).toDateString() === today);
-    return items.filter(i => new Date(i.scheduled_at).toDateString() === dayFilter);
-  }, [items, dayFilter]);
+  // E1/E4: query + filtering + realtime refresh live in the hook now.
+  const { filtered, days, dayFilter, setDayFilter, reload } = useClinicQueue(Boolean(user));
 
   async function save(id: string) {
     setBusy(id);
-    try { await run({ data: { appointmentId: id, englishSummary: drafts[id] ?? "" } }); toast.success("Sent & translated"); reload(); }
+    try { await run({ data: { appointmentId: id, englishSummary: drafts[id] ?? "" } }); toast.success("Sent & translated"); void reload(); }
     catch (e: unknown) { toast.error(e instanceof Error ? e.message : "Failed"); }
     finally { setBusy(null); }
   }
@@ -98,12 +65,12 @@ function Queue() {
         if (!data?.worker_id) return;
         await supabase.from("notifications").insert({
           worker_id: data.worker_id, type: "appointment_reminder", channel: "in_app",
-          title: titles[status], content: `${row.department} · ${new Date(row.scheduled_at).toLocaleString()}`,
+          title: titles[status], content: `${row.department} · ${fmt.dateTime(row.scheduled_at)}`,
         });
       });
     }
     toast.success(status.replace("_"," "));
-    reload();
+    void reload();
   }
 
   return (
@@ -114,7 +81,7 @@ function Queue() {
         <button onClick={()=>setDayFilter("all")} className={`chip ${dayFilter==="all"?"bg-primary text-primary-foreground":"bg-muted"}`}>All</button>
         {days.filter(d => d !== new Date().toDateString()).map(d => (
           <button key={d} onClick={()=>setDayFilter(d)} className={`chip ${dayFilter===d?"bg-primary text-primary-foreground":"bg-muted"}`}>
-            {new Date(d).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}
+            {fmt.date(d)}
           </button>
         ))}
       </div>
@@ -125,7 +92,7 @@ function Queue() {
               <div>
                 <div className="text-lg font-semibold">{q.worker?.full_name ?? "—"}</div>
                 <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                  <span>{new Date(q.scheduled_at).toLocaleString()}</span>
+                  <span>{fmt.dateTime(q.scheduled_at)}</span>
                   <span>·</span>
                   <span>{q.department}</span>
                   <StatusBadge status={q.status} />
