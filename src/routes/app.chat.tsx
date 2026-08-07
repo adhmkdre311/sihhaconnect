@@ -54,8 +54,6 @@ function Chat() {
     } finally { setBusy(false); }
   }
 
-  const quick = [
-
   async function toggleVoice() {
     if (transcribing) return;
     if (!recording) {
