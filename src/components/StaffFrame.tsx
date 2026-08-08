@@ -3,6 +3,8 @@ import { useEffect, type ComponentType, type ReactNode } from "react";
 import { LogOut } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { SihhaLockup } from "@/components/SihhaLogo";
+import { useViewAs } from "@/lib/viewAs";
+import { ViewAsBanner } from "@/components/ViewAsBanner";
 
 type NavItem = { to: string; label: string; icon: ComponentType<{ className?: string }> };
 
@@ -18,6 +20,10 @@ export function StaffFrame({
   const loc = useLocation();
   const nav = useNavigate();
   const { user, loading, roles, approved, isActive, signOut } = useAuth();
+  // M7: platform admins may enter any portal read-only.
+  const viewAs = useViewAs();
+  const isPlatformAdmin = roles.includes("platform_admin") || roles.includes("super_admin");
+  const viewingThisPortal = isPlatformAdmin && viewAs !== null && viewAs === role;
 
   useEffect(() => {
     if (loading) return;
@@ -38,7 +44,7 @@ export function StaffFrame({
       />
     );
   }
-  const hasRole = roles.includes(role) || (role === "platform_admin" && roles.includes("super_admin"));
+  const hasRole = roles.includes(role) || (role === "platform_admin" && roles.includes("super_admin")) || viewingThisPortal;
   if (!hasRole) {
     return (
       <PendingScreen
@@ -48,7 +54,7 @@ export function StaffFrame({
       />
     );
   }
-  if (requireApproved && !approved) {
+  if (requireApproved && !approved && !viewingThisPortal) {
     return (
       <PendingScreen
         title="Your account is awaiting approval"
@@ -81,6 +87,7 @@ export function StaffFrame({
         </button>
       </aside>
       <div className="flex-1">
+        {viewingThisPortal && <ViewAsBanner role={role as never} />}
         <header className="flex items-center justify-between border-b bg-background px-4 py-3 md:hidden">
           <span className="font-semibold">{roleLabel}</span>
           <button onClick={() => { void signOut(); nav({ to: "/" }); }} aria-label="logout"><LogOut className="h-5 w-5" /></button>
@@ -93,7 +100,13 @@ export function StaffFrame({
             })}
           </div>
         </div>
-        <main className="p-4 md:p-8">{children}</main>
+        <main className="p-4 md:p-8">
+          {viewingThisPortal ? (
+            <fieldset disabled className="min-w-0 border-0 p-0 opacity-95">{children}</fieldset>
+          ) : (
+            children
+          )}
+        </main>
       </div>
     </div>
   );
