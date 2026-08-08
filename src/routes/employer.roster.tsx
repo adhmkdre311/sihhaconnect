@@ -92,6 +92,8 @@ function Roster() {
         <p className="mt-1 text-xs text-muted-foreground">Share with workers when they sign up.</p>
       </div>
 
+      <EmployerInviteLinks />
+
       <div className="mb-6 grid gap-6 md:grid-cols-2">
         <form onSubmit={submit} className="rounded-2xl border bg-card p-4 space-y-3">
           <div className="text-sm font-semibold">{t("add_worker")}</div>
