@@ -12,6 +12,7 @@ import { translateVisitSummary } from "@/lib/ai.functions";
 import { useClinicQueue, type QueueRow } from "@/hooks/useClinicQueue";
 import { useFormat } from "@/lib/format";
 import { Languages, Sparkles } from "lucide-react";
+import { WalkInDialog } from "@/components/WalkInDialog";
 
 export const Route = createFileRoute("/clinic/")({ component: Queue });
 
@@ -75,7 +76,10 @@ function Queue() {
 
   return (
     <ClinicShell>
-      <h1 className="mb-4 text-xl font-semibold">{t("incoming_appointments")}</h1>
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-xl font-semibold">{t("incoming_appointments")}</h1>
+        <WalkInDialog onCreated={() => void reload()} />
+      </div>
       <div className="mb-4 flex flex-wrap gap-2">
         <button onClick={()=>setDayFilter("today")} className={`chip ${dayFilter==="today"?"bg-primary text-primary-foreground":"bg-muted"}`}>Today</button>
         <button onClick={()=>setDayFilter("all")} className={`chip ${dayFilter==="all"?"bg-primary text-primary-foreground":"bg-muted"}`}>All</button>

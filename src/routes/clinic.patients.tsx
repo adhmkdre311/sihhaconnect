@@ -10,13 +10,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { clinicAddDocument } from "@/lib/clinic.functions";
-import { Languages, FileText, X } from "lucide-react";
+import { Languages, FileText, X, Eye } from "lucide-react";
 import { useClinicPerms } from "@/lib/useClinicPerms";
 
 export const Route = createFileRoute("/clinic/patients")({ component: Patients });
 
 type Patient = { worker_id: string; full_name: string | null; preferred_language: string | null; visit_count: number; last_visit: string };
-type Doc = { id: string; type: string; original_text: string | null; ai_plain_language_summary: string | null; created_at: string };
+type Doc = { id: string; type: string; original_text: string | null; ai_plain_language_summary: string | null; created_at: string; original_file_url: string | null };
 
 function Patients() {
   const { user } = useAuth();
@@ -62,9 +62,16 @@ function Patients() {
     setOpen(p);
     setDocs([]);
     const { data } = await supabase.from("documents")
-      .select("id, type, original_text, ai_plain_language_summary, created_at")
+      .select("id, type, original_text, ai_plain_language_summary, created_at, original_file_url")
       .eq("worker_id", p.worker_id).order("created_at", { ascending: false });
     setDocs((data ?? []) as Doc[]);
+  };
+
+  // M3: patient-uploaded scans live in a private bucket; open via signed URL.
+  const openFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from("documents").createSignedUrl(path, 60);
+    if (error || !data) { toast.error(error?.message ?? "Could not open file"); return; }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
   const submitDoc = async (e: React.FormEvent) => {
@@ -126,6 +133,11 @@ function Patients() {
                 <li key={d.id} className="rounded-lg border p-3 text-sm">
                   <div className="flex items-center gap-2 text-xs font-medium"><FileText className="h-3 w-3" /> {d.type.replace("_"," ")} · {new Date(d.created_at).toLocaleDateString()}</div>
                   {d.ai_plain_language_summary && <div className="mt-1 text-xs text-muted-foreground">{d.ai_plain_language_summary}</div>}
+                  {d.original_file_url && (
+                    <Button size="sm" variant="ghost" className="mt-1" onClick={()=>void openFile(d.original_file_url!)}>
+                      <Eye className="me-1 h-3 w-3" /> View file
+                    </Button>
+                  )}
                 </li>
               ))}
               {docs.length === 0 && <li className="text-xs text-muted-foreground">No documents yet.</li>}

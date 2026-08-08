@@ -1,22 +1,27 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Users, CalendarDays, BarChart3, Megaphone, CreditCard, LogOut } from "lucide-react";
+import { Users, CalendarDays, BarChart3, Megaphone, CreditCard, LogOut, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaLockup } from "@/components/SihhaLogo";
+import { useViewAs } from "@/lib/viewAs";
+import { ViewAsBanner } from "@/components/ViewAsBanner";
 
 export function AdminShell({ children }: { children: ReactNode }) {
   const { t } = useLang();
   const loc = useLocation();
   const nav = useNavigate();
   const { user, loading, roles, approved, isActive, signOut } = useAuth();
+  // M7: read-only support view for platform admins.
+  const viewAs = useViewAs();
+  const viewing = (roles.includes("platform_admin") || roles.includes("super_admin")) && viewAs === "employer_admin";
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
   if (!user) {
     const next = loc.pathname + (typeof loc.search === "string" ? loc.search : "");
     nav({ to: "/auth", search: { role: "employer_admin", mode: "login", next } });
     return null;
   }
-  if (!roles.includes("employer_admin")) { nav({ to: "/" }); return null; }
+  if (!roles.includes("employer_admin") && !viewing) { nav({ to: "/" }); return null; }
   if (!isActive) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -28,7 +33,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  if (!approved) {
+  if (!approved && !viewing) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
         <div className="max-w-md rounded-2xl border bg-card p-8 shadow-sm text-center">
@@ -46,6 +51,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { to: "/employer/appointments", icon: CalendarDays, label: t("book_appointment") },
     { to: "/employer/compliance", icon: BarChart3, label: t("compliance") },
     { to: "/employer/notifications", icon: Megaphone, label: t("notifications") },
+    { to: "/employer/inbox", icon: Bell, label: "Inbox" },
     { to: "/employer/billing", icon: CreditCard, label: t("billing") },
   ];
 
@@ -84,7 +90,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             })}
           </div>
         </div>
-        <main className="p-4 md:p-8">{children}</main>
+        {viewing && <ViewAsBanner role="employer_admin" />}
+        <main className="p-4 md:p-8">{viewing ? <fieldset disabled className="min-w-0 border-0 p-0">{children}</fieldset> : children}</main>
       </div>
     </div>
   );

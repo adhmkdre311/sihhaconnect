@@ -24,16 +24,20 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as PharmacyVisibilityRouteImport } from './routes/pharmacy.visibility'
 import { Route as PharmacySettingsRouteImport } from './routes/pharmacy.settings'
+import { Route as PharmacyNotificationsRouteImport } from './routes/pharmacy.notifications'
+import { Route as InsuranceNotificationsRouteImport } from './routes/insurance.notifications'
 import { Route as InsuranceComplianceRouteImport } from './routes/insurance.compliance'
 import { Route as InsuranceClaimsRouteImport } from './routes/insurance.claims'
 import { Route as EmployerRosterRouteImport } from './routes/employer.roster'
 import { Route as EmployerNotificationsRouteImport } from './routes/employer.notifications'
+import { Route as EmployerInboxRouteImport } from './routes/employer.inbox'
 import { Route as EmployerComplianceRouteImport } from './routes/employer.compliance'
 import { Route as EmployerBillingRouteImport } from './routes/employer.billing'
 import { Route as EmployerAppointmentsRouteImport } from './routes/employer.appointments'
 import { Route as ClinicSlotsRouteImport } from './routes/clinic.slots'
 import { Route as ClinicSettingsRouteImport } from './routes/clinic.settings'
 import { Route as ClinicPatientsRouteImport } from './routes/clinic.patients'
+import { Route as ClinicNotificationsRouteImport } from './routes/clinic.notifications'
 import { Route as ClinicAcceptInviteRouteImport } from './routes/clinic.accept-invite'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as AuthResetRouteImport } from './routes/auth.reset'
@@ -133,6 +137,16 @@ const PharmacySettingsRoute = PharmacySettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => PharmacyRoute,
 } as any)
+const PharmacyNotificationsRoute = PharmacyNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => PharmacyRoute,
+} as any)
+const InsuranceNotificationsRoute = InsuranceNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => InsuranceRoute,
+} as any)
 const InsuranceComplianceRoute = InsuranceComplianceRouteImport.update({
   id: '/compliance',
   path: '/compliance',
@@ -151,6 +165,11 @@ const EmployerRosterRoute = EmployerRosterRouteImport.update({
 const EmployerNotificationsRoute = EmployerNotificationsRouteImport.update({
   id: '/employer/notifications',
   path: '/employer/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EmployerInboxRoute = EmployerInboxRouteImport.update({
+  id: '/employer/inbox',
+  path: '/employer/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployerComplianceRoute = EmployerComplianceRouteImport.update({
@@ -181,6 +200,11 @@ const ClinicSettingsRoute = ClinicSettingsRouteImport.update({
 const ClinicPatientsRoute = ClinicPatientsRouteImport.update({
   id: '/clinic/patients',
   path: '/clinic/patients',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClinicNotificationsRoute = ClinicNotificationsRouteImport.update({
+  id: '/clinic/notifications',
+  path: '/clinic/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ClinicAcceptInviteRoute = ClinicAcceptInviteRouteImport.update({
@@ -326,16 +350,20 @@ export interface FileRoutesByFullPath {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
+  '/clinic/notifications': typeof ClinicNotificationsRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/inbox': typeof EmployerInboxRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
   '/insurance/compliance': typeof InsuranceComplianceRoute
+  '/insurance/notifications': typeof InsuranceNotificationsRoute
+  '/pharmacy/notifications': typeof PharmacyNotificationsRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
@@ -372,16 +400,20 @@ export interface FileRoutesByTo {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
+  '/clinic/notifications': typeof ClinicNotificationsRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/inbox': typeof EmployerInboxRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
   '/insurance/compliance': typeof InsuranceComplianceRoute
+  '/insurance/notifications': typeof InsuranceNotificationsRoute
+  '/pharmacy/notifications': typeof PharmacyNotificationsRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin': typeof AdminIndexRoute
@@ -423,16 +455,20 @@ export interface FileRoutesById {
   '/auth/reset': typeof AuthResetRoute
   '/auth/verify': typeof AuthVerifyRoute
   '/clinic/accept-invite': typeof ClinicAcceptInviteRoute
+  '/clinic/notifications': typeof ClinicNotificationsRoute
   '/clinic/patients': typeof ClinicPatientsRoute
   '/clinic/settings': typeof ClinicSettingsRoute
   '/clinic/slots': typeof ClinicSlotsRoute
   '/employer/appointments': typeof EmployerAppointmentsRoute
   '/employer/billing': typeof EmployerBillingRoute
   '/employer/compliance': typeof EmployerComplianceRoute
+  '/employer/inbox': typeof EmployerInboxRoute
   '/employer/notifications': typeof EmployerNotificationsRoute
   '/employer/roster': typeof EmployerRosterRoute
   '/insurance/claims': typeof InsuranceClaimsRoute
   '/insurance/compliance': typeof InsuranceComplianceRoute
+  '/insurance/notifications': typeof InsuranceNotificationsRoute
+  '/pharmacy/notifications': typeof PharmacyNotificationsRoute
   '/pharmacy/settings': typeof PharmacySettingsRoute
   '/pharmacy/visibility': typeof PharmacyVisibilityRoute
   '/admin/': typeof AdminIndexRoute
@@ -475,16 +511,20 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/accept-invite'
+    | '/clinic/notifications'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
+    | '/employer/inbox'
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
     | '/insurance/compliance'
+    | '/insurance/notifications'
+    | '/pharmacy/notifications'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin/'
@@ -521,16 +561,20 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/accept-invite'
+    | '/clinic/notifications'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
+    | '/employer/inbox'
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
     | '/insurance/compliance'
+    | '/insurance/notifications'
+    | '/pharmacy/notifications'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin'
@@ -571,16 +615,20 @@ export interface FileRouteTypes {
     | '/auth/reset'
     | '/auth/verify'
     | '/clinic/accept-invite'
+    | '/clinic/notifications'
     | '/clinic/patients'
     | '/clinic/settings'
     | '/clinic/slots'
     | '/employer/appointments'
     | '/employer/billing'
     | '/employer/compliance'
+    | '/employer/inbox'
     | '/employer/notifications'
     | '/employer/roster'
     | '/insurance/claims'
     | '/insurance/compliance'
+    | '/insurance/notifications'
+    | '/pharmacy/notifications'
     | '/pharmacy/settings'
     | '/pharmacy/visibility'
     | '/admin/'
@@ -610,12 +658,14 @@ export interface RootRouteChildren {
   AppProfileRoute: typeof AppProfileRoute
   AppRecordsRoute: typeof AppRecordsRoute
   ClinicAcceptInviteRoute: typeof ClinicAcceptInviteRoute
+  ClinicNotificationsRoute: typeof ClinicNotificationsRoute
   ClinicPatientsRoute: typeof ClinicPatientsRoute
   ClinicSettingsRoute: typeof ClinicSettingsRoute
   ClinicSlotsRoute: typeof ClinicSlotsRoute
   EmployerAppointmentsRoute: typeof EmployerAppointmentsRoute
   EmployerBillingRoute: typeof EmployerBillingRoute
   EmployerComplianceRoute: typeof EmployerComplianceRoute
+  EmployerInboxRoute: typeof EmployerInboxRoute
   EmployerNotificationsRoute: typeof EmployerNotificationsRoute
   EmployerRosterRoute: typeof EmployerRosterRoute
   AppIndexRoute: typeof AppIndexRoute
@@ -733,6 +783,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PharmacySettingsRouteImport
       parentRoute: typeof PharmacyRoute
     }
+    '/pharmacy/notifications': {
+      id: '/pharmacy/notifications'
+      path: '/notifications'
+      fullPath: '/pharmacy/notifications'
+      preLoaderRoute: typeof PharmacyNotificationsRouteImport
+      parentRoute: typeof PharmacyRoute
+    }
+    '/insurance/notifications': {
+      id: '/insurance/notifications'
+      path: '/notifications'
+      fullPath: '/insurance/notifications'
+      preLoaderRoute: typeof InsuranceNotificationsRouteImport
+      parentRoute: typeof InsuranceRoute
+    }
     '/insurance/compliance': {
       id: '/insurance/compliance'
       path: '/compliance'
@@ -759,6 +823,13 @@ declare module '@tanstack/react-router' {
       path: '/employer/notifications'
       fullPath: '/employer/notifications'
       preLoaderRoute: typeof EmployerNotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/employer/inbox': {
+      id: '/employer/inbox'
+      path: '/employer/inbox'
+      fullPath: '/employer/inbox'
+      preLoaderRoute: typeof EmployerInboxRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employer/compliance': {
@@ -801,6 +872,13 @@ declare module '@tanstack/react-router' {
       path: '/clinic/patients'
       fullPath: '/clinic/patients'
       preLoaderRoute: typeof ClinicPatientsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clinic/notifications': {
+      id: '/clinic/notifications'
+      path: '/clinic/notifications'
+      fullPath: '/clinic/notifications'
+      preLoaderRoute: typeof ClinicNotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clinic/accept-invite': {
@@ -1014,12 +1092,14 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 interface InsuranceRouteChildren {
   InsuranceClaimsRoute: typeof InsuranceClaimsRoute
   InsuranceComplianceRoute: typeof InsuranceComplianceRoute
+  InsuranceNotificationsRoute: typeof InsuranceNotificationsRoute
   InsuranceIndexRoute: typeof InsuranceIndexRoute
 }
 
 const InsuranceRouteChildren: InsuranceRouteChildren = {
   InsuranceClaimsRoute: InsuranceClaimsRoute,
   InsuranceComplianceRoute: InsuranceComplianceRoute,
+  InsuranceNotificationsRoute: InsuranceNotificationsRoute,
   InsuranceIndexRoute: InsuranceIndexRoute,
 }
 
@@ -1028,12 +1108,14 @@ const InsuranceRouteWithChildren = InsuranceRoute._addFileChildren(
 )
 
 interface PharmacyRouteChildren {
+  PharmacyNotificationsRoute: typeof PharmacyNotificationsRoute
   PharmacySettingsRoute: typeof PharmacySettingsRoute
   PharmacyVisibilityRoute: typeof PharmacyVisibilityRoute
   PharmacyIndexRoute: typeof PharmacyIndexRoute
 }
 
 const PharmacyRouteChildren: PharmacyRouteChildren = {
+  PharmacyNotificationsRoute: PharmacyNotificationsRoute,
   PharmacySettingsRoute: PharmacySettingsRoute,
   PharmacyVisibilityRoute: PharmacyVisibilityRoute,
   PharmacyIndexRoute: PharmacyIndexRoute,
@@ -1058,12 +1140,14 @@ const rootRouteChildren: RootRouteChildren = {
   AppProfileRoute: AppProfileRoute,
   AppRecordsRoute: AppRecordsRoute,
   ClinicAcceptInviteRoute: ClinicAcceptInviteRoute,
+  ClinicNotificationsRoute: ClinicNotificationsRoute,
   ClinicPatientsRoute: ClinicPatientsRoute,
   ClinicSettingsRoute: ClinicSettingsRoute,
   ClinicSlotsRoute: ClinicSlotsRoute,
   EmployerAppointmentsRoute: EmployerAppointmentsRoute,
   EmployerBillingRoute: EmployerBillingRoute,
   EmployerComplianceRoute: EmployerComplianceRoute,
+  EmployerInboxRoute: EmployerInboxRoute,
   EmployerNotificationsRoute: EmployerNotificationsRoute,
   EmployerRosterRoute: EmployerRosterRoute,
   AppIndexRoute: AppIndexRoute,

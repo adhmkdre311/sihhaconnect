@@ -1,22 +1,27 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CalendarClock, ListChecks, LogOut, Users, Settings } from "lucide-react";
+import { CalendarClock, ListChecks, LogOut, Users, Settings, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaLockup } from "@/components/SihhaLogo";
+import { useViewAs } from "@/lib/viewAs";
+import { ViewAsBanner } from "@/components/ViewAsBanner";
 
 export function ClinicShell({ children }: { children: ReactNode }) {
   const { t } = useLang();
   const loc = useLocation();
   const nav = useNavigate();
   const { user, loading, roles, approved, isActive, signOut } = useAuth();
+  // M7: read-only support view for platform admins.
+  const viewAs = useViewAs();
+  const viewing = (roles.includes("platform_admin") || roles.includes("super_admin")) && viewAs === "clinic_staff";
   if (loading) return <div className="p-6 text-sm text-muted-foreground">{t("loading")}</div>;
   if (!user) {
     const next = loc.pathname + (typeof loc.search === "string" ? loc.search : "");
     nav({ to: "/auth", search: { role: "clinic_staff", mode: "login", next } });
     return null;
   }
-  if (!roles.includes("clinic_staff")) { nav({ to: "/" }); return null; }
+  if (!roles.includes("clinic_staff") && !viewing) { nav({ to: "/" }); return null; }
   if (!isActive) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
@@ -28,7 +33,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
       </div>
     );
   }
-  if (!approved) {
+  if (!approved && !viewing) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background p-6">
         <div className="max-w-md rounded-2xl border bg-card p-8 shadow-sm text-center">
@@ -44,6 +49,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
     { to: "/clinic", icon: ListChecks, label: t("queue") },
     { to: "/clinic/slots", icon: CalendarClock, label: t("slots") },
     { to: "/clinic/patients", icon: Users, label: "Patients" },
+    { to: "/clinic/notifications", icon: Bell, label: "Notifications" },
     { to: "/clinic/settings", icon: Settings, label: "Settings" },
   ];
 
@@ -82,7 +88,8 @@ export function ClinicShell({ children }: { children: ReactNode }) {
             })}
           </div>
         </div>
-        <main className="p-4 md:p-8">{children}</main>
+        {viewing && <ViewAsBanner role="clinic_staff" />}
+        <main className="p-4 md:p-8">{viewing ? <fieldset disabled className="min-w-0 border-0 p-0">{children}</fieldset> : children}</main>
       </div>
     </div>
   );

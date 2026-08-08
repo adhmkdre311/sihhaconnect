@@ -20,10 +20,18 @@ export function parseNext(value: unknown): string | undefined {
   return value;
 }
 
+// M1: invite code arriving from an employer-shared link.
+export function parseInvite(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const code = value.trim().toUpperCase();
+  return /^[A-Z0-9-]{4,24}$/.test(code) ? code : undefined;
+}
+
 export const Route = createFileRoute("/auth")({
   validateSearch: (s: Record<string, unknown>) => ({
     role: parseRole(s.role),
     mode: parseMode(s.mode),
     next: parseNext(s.next),
+    invite: parseInvite(s.invite),
   }),
 });

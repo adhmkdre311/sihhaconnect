@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EmployerInviteLinks } from "@/components/EmployerInviteLinks";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { useEmployerWorkers, type WorkerRow } from "@/hooks/useEmployerWorkers";
 import { useFormat } from "@/lib/format";
@@ -91,6 +92,8 @@ function Roster() {
         </div>
         <p className="mt-1 text-xs text-muted-foreground">Share with workers when they sign up.</p>
       </div>
+
+      <EmployerInviteLinks />
 
       <div className="mb-6 grid gap-6 md:grid-cols-2">
         <form onSubmit={submit} className="rounded-2xl border bg-card p-4 space-y-3">

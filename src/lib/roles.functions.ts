@@ -16,15 +16,33 @@ export const bootstrapWorker = createServerFn({ method: "POST" })
 
     let employerId: string | null = null;
     if (data.inviteCode) {
-      const { data: emp } = await supabaseAdmin
-        .from("employers").select("id").eq("invite_code", data.inviteCode.trim()).maybeSingle();
-      if (emp) employerId = emp.id;
+      const code = data.inviteCode.trim().toUpperCase();
+      // M1: employer-generated invite links take precedence, then the legacy
+      // company-wide code on employers.invite_code.
+      const { data: link } = await supabaseAdmin
+        .from("employer_invites")
+        .select("id, employer_id, uses, max_uses, revoked, expires_at")
+        .eq("code", code)
+        .maybeSingle();
+      if (link && !link.revoked && new Date(link.expires_at) > new Date()
+          && (link.max_uses === null || link.uses < link.max_uses)) {
+        employerId = link.employer_id;
+        await supabaseAdmin.from("employer_invites")
+          .update({ uses: link.uses + 1 }).eq("id", link.id);
+      } else {
+        const { data: emp } = await supabaseAdmin
+          .from("employers").select("id").ilike("invite_code", code).maybeSingle();
+        if (emp) employerId = emp.id;
+      }
     }
 
-    await supabase.from("profiles").upsert({
+    // profiles.employer_id is a privileged field (locked by trigger for
+    // non-admins), so the employer link is written with the service role.
+    await supabaseAdmin.from("profiles").upsert({
       id: userId, full_name: data.fullName, phone_number: data.phoneNumber,
       preferred_language: data.preferredLanguage, employer_id: employerId,
     });
+    void supabase;
 
     await supabaseAdmin.from("user_roles").upsert({
       user_id: userId, role: "worker", employer_id: employerId,

@@ -36,7 +36,7 @@ export const Route = createLazyFileRoute("/auth/")({
 });
 
 function AuthPage() {
-  const { role, mode: initialMode, next } = RouteApi.useSearch();
+  const { role, mode: initialMode, next, invite } = RouteApi.useSearch();
   const { t, lang } = useLang();
   const { refreshRoles } = useAuth();
   const nav = useNavigate();
@@ -47,7 +47,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  const [inviteCode, setInviteCode] = useState(invite ?? "");
   const [companyName, setCompanyName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
