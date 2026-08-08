@@ -20,6 +20,10 @@ function Profile() {
   const [emergency, setEmergency] = useState("");
   const [employer, setEmployer] = useState<string>("");
   const [busy, setBusy] = useState(false);
+  // M4: email change + password reset from the worker profile.
+  const [newEmail, setNewEmail] = useState("");
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [pwBusy, setPwBusy] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -44,6 +48,31 @@ function Profile() {
     if (error) toast.error(error.message); else toast.success(t("saved"));
   }
 
+  async function changeEmail() {
+    const email = newEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { toast.error("Enter a valid email address"); return; }
+    setEmailBusy(true);
+    const { error } = await supabase.auth.updateUser(
+      { email },
+      { emailRedirectTo: `${window.location.origin}/app/profile` },
+    );
+    setEmailBusy(false);
+    if (error) { toast.error(error.message); return; }
+    setNewEmail("");
+    toast.success("Confirm the change from the link sent to both your old and new email.");
+  }
+
+  async function resetPassword() {
+    if (!user?.email) return;
+    setPwBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/auth/reset`,
+    });
+    setPwBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Password reset link sent to your email.");
+  }
+
   return (
     <AppShell title={t("profile")}>
       <div className="space-y-3">
@@ -62,6 +91,26 @@ function Profile() {
           </div>
         </div>
         <Button onClick={save} disabled={busy} className="w-full">{busy ? t("saving") : t("save")}</Button>
+
+        <section className="rounded-2xl border bg-card p-4 space-y-3">
+          <div>
+            <div className="text-sm font-semibold">Account & security</div>
+            <p className="text-xs text-muted-foreground">
+              Signed in as <span dir="ltr" className="font-medium">{user?.email ?? "—"}</span>
+            </p>
+          </div>
+          <div>
+            <Label htmlFor="new-email">New email address</Label>
+            <Input id="new-email" type="email" dir="ltr" value={newEmail} onChange={(e)=>setNewEmail(e.target.value)} placeholder="you@example.com" />
+            <Button variant="outline" className="mt-2 w-full" disabled={emailBusy || !newEmail} onClick={changeEmail}>
+              {emailBusy ? t("saving") : "Change email"}
+            </Button>
+          </div>
+          <Button variant="outline" className="w-full" disabled={pwBusy || !user?.email} onClick={resetPassword}>
+            {pwBusy ? t("saving") : "Send password reset link"}
+          </Button>
+        </section>
+
         <Button variant="outline" onClick={async () => { await signOut(); nav({ to: "/" }); }} className="w-full">{t("logout")}</Button>
       </div>
     </AppShell>
