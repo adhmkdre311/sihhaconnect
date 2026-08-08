@@ -576,6 +576,70 @@ export type Database = {
           },
         ]
       }
+      employer_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string | null
+          employer_id: string
+          expires_at: string
+          id: string
+          label: string | null
+          max_uses: number | null
+          revoked: boolean
+          updated_at: string
+          uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by?: string | null
+          employer_id: string
+          expires_at?: string
+          id?: string
+          label?: string | null
+          max_uses?: number | null
+          revoked?: boolean
+          updated_at?: string
+          uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string | null
+          employer_id?: string
+          expires_at?: string
+          id?: string
+          label?: string | null
+          max_uses?: number | null
+          revoked?: boolean
+          updated_at?: string
+          uses?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employer_invites_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employer_compliance_stats"
+            referencedColumns: ["employer_id"]
+          },
+          {
+            foreignKeyName: "employer_invites_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employer_invites_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "insurer_network_overview"
+            referencedColumns: ["employer_id"]
+          },
+        ]
+      }
       employers: {
         Row: {
           company_name: string
@@ -1220,6 +1284,7 @@ export type Database = {
         }
         Returns: number
       }
+      validate_invite: { Args: { _code: string }; Returns: boolean }
       worker_has_appointment_at_clinic: {
         Args: { _worker: string }
         Returns: boolean
