@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Upload, FileText, AlertTriangle } from "lucide-react";
+import { Upload, FileText, AlertTriangle, Camera, FolderOpen, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { summarizeDocument } from "@/lib/ai.functions";
@@ -16,6 +16,9 @@ export const Route = createFileRoute("/app/records")({ component: Records });
 type Doc = { id: string; type: string; created_at: string; ai_plain_language_summary: string | null; flagged_for_human_review: boolean; original_file_url: string | null };
 type Appt = { id: string; scheduled_at: string; status: string; department: string; clinic: { name: string } | null; visit_summary: string | null };
 
+const DOC_TYPES = ["prescription", "lab_report", "visit_summary", "insurance_form", "other"] as const;
+type DocType = (typeof DOC_TYPES)[number];
+
 function Records() {
   const { t, lang } = useLang();
   const { user } = useAuth();
@@ -23,6 +26,7 @@ function Records() {
   const [appts, setAppts] = useState<Appt[]>([]);
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
+  const [docType, setDocType] = useState<DocType>("other");
   const summarize = useServerFn(summarizeDocument);
 
   const reload = () => {
@@ -43,14 +47,15 @@ function Records() {
       let url: string | null = null;
       let extracted = pasted;
       if (file) {
+        if (file.size > 15 * 1024 * 1024) throw new Error("File is too large (max 15 MB).");
         const path = `${user.id}/${Date.now()}-${file.name}`;
-        const up = await supabase.storage.from("documents").upload(path, file);
+        const up = await supabase.storage.from("documents").upload(path, file, { contentType: file.type || undefined });
         if (up.error) throw up.error;
         url = up.data.path;
         if (!extracted) extracted = `[Uploaded ${file.name}]`;
       }
       const { data: doc, error } = await supabase.from("documents").insert({
-        worker_id: user.id, type: "other", original_file_url: url,
+        worker_id: user.id, type: docType, original_file_url: url,
       }).select("id").single();
       if (error || !doc) throw error;
       if (extracted.trim()) {
@@ -63,11 +68,33 @@ function Records() {
     finally { setBusy(false); }
   }
 
+  // M3: files live in a private bucket — open through a short-lived signed URL.
+  async function openFile(path: string) {
+    const { data, error } = await supabase.storage.from("documents").createSignedUrl(path, 60);
+    if (error || !data) { toast.error(error?.message ?? "Could not open file"); return; }
+    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
+  }
+
   return (
     <AppShell title={t("my_records")}>
       <div className="mb-4 rounded-2xl border bg-card p-4">
         <div className="mb-2 text-sm font-medium">{t("upload_document")}</div>
-        <input type="file" accept="image/*,application/pdf" onChange={(e) => void uploadAndSummarize(e.target.files?.[0] ?? null, text)} className="mb-2 block w-full text-xs" />
+        <div className="mb-2 flex flex-wrap gap-2">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs font-medium">
+            <Camera className="h-4 w-4 text-primary" /> Take a photo
+            <input type="file" accept="image/*" capture="environment" className="hidden"
+              onChange={(e) => void uploadAndSummarize(e.target.files?.[0] ?? null, text)} />
+          </label>
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border bg-background px-3 py-2 text-xs font-medium">
+            <FolderOpen className="h-4 w-4 text-primary" /> Choose a file
+            <input type="file" accept="image/*,application/pdf" className="hidden"
+              onChange={(e) => void uploadAndSummarize(e.target.files?.[0] ?? null, text)} />
+          </label>
+          <select value={docType} onChange={(e) => setDocType(e.target.value as DocType)}
+            className="rounded-lg border bg-background px-2 py-2 text-xs">
+            {DOC_TYPES.map((d) => <option key={d} value={d}>{d.replace(/_/g, " ")}</option>)}
+          </select>
+        </div>
         <Textarea placeholder="Paste text from the document (temporary until OCR)" rows={3} value={text} onChange={(e)=>setText(e.target.value)} />
         <Button disabled={busy || !text} className="mt-2 w-full" onClick={() => void uploadAndSummarize(null, text)}>
           <Upload className="me-2 h-4 w-4" />{busy ? t("saving") : t("send")}
@@ -96,6 +123,11 @@ function Records() {
             )}
             {d.ai_plain_language_summary && (
               <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{d.ai_plain_language_summary}</p>
+            )}
+            {d.original_file_url && (
+              <Button size="sm" variant="ghost" className="mt-2" onClick={() => void openFile(d.original_file_url!)}>
+                <Eye className="me-1 h-4 w-4" /> View file
+              </Button>
             )}
           </div>
         ))}
