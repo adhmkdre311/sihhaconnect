@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { EmployerInviteLinks } from "@/components/EmployerInviteLinks";
 import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
 import { useEmployerWorkers, type WorkerRow } from "@/hooks/useEmployerWorkers";
 import { useFormat } from "@/lib/format";
