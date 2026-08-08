@@ -4,6 +4,8 @@ import { AdminShell } from "@/components/AdminShell";
 import { useLang } from "@/lib/i18n";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { getComplianceRule } from "@/lib/compliance.functions";
 import { UserCheck, TrendingDown, Stethoscope, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/employer/compliance")({ component: Compliance });
@@ -11,9 +13,17 @@ export const Route = createFileRoute("/employer/compliance")({ component: Compli
 function Compliance() {
   const { t } = useLang();
   const { user } = useAuth();
+  const loadRule = useServerFn(getComplianceRule);
+  // M6: cadence comes from platform settings, not a hardcoded year.
+  const [checkupMonths, setCheckupMonths] = useState(12);
   const [data, setData] = useState({ total: 0, enrolled: 0, annualCheckup: 0, noShow: 0, completed: 0 });
   const [workers, setWorkers] = useState<{ id: string; full_name: string | null; preferred_language: string; is_active: boolean; last_checkup: string | null }[]>([]);
   const [upcoming, setUpcoming] = useState(0);
+
+  useEffect(() => {
+    void loadRule().then((r) => setCheckupMonths(r.checkupMonths)).catch(() => setCheckupMonths(12));
+  }, [loadRule]);
+
   useEffect(() => {
     if (!user) return;
     (async () => {
@@ -25,10 +35,11 @@ function Compliance() {
         .eq("employer_id", empId);
       const total = emp?.worker_count ?? ws?.length ?? 0;
       const enrolled = ws?.length ?? 0;
-      const yearAgo = new Date(); yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+      const windowStart = new Date();
+      windowStart.setMonth(windowStart.getMonth() - checkupMonths);
       const { data: appts } = await supabase.from("appointments")
         .select("worker_id, department, status, scheduled_at")
-        .gte("scheduled_at", yearAgo.toISOString());
+        .gte("scheduled_at", windowStart.toISOString());
       const checkupRows = (appts ?? []).filter(a => a.department === "routine_checkup" && a.status === "completed");
       const checkups = new Set(checkupRows.map(a => a.worker_id));
       const completed = (appts ?? []).filter(a => a.status === "completed").length;
@@ -47,13 +58,28 @@ function Compliance() {
         last_checkup: lastByWorker.get(w.id) ?? null,
       })));
     })();
-  }, [user]);
+  }, [user, checkupMonths]);
 
   const pct = (a: number, b: number) => (b ? Math.round((a/b)*100) : 0);
+  // Due date = last completed checkup + cadence; "due soon" = within 30 days.
+  const dueState = (last: string | null): { label: string; tone: string; due: string | null } => {
+    if (!last) return { label: "No checkup yet", tone: "bg-destructive/10 text-destructive", due: null };
+    const due = new Date(last);
+    due.setMonth(due.getMonth() + checkupMonths);
+    const days = Math.round((due.getTime() - Date.now()) / 86_400_000);
+    if (days < 0) return { label: `Overdue by ${Math.abs(days)}d`, tone: "bg-destructive/10 text-destructive", due: due.toLocaleDateString() };
+    if (days <= 30) return { label: `Due in ${days}d`, tone: "bg-amber-100 text-amber-700", due: due.toLocaleDateString() };
+    return { label: "Compliant", tone: "bg-primary/10 text-primary", due: due.toLocaleDateString() };
+  };
+  const flagged = workers.filter((w) => dueState(w.last_checkup).label !== "Compliant").length;
+
   return (
     <AdminShell>
       <h1 className="mb-1 font-display text-2xl font-semibold">{t("compliance")}</h1>
-      <p className="mb-5 text-sm text-muted-foreground">The four numbers you'll be asked to defend in an audit.</p>
+      <p className="mb-5 text-sm text-muted-foreground">
+        The four numbers you'll be asked to defend in an audit. Rule in force: a checkup every {checkupMonths} months
+        {flagged > 0 && <span className="ms-1 font-medium text-destructive">· {flagged} worker(s) flagged</span>}
+      </p>
 
       {(() => {
         const enrollmentPct = pct(data.enrolled, data.total);
@@ -113,26 +139,26 @@ function Compliance() {
               <th className="p-3">Name</th>
               <th className="p-3">Language</th>
               <th className="p-3">Last checkup</th>
+              <th className="p-3">Next due</th>
               <th className="p-3">Status</th>
             </tr>
           </thead>
           <tbody>
             {workers.map(w => {
-              const compliant = !!w.last_checkup;
+              const state = dueState(w.last_checkup);
               return (
                 <tr key={w.id} className="border-b last:border-0">
                   <td className="p-3">{w.full_name ?? "—"}</td>
                   <td className="p-3 uppercase">{w.preferred_language}</td>
                   <td className="p-3">{w.last_checkup ? new Date(w.last_checkup).toLocaleDateString() : "—"}</td>
+                  <td className="p-3">{state.due ?? "—"}</td>
                   <td className="p-3">
-                    <span className={`rounded-full px-2 py-0.5 text-xs ${compliant ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"}`}>
-                      {compliant ? "Compliant" : "No checkup yet"}
-                    </span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${state.tone}`}>{state.label}</span>
                   </td>
                 </tr>
               );
             })}
-            {workers.length === 0 && <tr><td colSpan={4} className="p-4 text-center text-xs text-muted-foreground">—</td></tr>}
+            {workers.length === 0 && <tr><td colSpan={5} className="p-4 text-center text-xs text-muted-foreground">—</td></tr>}
           </tbody>
         </table>
       </div>
