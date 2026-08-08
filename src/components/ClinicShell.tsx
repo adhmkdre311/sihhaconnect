@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { CalendarClock, ListChecks, LogOut, Users, Settings } from "lucide-react";
+import { CalendarClock, ListChecks, LogOut, Users, Settings, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaLockup } from "@/components/SihhaLogo";
@@ -44,6 +44,7 @@ export function ClinicShell({ children }: { children: ReactNode }) {
     { to: "/clinic", icon: ListChecks, label: t("queue") },
     { to: "/clinic/slots", icon: CalendarClock, label: t("slots") },
     { to: "/clinic/patients", icon: Users, label: "Patients" },
+    { to: "/clinic/notifications", icon: Bell, label: "Notifications" },
     { to: "/clinic/settings", icon: Settings, label: "Settings" },
   ];
 

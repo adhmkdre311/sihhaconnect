@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { Users, CalendarDays, BarChart3, Megaphone, CreditCard, LogOut } from "lucide-react";
+import { Users, CalendarDays, BarChart3, Megaphone, CreditCard, LogOut, Bell } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useLang } from "@/lib/i18n";
 import { SihhaLockup } from "@/components/SihhaLogo";
@@ -46,6 +46,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
     { to: "/employer/appointments", icon: CalendarDays, label: t("book_appointment") },
     { to: "/employer/compliance", icon: BarChart3, label: t("compliance") },
     { to: "/employer/notifications", icon: Megaphone, label: t("notifications") },
+    { to: "/employer/inbox", icon: Bell, label: "Inbox" },
     { to: "/employer/billing", icon: CreditCard, label: t("billing") },
   ];
 

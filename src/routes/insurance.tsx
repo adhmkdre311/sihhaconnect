@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { StaffFrame } from "@/components/StaffFrame";
-import { BarChart3, FileText, ShieldCheck } from "lucide-react";
+import { BarChart3, FileText, ShieldCheck, Bell } from "lucide-react";
 
 export const Route = createFileRoute("/insurance")({
   component: () => (
@@ -9,6 +9,7 @@ export const Route = createFileRoute("/insurance")({
         { to: "/insurance", icon: BarChart3, label: "Network" },
         { to: "/insurance/compliance", icon: ShieldCheck, label: "Compliance" },
         { to: "/insurance/claims", icon: FileText, label: "Claims" },
+        { to: "/insurance/notifications", icon: Bell, label: "Notifications" },
       ]}>
       <Outlet />
     </StaffFrame>
