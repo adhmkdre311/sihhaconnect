@@ -28,7 +28,9 @@ export function parseInvite(value: unknown): string | undefined {
 }
 
 export const Route = createFileRoute("/auth")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (
+    s: Record<string, unknown>,
+  ): { role: Role; mode: AuthMode; next?: string | undefined; invite?: string | undefined } => ({
     role: parseRole(s.role),
     mode: parseMode(s.mode),
     next: parseNext(s.next),

@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { SAFE_FALLBACK, checkGuardrail } from "@/lib/guardrail";
+import { scriptedReply } from "@/lib/assistantFallback";
 
 const LANG_NAMES: Record<string, string> = {
   en: "English", ar: "Arabic", hi: "Hindi", ur: "Urdu",
@@ -38,22 +40,8 @@ async function callGateway(body: unknown) {
 
 const RED_FLAG = /\b(chest pain|can'?t breathe|difficulty breathing|severe bleeding|unconscious|passing out|suicid|heat stroke|stroke|seizure|choking|overdose)\b/i;
 
-// Code-level guardrail (Sihha spec §3.5): even if a prompt is bypassed,
-// diagnostic language and specific dosage advice must never reach the user.
-const DIAGNOSTIC_PATTERNS: RegExp[] = [
-  /you (have|are suffering from|are experiencing) [a-z\s]{1,40}(itis|osis|emia|oma|disease|infection|syndrome)\b/i,
-  /this (is|looks like|sounds like|appears to be) [a-z\s]{1,40}(itis|osis|emia|oma|disease|infection|syndrome)\b/i,
-  /\btake\s+\d+\s?(mg|ml|mcg|g|tablets?|pills?|capsules?)\b/i,
-  /\b(i\s+diagnose|my diagnosis|the diagnosis is)\b/i,
-];
-const SAFE_FALLBACK =
-  "I can't tell you what this is, but I can help you book a visit to get it checked. Would you like to book now?";
-function checkGuardrail(text: string): { safe: boolean; reason?: string } {
-  for (const p of DIAGNOSTIC_PATTERNS) {
-    if (p.test(text)) return { safe: false, reason: "diagnostic_or_dosage_language_detected" };
-  }
-  return { safe: true };
-}
+// Code-level guardrail (Sihha spec §3.5) lives in src/lib/guardrail.ts so the
+// client mirror and the unit suite (§9.1) test exactly the same patterns.
 
 // Rate limit: 30 chat messages / 10 minutes per worker.
 const RATE_WINDOW_MS = 10 * 60 * 1000;
@@ -107,9 +95,12 @@ export const askAssistant = createServerFn({ method: "POST" })
     try {
       const out = await callGateway({ model: "google/gemini-2.5-flash", messages });
       assistantText = out.choices?.[0]?.message?.content ?? "";
+      if (!assistantText.trim()) assistantText = scriptedReply(data.message);
     } catch (err) {
       console.error(err);
-      assistantText = "I'm having trouble right now. If this is urgent, please call 999.";
+      // Fallback mode (§9.4): scripted, non-diagnostic reply when the gateway
+      // is unavailable or no API key is configured.
+      assistantText = scriptedReply(data.message);
     }
 
     // Code-level safety net
