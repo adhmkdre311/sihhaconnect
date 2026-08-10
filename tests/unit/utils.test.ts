@@ -24,7 +24,7 @@ describe("date / time formatting", () => {
 describe("distanceKm", () => {
   // Reference pairs with published great-circle distances.
   const cases: Array<[string, { lat: number; lng: number }, { lat: number; lng: number }, number]> = [
-    ["Doha → Al Wakrah", { lat: 25.2854, lng: 51.531 }, { lat: 25.1715, lng: 51.6034 }, 15.45],
+    ["Doha → Al Wakrah", { lat: 25.2854, lng: 51.531 }, { lat: 25.1715, lng: 51.6034 }, 14.61],
     ["Doha → Dubai", { lat: 25.2854, lng: 51.531 }, { lat: 25.2048, lng: 55.2708 }, 375.6],
     ["equator 1° of longitude", { lat: 0, lng: 0 }, { lat: 0, lng: 1 }, 111.195],
     ["1° of latitude", { lat: 0, lng: 0 }, { lat: 1, lng: 0 }, 111.195],
