@@ -2,11 +2,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-const DEFAULT_MONTHS = 12;
-
 export const getComplianceRule = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async () => {
+  .handler(async ({ context }) => {
+    const DEFAULT_MONTHS = 12;
+    // Explicitly bind the read to the verified caller — never run unauthenticated.
+    if (!context.userId) throw new Error("Unauthorized");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data } = await supabaseAdmin
       .from("platform_settings").select("value").eq("key", "compliance_checkup_months").maybeSingle();
