@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useLang } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import { useAuth } from "@/lib/auth";
+import { homeForRoles } from "@/lib/portals";
 import { Stethoscope, Building2, User, Pill, Landmark } from "lucide-react";
 import { SihhaLockup, SihhaMark } from "@/components/SihhaLogo";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
@@ -19,12 +20,8 @@ function Landing() {
 
   useEffect(() => {
     if (loading || !user) return;
-    if (roles.includes("worker")) nav({ to: "/app" });
-    else if (roles.includes("employer_admin")) nav({ to: "/employer" });
-    else if (roles.includes("clinic_staff")) nav({ to: "/clinic" });
-    else if (roles.includes("pharmacy_staff")) nav({ to: "/pharmacy" });
-    else if (roles.includes("insurance_staff")) nav({ to: "/insurance" });
-    else if (roles.includes("platform_admin") || roles.includes("super_admin")) nav({ to: "/admin" });
+    const home = homeForRoles(roles);
+    if (home) nav({ to: home });
   }, [user, roles, loading, nav]);
 
   return (
