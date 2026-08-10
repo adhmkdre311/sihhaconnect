@@ -95,9 +95,12 @@ export const askAssistant = createServerFn({ method: "POST" })
     try {
       const out = await callGateway({ model: "google/gemini-2.5-flash", messages });
       assistantText = out.choices?.[0]?.message?.content ?? "";
+      if (!assistantText.trim()) assistantText = scriptedReply(data.message);
     } catch (err) {
       console.error(err);
-      assistantText = "I'm having trouble right now. If this is urgent, please call 999.";
+      // Fallback mode (§9.4): scripted, non-diagnostic reply when the gateway
+      // is unavailable or no API key is configured.
+      assistantText = scriptedReply(data.message);
     }
 
     // Code-level safety net
