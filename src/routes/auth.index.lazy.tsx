@@ -22,6 +22,7 @@ import {
 } from "@/lib/validation";
 import { PasswordToggle } from "@/components/PasswordToggle";
 import { useDocumentTitle } from "@/lib/useDocumentTitle";
+import { ROLE_HOME, homeForRoles } from "@/lib/portals";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AuthMode, Role } from "./auth";
 import { lovable } from "@/integrations/lovable/index";
