@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:security": "vitest run tests",
     "types:gen": "supabase gen types typescript --project-id \"$SUPABASE_PROJECT_ID\" --schema public > src/integrations/supabase/types.ts",
-    "types:check": "bun run types:gen && git diff --exit-code -- src/integrations/supabase/types.ts"
+    "types:check": "bun run types:gen && git diff --exit-code -- src/integrations/supabase/types.ts",
+    "seed:demo": "bun scripts/seed-demo.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
