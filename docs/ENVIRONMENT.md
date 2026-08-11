@@ -45,6 +45,18 @@ Password for all six: `SihhaDemo#2026`
 | `anjali@alnasrpharmacy.qa` | `pharmacy_staff` | `/pharmacy` | Al Nasr Pharmacy |
 | `khalid@qlm.qa` | `insurance_staff` | `/insurance` | QLM Life & Medical Insurance (scoped to Al Wathba) |
 
+### Re-seeding
+
+```bash
+bun run seed:demo             # idempotent: creates or refreshes the 6 accounts + demo orgs
+bun run seed:demo -- --reset  # deletes the 6 demo accounts first, then recreates them clean
+```
+
+`scripts/seed-demo.ts` only writes the six demo emails and the four fixed demo org ids, needs
+`SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` in the environment, and refuses to run when
+`NODE_ENV=production` or when the backend URL appears in `SEED_BLOCKED_URLS`
+(override with `--i-know-what-im-doing`). Override the password with `SEED_DEMO_PASSWORD`.
+
 All demo users are email-confirmed, approved and active. Demo organisations use fixed ids
 (`d0000000-0000-4000-8000-00000000000{1..4}`) so re-seeding is idempotent.
 
