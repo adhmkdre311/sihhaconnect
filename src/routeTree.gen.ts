@@ -59,7 +59,6 @@ import { Route as AdminApprovalsRouteImport } from './routes/admin.approvals'
 import { Route as AdminAnnouncementsRouteImport } from './routes/admin.announcements'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments.$id'
-import { Route as ApiPublicSeedDemoTmpRouteImport } from './routes/api/public/seed-demo-tmp'
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
@@ -313,11 +312,6 @@ const AppAppointmentsIdRoute = AppAppointmentsIdRouteImport.update({
   path: '/app/appointments/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicSeedDemoTmpRoute = ApiPublicSeedDemoTmpRouteImport.update({
-  id: '/api/public/seed-demo-tmp',
-  path: '/api/public/seed-demo-tmp',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LovableEmailAuthWebhookRoute = LovableEmailAuthWebhookRouteImport.update({
   id: '/lovable/email/auth/webhook',
   path: '/lovable/email/auth/webhook',
@@ -379,7 +373,6 @@ export interface FileRoutesByFullPath {
   '/employer/': typeof EmployerIndexRoute
   '/insurance/': typeof InsuranceIndexRoute
   '/pharmacy/': typeof PharmacyIndexRoute
-  '/api/public/seed-demo-tmp': typeof ApiPublicSeedDemoTmpRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -430,7 +423,6 @@ export interface FileRoutesByTo {
   '/employer': typeof EmployerIndexRoute
   '/insurance': typeof InsuranceIndexRoute
   '/pharmacy': typeof PharmacyIndexRoute
-  '/api/public/seed-demo-tmp': typeof ApiPublicSeedDemoTmpRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -486,7 +478,6 @@ export interface FileRoutesById {
   '/employer/': typeof EmployerIndexRoute
   '/insurance/': typeof InsuranceIndexRoute
   '/pharmacy/': typeof PharmacyIndexRoute
-  '/api/public/seed-demo-tmp': typeof ApiPublicSeedDemoTmpRoute
   '/app/appointments/$id': typeof AppAppointmentsIdRoute
   '/lovable/email/auth/preview': typeof LovableEmailAuthPreviewRoute
   '/lovable/email/auth/webhook': typeof LovableEmailAuthWebhookRoute
@@ -543,7 +534,6 @@ export interface FileRouteTypes {
     | '/employer/'
     | '/insurance/'
     | '/pharmacy/'
-    | '/api/public/seed-demo-tmp'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -594,7 +584,6 @@ export interface FileRouteTypes {
     | '/employer'
     | '/insurance'
     | '/pharmacy'
-    | '/api/public/seed-demo-tmp'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -649,7 +638,6 @@ export interface FileRouteTypes {
     | '/employer/'
     | '/insurance/'
     | '/pharmacy/'
-    | '/api/public/seed-demo-tmp'
     | '/app/appointments/$id'
     | '/lovable/email/auth/preview'
     | '/lovable/email/auth/webhook'
@@ -683,7 +671,6 @@ export interface RootRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   ClinicIndexRoute: typeof ClinicIndexRoute
   EmployerIndexRoute: typeof EmployerIndexRoute
-  ApiPublicSeedDemoTmpRoute: typeof ApiPublicSeedDemoTmpRoute
   AppAppointmentsIdRoute: typeof AppAppointmentsIdRoute
   LovableEmailAuthPreviewRoute: typeof LovableEmailAuthPreviewRoute
   LovableEmailAuthWebhookRoute: typeof LovableEmailAuthWebhookRoute
@@ -1041,13 +1028,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAppointmentsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/seed-demo-tmp': {
-      id: '/api/public/seed-demo-tmp'
-      path: '/api/public/seed-demo-tmp'
-      fullPath: '/api/public/seed-demo-tmp'
-      preLoaderRoute: typeof ApiPublicSeedDemoTmpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/lovable/email/auth/webhook': {
       id: '/lovable/email/auth/webhook'
       path: '/lovable/email/auth/webhook'
@@ -1173,7 +1153,6 @@ const rootRouteChildren: RootRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   ClinicIndexRoute: ClinicIndexRoute,
   EmployerIndexRoute: EmployerIndexRoute,
-  ApiPublicSeedDemoTmpRoute: ApiPublicSeedDemoTmpRoute,
   AppAppointmentsIdRoute: AppAppointmentsIdRoute,
   LovableEmailAuthPreviewRoute: LovableEmailAuthPreviewRoute,
   LovableEmailAuthWebhookRoute: LovableEmailAuthWebhookRoute,
