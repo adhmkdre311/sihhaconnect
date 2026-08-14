@@ -61,7 +61,7 @@ const summaryLine = (t: string) => {
 // ---------------------------------------------------------------- stage 1 ----
 // §9.1 unit tests + RLS/server-fn guards (the vitest suite).
 function stageUnit() {
-  run("§9.1 unit + guard tests (vitest)", "bunx", ["vitest", "run", "--reporter=basic"]);
+  run("§9.1 unit + guard tests (vitest)", "bunx", ["vitest", "run", "--reporter=dot"]);
 }
 
 // ---------------------------------------------------------------- stage 2 ----
