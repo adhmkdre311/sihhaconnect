@@ -40,7 +40,7 @@ server code may rely on `child_process`, `sharp`, native addons, or `os.cpus()`.
 
 ## Release checklist
 
-- `bun run test` green; `bun run lint` clean.
+- `bun run acceptance` green (or `bun run test` for the fast guard); `bun run lint` clean.
 - `bun run types:check` shows no drift after any migration.
 - Database linter reviewed: RLS enabled and GRANTs present on every new public table.
 - Auth: Google provider configured; no anonymous sign-ups; email confirmation on.
