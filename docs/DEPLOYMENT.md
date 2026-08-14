@@ -14,11 +14,18 @@
    ship with the app build; no Deno edge functions and no `ANTHROPIC_API_KEY`. AI runs
    through the Lovable AI Gateway (`LOVABLE_API_KEY`, injected). Email needs
    `RESEND_API_KEY` and `RESEND_FROM` as backend secrets.
-4. **Verify** — run the acceptance pass, starting with the database suite:
+4. **Verify** — run the §9.4 acceptance suite:
    ```bash
-   bun run test                                   # unit + RLS/server-fn guards
-   INTEGRATION_DATABASE_URL=... bun run test      # adds the 15-check §9.2 suite
+   bun run acceptance
    ```
+   This runs three stages: §9.1 unit/guard tests (vitest), the §9.2 15-check database
+   suite, and the §9.4 per-module definition-of-done checks. To include the database
+   suite, supply a local Supabase connection via one of:
+   - `INTEGRATION_DATABASE_URL` env var, e.g. `postgresql://postgres:postgres@localhost:54322/postgres`
+   - `--db <url>` flag, e.g. `bun run acceptance -- --db postgres://...`
+   - Standard `PGHOST` / `PGPORT` / `PGDATABASE` / `PGUSER` / `PGPASSWORD` env vars
+   Use `--skip-db` to omit the database suite (e.g. in CI without a local Supabase). Use
+   `--json` for machine-readable CI output.
    Then walk §9.4 per module using the six demo accounts in `docs/ENVIRONMENT.md`.
 
 ## Environments
@@ -33,7 +40,7 @@ server code may rely on `child_process`, `sharp`, native addons, or `os.cpus()`.
 
 ## Release checklist
 
-- `bun run test` green; `bun run lint` clean.
+- `bun run acceptance` green (or `bun run test` for the fast guard); `bun run lint` clean.
 - `bun run types:check` shows no drift after any migration.
 - Database linter reviewed: RLS enabled and GRANTs present on every new public table.
 - Auth: Google provider configured; no anonymous sign-ups; email confirmation on.
