@@ -7,6 +7,9 @@ on:
 jobs:
   acceptance:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
 
@@ -40,3 +43,43 @@ jobs:
           name: acceptance-summary
           path: acceptance-summary.json
           if-no-files-found: warn
+
+      - name: Comment acceptance summary on PR
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- sihha-acceptance-summary -->';
+            let body;
+            try {
+              const raw = fs.readFileSync('acceptance-summary.json', 'utf8');
+              const data = JSON.parse(raw);
+              const rows = (data.results ?? [])
+                .map((r) => `| ${r.status.toUpperCase()} | ${r.name} | ${r.detail ? String(r.detail).replace(/\|/g, '\\|').slice(0, 300) : ''} | ${r.ms}ms |`)
+                .join('\n');
+              body = [
+                marker,
+                `### §9.4 acceptance suite — ${data.ok ? 'PASS ✅' : 'FAIL ❌'}`,
+                '',
+                `${data.passed} passed · ${data.failed} failed · ${data.skipped} skipped`,
+                '',
+                '| Status | Check | Detail | Time |',
+                '| --- | --- | --- | --- |',
+                rows,
+                '',
+                `<sub>commit ${context.sha.slice(0, 7)} · full JSON in the \`acceptance-summary\` artifact</sub>`,
+              ].join('\n');
+            } catch (err) {
+              body = `${marker}\n### §9.4 acceptance suite — no summary produced ❌\n\nThe run did not write a readable \`acceptance-summary.json\` (${err.message}). Check the job logs.`;
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const existing = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const mine = existing.find((c) => c.body?.includes(marker));
+            if (mine) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
