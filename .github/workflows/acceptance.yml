@@ -1,0 +1,32 @@
+name: Acceptance
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  acceptance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run §9.4 acceptance suite
+        id: acceptance
+        run: |
+          set -o pipefail
+          bun run acceptance -- --json --skip-db | tee acceptance-summary.json
+
+      - name: Upload acceptance summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-summary
+          path: acceptance-summary.json
+          if-no-files-found: warn
