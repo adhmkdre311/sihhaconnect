@@ -72,11 +72,11 @@ jobs:
           path: acceptance-summary.json
           if-no-files-found: warn
 
-      - name: Upload acceptance logs and raw JSON on failure
-        if: failure()
+      - name: Upload acceptance logs and raw JSON
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: acceptance-logs-failed
+          name: acceptance-logs
           path: |
             acceptance-logs.txt
             acceptance-summary.json
