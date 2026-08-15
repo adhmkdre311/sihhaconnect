@@ -36,9 +36,7 @@ jobs:
 
       - name: Run §9.4 acceptance suite
         id: acceptance
-        run: |
-          set -o pipefail
-          bun run acceptance -- --json --skip-db | tee acceptance-summary.json
+        run: bun run acceptance -- --json --skip-db
 
       - name: Annotate failing acceptance checks
         if: always()
@@ -73,6 +71,17 @@ jobs:
           name: acceptance-summary
           path: acceptance-summary.json
           if-no-files-found: warn
+
+      - name: Upload acceptance logs and raw JSON on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-logs-failed
+          path: |
+            acceptance-logs.txt
+            acceptance-summary.json
+          if-no-files-found: warn
+
 
       - name: Comment acceptance summary on PR
         if: always() && github.event_name == 'pull_request'

@@ -10,7 +10,7 @@
  * Exit code 0 = every required stage passed. Non-zero = at least one failure.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const argv = process.argv.slice(2);
@@ -23,6 +23,11 @@ const value = (name: string) => {
 const asJson = flag("json");
 const skipDb = flag("skip-db");
 const dbUrl = value("db") ?? process.env.INTEGRATION_DATABASE_URL ?? "";
+
+const LOG_FILE = "acceptance-logs.txt";
+const SUMMARY_FILE = "acceptance-summary.json";
+if (asJson) writeFileSync(LOG_FILE, "", "utf8");
+
 
 type Result = { name: string; status: "pass" | "fail" | "skip"; detail?: string; ms: number };
 const results: Result[] = [];
@@ -41,6 +46,9 @@ function run(name: string, cmd: string, args: string[]) {
   const out = spawnSync(cmd, args, { encoding: "utf8" });
   const ms = Date.now() - started;
   const text = `${out.stdout ?? ""}${out.stderr ?? ""}`;
+  if (asJson) {
+    appendFileSync(LOG_FILE, `[${name}]\n$ ${cmd} ${args.join(" ")}\n${text}\n\n`, "utf8");
+  }
   if (out.error) {
     record(name, "fail", ms, out.error.message);
   } else if (out.status !== 0) {
@@ -50,6 +58,7 @@ function run(name: string, cmd: string, args: string[]) {
   }
   return { ok: out.status === 0 && !out.error, text };
 }
+
 
 const lastLines = (t: string, n = 12) =>
   t.trim().split("\n").slice(-n).join(" | ").slice(0, 1200) || "no output";
@@ -151,14 +160,15 @@ const skipped = results.filter((r) => r.status === "skip");
 const passed = results.filter((r) => r.status === "pass");
 
 if (asJson) {
-  console.log(
-    JSON.stringify(
-      { ok: failed.length === 0, passed: passed.length, failed: failed.length, skipped: skipped.length, results },
-      null,
-      2,
-    ),
+  const summary = JSON.stringify(
+    { ok: failed.length === 0, passed: passed.length, failed: failed.length, skipped: skipped.length, results },
+    null,
+    2,
   );
+  writeFileSync(SUMMARY_FILE, summary, "utf8");
+  console.log(summary);
 } else {
+
   log("=".repeat(60));
   log(`${passed.length} passed · ${failed.length} failed · ${skipped.length} skipped`);
   if (failed.length) {
