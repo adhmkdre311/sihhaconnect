@@ -10,7 +10,7 @@
  * Exit code 0 = every required stage passed. Non-zero = at least one failure.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { appendFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 const argv = process.argv.slice(2);
@@ -23,6 +23,11 @@ const value = (name: string) => {
 const asJson = flag("json");
 const skipDb = flag("skip-db");
 const dbUrl = value("db") ?? process.env.INTEGRATION_DATABASE_URL ?? "";
+
+const LOG_FILE = "acceptance-logs.txt";
+const SUMMARY_FILE = "acceptance-summary.json";
+if (asJson) writeFileSync(LOG_FILE, "", "utf8");
+
 
 type Result = { name: string; status: "pass" | "fail" | "skip"; detail?: string; ms: number };
 const results: Result[] = [];
