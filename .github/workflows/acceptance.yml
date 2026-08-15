@@ -40,6 +40,32 @@ jobs:
           set -o pipefail
           bun run acceptance -- --json --skip-db | tee acceptance-summary.json
 
+      - name: Annotate failing acceptance checks
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let data;
+            try {
+              data = JSON.parse(fs.readFileSync('acceptance-summary.json', 'utf8'));
+            } catch (err) {
+              core.warning(`No readable acceptance-summary.json (${err.message})`);
+              return;
+            }
+            const results = data.results ?? [];
+            const failures = results.filter((r) => r.status === 'fail');
+            for (const r of failures) {
+              core.error(String(r.detail ?? 'Check failed'), { title: `Acceptance failed: ${r.name}` });
+            }
+            for (const r of results.filter((r) => r.status === 'skip')) {
+              core.notice(String(r.detail ?? 'Check skipped'), { title: `Acceptance skipped: ${r.name}` });
+            }
+            await core.summary
+              .addHeading(`§9.4 acceptance — ${data.ok ? 'PASS' : 'FAIL'}`)
+              .addRaw(`${data.passed} passed · ${data.failed} failed · ${data.skipped} skipped`)
+              .write();
+
       - name: Upload acceptance summary
         if: always()
         uses: actions/upload-artifact@v4
