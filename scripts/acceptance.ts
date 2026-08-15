@@ -46,6 +46,9 @@ function run(name: string, cmd: string, args: string[]) {
   const out = spawnSync(cmd, args, { encoding: "utf8" });
   const ms = Date.now() - started;
   const text = `${out.stdout ?? ""}${out.stderr ?? ""}`;
+  if (asJson) {
+    appendFileSync(LOG_FILE, `[${name}]\n$ ${cmd} ${args.join(" ")}\n${text}\n\n`, "utf8");
+  }
   if (out.error) {
     record(name, "fail", ms, out.error.message);
   } else if (out.status !== 0) {
@@ -55,6 +58,7 @@ function run(name: string, cmd: string, args: string[]) {
   }
   return { ok: out.status === 0 && !out.error, text };
 }
+
 
 const lastLines = (t: string, n = 12) =>
   t.trim().split("\n").slice(-n).join(" | ").slice(0, 1200) || "no output";
