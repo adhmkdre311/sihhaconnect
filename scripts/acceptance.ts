@@ -160,14 +160,15 @@ const skipped = results.filter((r) => r.status === "skip");
 const passed = results.filter((r) => r.status === "pass");
 
 if (asJson) {
-  console.log(
-    JSON.stringify(
-      { ok: failed.length === 0, passed: passed.length, failed: failed.length, skipped: skipped.length, results },
-      null,
-      2,
-    ),
+  const summary = JSON.stringify(
+    { ok: failed.length === 0, passed: passed.length, failed: failed.length, skipped: skipped.length, results },
+    null,
+    2,
   );
+  writeFileSync(SUMMARY_FILE, summary, "utf8");
+  console.log(summary);
 } else {
+
   log("=".repeat(60));
   log(`${passed.length} passed · ${failed.length} failed · ${skipped.length} skipped`);
   if (failed.length) {
