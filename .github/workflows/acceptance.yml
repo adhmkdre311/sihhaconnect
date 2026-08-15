@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: acceptance-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   acceptance:
     runs-on: ubuntu-latest
