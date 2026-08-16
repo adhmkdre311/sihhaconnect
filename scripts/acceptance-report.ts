@@ -17,6 +17,7 @@ const value = (name: string) => {
 
 const input = value("input") ?? "acceptance-summary.json";
 const output = value("output") ?? "acceptance-report.html";
+const asMarkdown = argv.includes("--markdown") || output.endsWith(".md");
 
 let data: {
   ok?: boolean;
@@ -43,6 +44,12 @@ const statusClass = {
   pass: "pass",
   fail: "fail",
   skip: "skip",
+} as const;
+
+const statusEmoji = {
+  pass: "✅",
+  fail: "❌",
+  skip: "⚠️",
 } as const;
 
 const statusLabel = {
@@ -192,8 +199,35 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-writeFileSync(output, html, "utf8");
+const markdown = [
+  `## Sihha §9.4 Acceptance Report — ${overall}`,
+  "",
+  `**${passed} passed · ${failed} failed · ${skipped} skipped · ${results.length} total**`,
+  "",
+  "| Status | Check | Detail | Time |",
+  "| --- | --- | --- | --- |",
+  ...(results.length
+    ? results.map(
+        (r) =>
+          `| ${statusEmoji[r.status]} ${statusLabel[r.status]} | ${escapePipes(r.name)} | ${escapePipes(
+            truncate(r.detail ?? "—"),
+          )} | ${r.ms}ms |`,
+      )
+    : ["| — | No results | — | — |"]),
+  "",
+  `_Generated ${new Date().toUTCString()} · Sihha Connect_`,
+].join("\n");
+
+writeFileSync(output, asMarkdown ? markdown : html, "utf8");
 console.log(`Wrote ${output} (${overall}: ${passed} passed, ${failed} failed, ${skipped} skipped)`);
+
+function escapePipes(text: string): string {
+  return text.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
+}
+
+function truncate(text: string, max = 300): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
 
 function escapeHtml(text: string): string {
   return text
