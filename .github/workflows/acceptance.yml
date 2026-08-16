@@ -38,6 +38,10 @@ jobs:
         id: acceptance
         run: bun run acceptance -- --json --skip-db
 
+      - name: Generate HTML acceptance report
+        if: always()
+        run: bun run acceptance:report
+
       - name: Annotate failing acceptance checks
         if: always()
         uses: actions/github-script@v7
@@ -59,9 +63,11 @@ jobs:
             for (const r of results.filter((r) => r.status === 'skip')) {
               core.notice(String(r.detail ?? 'Check skipped'), { title: `Acceptance skipped: ${r.name}` });
             }
+            const artifactUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}/artifacts`;
             await core.summary
               .addHeading(`§9.4 acceptance — ${data.ok ? 'PASS' : 'FAIL'}`)
               .addRaw(`${data.passed} passed · ${data.failed} failed · ${data.skipped} skipped`)
+              .addRaw(`<br>📄 <a href="${artifactUrl}">Download acceptance-report.html</a> (artifact: <code>acceptance-report</code>)`)
               .write();
 
       - name: Upload acceptance summary
@@ -81,6 +87,15 @@ jobs:
             acceptance-logs.txt
             acceptance-summary.json
           if-no-files-found: warn
+
+      - name: Upload HTML acceptance report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: acceptance-report
+          path: acceptance-report.html
+          if-no-files-found: warn
+
 
 
       - name: Comment acceptance summary on PR
