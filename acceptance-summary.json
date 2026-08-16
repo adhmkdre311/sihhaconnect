@@ -1,0 +1,84 @@
+{
+  "ok": true,
+  "passed": 14,
+  "failed": 0,
+  "skipped": 1,
+  "results": [
+    {
+      "name": "§9.1 unit + guard tests (vitest)",
+      "status": "pass",
+      "ms": 4682
+    },
+    {
+      "name": "§9.2 database suite (15 checks)",
+      "status": "skip",
+      "detail": "--skip-db",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 A auth/roles — auth screens + role routing",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 A auth/roles — staff signup requests a role",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 B worker — home, booking, assistant, documents",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 B worker — booking books a slot, never writes clinic_slots",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 B worker — assistant is non-diagnostic (guardrail)",
+      "status": "pass",
+      "ms": 1
+    },
+    {
+      "name": "§9.4 C clinic — queue, slots, patients, walk-in",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 D employer — roster, compliance, appointments, invites",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 E pharmacy — availability directory only (no dispensing)",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 F insurance — aggregates only, via the definer view",
+      "status": "pass",
+      "ms": 1
+    },
+    {
+      "name": "§9.4 G admin — users, orgs, records, analytics, audit, settings",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 G admin — view-as impersonation is audited",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 X i18n — 7 languages incl. RTL Arabic",
+      "status": "pass",
+      "ms": 0
+    },
+    {
+      "name": "§9.4 X notifications — shared staff notifications inbox",
+      "status": "pass",
+      "ms": 0
+    }
+  ]
+}
