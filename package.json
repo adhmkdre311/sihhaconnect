@@ -17,8 +17,8 @@
     "types:check": "bun run types:gen && git diff --exit-code -- src/integrations/supabase/types.ts",
     "seed:demo": "bun scripts/seed-demo.ts",
     "acceptance": "bun scripts/acceptance.ts",
-    "acceptance:report": "bun scripts/acceptance-report.ts"
-
+    "acceptance:report": "bun scripts/acceptance-report.ts",
+    "acceptance:publish": "bun scripts/acceptance-publish.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

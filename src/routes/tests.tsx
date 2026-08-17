@@ -1,11 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import summary from "../../acceptance-summary.json";
+import fallbackSummary from "../../acceptance-summary.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { getLatestAcceptanceRun } from "@/lib/acceptance.functions";
 
 type Status = "pass" | "fail" | "skip";
 type Result = { name: string; status: Status; detail?: string; ms: number };
 
 export const Route = createFileRoute("/tests")({
+  loader: async () => ({ run: await getLatestAcceptanceRun() }),
+  errorComponent: () => (
+    <main className="min-h-screen bg-background px-4 py-10">
+      <p className="text-sm text-muted-foreground">Could not load the latest test run.</p>
+    </main>
+  ),
+  notFoundComponent: () => (
+    <main className="min-h-screen bg-background px-4 py-10">
+      <p className="text-sm text-muted-foreground">No test runs recorded yet.</p>
+    </main>
+  ),
   head: () => ({
     meta: [
       { title: "Test Dashboard — Sihha Connect" },
@@ -35,11 +47,12 @@ const statusStyles: Record<Status, string> = {
 const statusLabel: Record<Status, string> = { pass: "PASS", fail: "FAIL", skip: "SKIP" };
 
 function TestDashboard() {
-  const results = (summary.results ?? []) as Result[];
+  const { run } = Route.useLoaderData();
+  const results = (run?.results ?? fallbackSummary.results ?? []) as Result[];
   const passed = results.filter((r) => r.status === "pass").length;
   const failed = results.filter((r) => r.status === "fail").length;
   const skipped = results.filter((r) => r.status === "skip").length;
-  const totalMs = results.reduce((sum, r) => sum + (r.ms || 0), 0);
+  const totalMs = run?.total_ms ?? results.reduce((sum, r) => sum + (r.ms || 0), 0);
   const slowest = Math.max(1, ...results.map((r) => r.ms || 0));
 
   return (
@@ -50,6 +63,7 @@ function TestDashboard() {
             <h1 className="text-2xl font-semibold text-foreground">Test dashboard</h1>
             <p className="mt-1 text-sm text-muted-foreground">
               Latest acceptance run · {results.length} checks · {totalMs}ms total
+              {run ? ` · saved ${new Date(run.created_at).toLocaleString()} (${run.source})` : " · not yet saved"}
             </p>
           </div>
           <span
