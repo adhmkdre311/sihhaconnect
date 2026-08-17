@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      acceptance_runs: {
+        Row: {
+          created_at: string
+          failed: number
+          id: string
+          ok: boolean
+          passed: number
+          results: Json
+          skipped: number
+          source: string
+          total_ms: number
+        }
+        Insert: {
+          created_at?: string
+          failed?: number
+          id?: string
+          ok?: boolean
+          passed?: number
+          results?: Json
+          skipped?: number
+          source?: string
+          total_ms?: number
+        }
+        Update: {
+          created_at?: string
+          failed?: number
+          id?: string
+          ok?: boolean
+          passed?: number
+          results?: Json
+          skipped?: number
+          source?: string
+          total_ms?: number
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           audience: string
