@@ -33,3 +33,18 @@ export const getLatestAcceptanceRun = createServerFn({ method: "GET" }).handler(
     return { ...data, results: (data.results ?? []) as AcceptanceResult[] } as AcceptanceRun;
   },
 );
+
+export type AcceptanceRunSummary = Omit<AcceptanceRun, "results">;
+
+/** History of recent persisted acceptance runs (public test metadata). */
+export const getAcceptanceRunHistory = createServerFn({ method: "GET" }).handler(
+  async (): Promise<AcceptanceRunSummary[]> => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data } = await supabaseAdmin
+      .from("acceptance_runs")
+      .select("id, ok, passed, failed, skipped, total_ms, source, created_at")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    return (data ?? []) as AcceptanceRunSummary[];
+  },
+);
