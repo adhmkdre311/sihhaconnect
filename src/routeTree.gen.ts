@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TestsRouteImport } from './routes/tests'
 import { Route as StaffSignupRouteImport } from './routes/staff-signup'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
 import { Route as InsuranceRouteImport } from './routes/insurance'
@@ -62,6 +63,11 @@ import { Route as AppAppointmentsIdRouteImport } from './routes/app.appointments
 import { Route as LovableEmailAuthWebhookRouteImport } from './routes/lovable/email/auth/webhook'
 import { Route as LovableEmailAuthPreviewRouteImport } from './routes/lovable/email/auth/preview'
 
+const TestsRoute = TestsRouteImport.update({
+  id: '/tests',
+  path: '/tests',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StaffSignupRoute = StaffSignupRouteImport.update({
   id: '/staff-signup',
   path: '/staff-signup',
@@ -330,6 +336,7 @@ export interface FileRoutesByFullPath {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/tests': typeof TestsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -380,6 +387,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/staff-signup': typeof StaffSignupRoute
+  '/tests': typeof TestsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -435,6 +443,7 @@ export interface FileRoutesById {
   '/insurance': typeof InsuranceRouteWithChildren
   '/pharmacy': typeof PharmacyRouteWithChildren
   '/staff-signup': typeof StaffSignupRoute
+  '/tests': typeof TestsRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/announcements': typeof AdminAnnouncementsRoute
   '/admin/approvals': typeof AdminApprovalsRoute
@@ -491,6 +500,7 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/tests'
     | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/approvals'
@@ -541,6 +551,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/staff-signup'
+    | '/tests'
     | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/approvals'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/insurance'
     | '/pharmacy'
     | '/staff-signup'
+    | '/tests'
     | '/admin/analytics'
     | '/admin/announcements'
     | '/admin/approvals'
@@ -650,6 +662,7 @@ export interface RootRouteChildren {
   InsuranceRoute: typeof InsuranceRouteWithChildren
   PharmacyRoute: typeof PharmacyRouteWithChildren
   StaffSignupRoute: typeof StaffSignupRoute
+  TestsRoute: typeof TestsRoute
   AppBookRoute: typeof AppBookRoute
   AppChatRoute: typeof AppChatRoute
   AppEmergencyRoute: typeof AppEmergencyRoute
@@ -678,6 +691,13 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tests': {
+      id: '/tests'
+      path: '/tests'
+      fullPath: '/tests'
+      preLoaderRoute: typeof TestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/staff-signup': {
       id: '/staff-signup'
       path: '/staff-signup'
@@ -1132,6 +1152,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsuranceRoute: InsuranceRouteWithChildren,
   PharmacyRoute: PharmacyRouteWithChildren,
   StaffSignupRoute: StaffSignupRoute,
+  TestsRoute: TestsRoute,
   AppBookRoute: AppBookRoute,
   AppChatRoute: AppChatRoute,
   AppEmergencyRoute: AppEmergencyRoute,
